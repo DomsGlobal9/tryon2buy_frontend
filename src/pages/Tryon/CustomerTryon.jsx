@@ -22,8 +22,8 @@ const SHOWCASE_BLOUSES = [
 
 const SHOWCASE_NECKS = [
   { id: 'boat-neck',    name: 'Boat Neck',    image: '/assets/neck/boat_neck.png' },
-  { id: 'regular-neck', name: 'Regular Neck', image: '/assets/neck/normal_neck.png' },
-  { id: 'round-neck',   name: 'Round Neck',   image: '/assets/neck/round_neck.png' }
+  { id: 'round-neck',   name: 'Round Neck',   image: '/assets/neck/round_neck.png' },
+  { id: 'collar-neck',  name: 'Collar Neck',  image: '/assets/neck/collar_neck.png' }
 ];
 
 export default function CustomerTryon() {
@@ -46,8 +46,8 @@ export default function CustomerTryon() {
   const [isChangingBackground, setIsChangingBackground] = useState(false);
   const [selectedBg, setSelectedBg] = useState(null);
 
-  const [showcaseBlouse, setShowcaseBlouse] = useState('b1');
-  const [showcaseNeck, setShowcaseNeck] = useState('n1');
+  const [showcaseBlouse, setShowcaseBlouse] = useState('elbow-sleeve');
+  const [showcaseNeck, setShowcaseNeck] = useState('round-neck');
   const [activeTab, setActiveTab] = useState('sleeve');
   const [isModifying, setIsModifying] = useState(false);
 
