@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { API_URL } from '../../config';
+import { API_URL } from '../config';
 
 export default function CustomerAuthModal({ isOpen, onSuccess }) {
   const [name, setName] = useState('');
