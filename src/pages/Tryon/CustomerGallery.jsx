@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../../config';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Sparkles, ShoppingBag, Copy, Check } from 'lucide-react';
 
@@ -37,7 +38,7 @@ export default function CustomerGallery() {
   }, []);
 
   useEffect(() => {
-    fetch(`/api/tryon/vendor/${vendorId}/gallery`)
+    fetch(`${API_URL}/api/tryon/vendor/${vendorId}/gallery`)
       .then(res => {
         if (!res.ok) throw new Error('Collection not found.');
         return res.json();

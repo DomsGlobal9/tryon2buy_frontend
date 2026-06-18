@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_URL } from '../../config';
 
 export default function CustomerAuthModal({ isOpen, onSuccess }) {
   const [name, setName] = useState('');
@@ -19,7 +20,7 @@ export default function CustomerAuthModal({ isOpen, onSuccess }) {
     setError(null);
 
     try {
-      const res = await fetch('/api/auth/customer/login', {
+      const res = await fetch(`${API_URL}/api/auth/customer/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, phone }),

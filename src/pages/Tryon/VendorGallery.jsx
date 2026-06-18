@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../../config';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Share2, Copy, Check, Trash2, ExternalLink } from 'lucide-react';
 
@@ -24,7 +25,7 @@ export default function VendorGallery() {
 
   useEffect(() => {
     const token = localStorage.getItem('vendor_token');
-    fetch('/api/tryon/vendor/generations', {
+    fetch(`${API_URL}/api/tryon/vendor/generations`, {
       headers: {
         'Authorization': token ? `Bearer ${token}` : ''
       }
@@ -54,7 +55,7 @@ export default function VendorGallery() {
     
     try {
       const token = localStorage.getItem('vendor_token');
-      const res = await fetch(`/api/tryon/vendor/generations/${id}`, {
+      const res = await fetch(`${API_URL}/api/tryon/vendor/generations/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': token ? `Bearer ${token}` : ''

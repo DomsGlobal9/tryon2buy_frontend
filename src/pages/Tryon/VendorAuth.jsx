@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../../config';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, ArrowRight, Store, Lock, Mail, User, Eye, EyeOff } from 'lucide-react';
 
@@ -51,7 +52,7 @@ export default function VendorAuth() {
       : { email, password, name, storeName };
 
     try {
-      const res = await fetch(endpoint, {
+      const res = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

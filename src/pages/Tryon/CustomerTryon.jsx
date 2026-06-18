@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { API_URL } from '../../config';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Sparkles, Check, ChevronLeft, RefreshCw, LogOut, Upload } from 'lucide-react';
 import CustomerAuthModal from '../../components/CustomerAuthModal';
@@ -78,7 +79,7 @@ export default function CustomerTryon() {
   }, [authToken]);
 
   useEffect(() => {
-    fetch(`/api/tryon/generations/${id}`)
+    fetch(`${API_URL}/api/tryon/generations/${id}`)
       .then(res => {
         if (!res.ok) throw new Error("Dress not found or link expired");
         return res.json();
@@ -115,7 +116,7 @@ export default function CustomerTryon() {
     setIsChangingBackground(true);
     
     try {
-      const res = await fetch('/api/tryon/change-background', {
+      const res = await fetch(`${API_URL}/api/tryon/change-background`, {
         method: 'POST',
         headers: getHeaders(),
         body: JSON.stringify({
@@ -149,7 +150,7 @@ export default function CustomerTryon() {
 
     setIsModifying(true);
     try {
-      const response = await fetch('/api/tryon/modify-outfit', {
+      const response = await fetch(`${API_URL}/api/tryon/modify-outfit`, {
         method: 'POST',
         headers: getHeaders(),
         body: JSON.stringify({
@@ -193,7 +194,7 @@ export default function CustomerTryon() {
       if (selectedFile) {
         const formData = new FormData();
         formData.append('image', selectedFile);
-        const uploadRes = await fetch('/api/tryon/upload?folder=human-images', { 
+        const uploadRes = await fetch(`${API_URL}/api/tryon/upload?folder=human-images`, { 
           method: 'POST', 
           headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {},
           body: formData 
@@ -213,7 +214,7 @@ export default function CustomerTryon() {
 
       const garment_image_url = sourceGeneration.resultImageUrl || sourceGeneration.garmentImageUrl;
 
-      const genRes = await fetch('/api/tryon/generate', {
+      const genRes = await fetch(`${API_URL}/api/tryon/generate`, {
         method: 'POST',
         headers: getHeaders(),
         body: JSON.stringify({

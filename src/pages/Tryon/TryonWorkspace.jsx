@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { API_URL } from '../../config';
 import { Sparkles, Upload, Check, ChevronLeft, ArrowRight, RefreshCw, LogOut, Shirt, UserCheck, Wind, Star, Layers, Image } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -193,7 +194,7 @@ export default function TryonWorkspace({ onExit }) {
     setSelectedModel(localModels[0].name);
 
     // Fetch Catalog Dresses
-    fetch('/api/tryon/catalog-dresses')
+    fetch(`${API_URL}/api/tryon/catalog-dresses`)
       .then(res => res.json())
       .then(data => {
         if (data && data.length > 0) {
@@ -332,7 +333,7 @@ export default function TryonWorkspace({ onExit }) {
           if (slotData && slotData.file) {
             const formData = new FormData();
             formData.append('image', slotData.file);
-            const uploadRes = await fetch('/api/tryon/upload?folder=garments', { 
+            const uploadRes = await fetch(`${API_URL}/api/tryon/upload?folder=garments`, { 
               method: 'POST', 
               headers: getUploadHeaders(),
               body: formData 
@@ -357,7 +358,7 @@ export default function TryonWorkspace({ onExit }) {
         if (selectedFile) {
           const formData = new FormData();
           formData.append('image', selectedFile);
-          const uploadRes = await fetch('/api/tryon/upload?folder=human-images', { 
+          const uploadRes = await fetch(`${API_URL}/api/tryon/upload?folder=human-images`, { 
             method: 'POST', 
             headers: getUploadHeaders(),
             body: formData 
@@ -370,7 +371,7 @@ export default function TryonWorkspace({ onExit }) {
       }
 
       // 2. Call Generation endpoint
-      const genRes = await fetch('/api/tryon/generate', {
+      const genRes = await fetch(`${API_URL}/api/tryon/generate`, {
         method: 'POST',
         headers: getHeaders(),
         body: JSON.stringify({
@@ -419,14 +420,14 @@ export default function TryonWorkspace({ onExit }) {
       if (selectedFile) {
         const formData = new FormData();
         formData.append('image', selectedFile);
-        const uploadRes = await fetch('/api/tryon/upload?folder=human-images', { method: 'POST', body: formData });
+        const uploadRes = await fetch(`${API_URL}/api/tryon/upload?folder=human-images`, { method: 'POST', body: formData });
         const uploadData = await uploadRes.json();
         human_image_url = uploadData.url;
       } else {
         human_image_url = selectedImage;
       }
 
-      const genRes = await fetch('/api/tryon/generate', {
+      const genRes = await fetch(`${API_URL}/api/tryon/generate`, {
         method: 'POST',
         headers: getHeaders(),
         body: JSON.stringify({
