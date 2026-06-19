@@ -89,10 +89,7 @@ export default function Landing() {
             </p>
             
             <div className="flex flex-wrap items-center gap-4 md:gap-6">
-              <Link to="/login" state={{ isLogin: false }} className="bg-[#1a1410] text-white px-8 py-4 text-[11px] md:text-[12px] uppercase tracking-widest font-bold hover:bg-[#7f5700] transition-colors flex items-center gap-2">
-                Create An Account <ArrowRight className="w-4 h-4" />
-              </Link>
-              <button onClick={() => setShowGuestModal(true)} className="bg-transparent border-2 border-[#1a1410] text-[#1a1410] px-8 py-4 text-[11px] md:text-[12px] uppercase tracking-widest font-bold hover:bg-[#1a1410] hover:text-white transition-colors flex items-center gap-2">
+              <button onClick={() => setShowGuestModal(true)} className="bg-[#1a1410] text-white px-8 py-4 text-[11px] md:text-[12px] uppercase tracking-widest font-bold hover:bg-[#7f5700] transition-colors flex items-center gap-2">
                 Continue as Guest <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -319,11 +316,15 @@ export default function Landing() {
             </ul>
           </div>
           <div>
-            <h4 className="text-[11px] uppercase tracking-[2px] font-bold mb-6 text-[#8c8278]">Legal</h4>
+            <h4 className="text-[11px] uppercase tracking-[2px] font-bold mb-6 text-[#8c8278]">Contact & Legal</h4>
             <ul className="space-y-4">
+              <li>
+                <a href="mailto:info@tryon2buy.com" className="text-[13px] text-[#a69c92] hover:text-white transition-colors">
+                  info@tryon2buy.com
+                </a>
+              </li>
               <li><a href="#" className="text-[13px] text-[#a69c92] hover:text-white transition-colors">Privacy Policy</a></li>
               <li><a href="#" className="text-[13px] text-[#a69c92] hover:text-white transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="text-[13px] text-[#a69c92] hover:text-white transition-colors">Contact Support</a></li>
             </ul>
           </div>
         </div>

@@ -26,7 +26,7 @@ export default function VendorUpgradeModal({ isOpen, onClose, userType = 'vendor
         <button 
           onClick={() => {
             onClose();
-            window.location.href = 'mailto:hello@tryon2buy.com?subject=Upgrade%20to%20Unlimited';
+            window.location.href = 'mailto:info@tryon2buy.com?subject=Upgrade%20to%20Unlimited';
           }} 
           className="w-full bg-[#c4933f] hover:bg-[#a67c35] text-white py-4 text-[11px] font-bold tracking-[2px] uppercase transition-colors rounded-xl shadow-md"
         >
