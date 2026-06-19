@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { API_URL } from '../../config';
-import { useNavigate } from 'react-router-dom';
-import { Sparkles, ArrowRight, Store, Lock, Mail, User, Eye, EyeOff } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Sparkles, ArrowRight, Store, Lock, Mail, User, Eye, EyeOff, ChevronLeft } from 'lucide-react';
 
 export default function VendorAuth() {
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true);
+  const location = useLocation();
+  const [isLogin, setIsLogin] = useState(location.state?.isLogin ?? true);
   const [showPassword, setShowPassword] = useState(false);
   
   // Form fields
@@ -21,7 +22,7 @@ export default function VendorAuth() {
     // Redirect to workspace if already logged in
     const token = localStorage.getItem('vendor_token');
     if (token) {
-      navigate('/');
+      navigate('/workspace');
     }
 
     // Inject fonts
@@ -68,7 +69,7 @@ export default function VendorAuth() {
       localStorage.setItem('vendor_data', JSON.stringify(data.vendor));
 
       // Redirect to merchant dashboard
-      navigate('/');
+      navigate('/workspace');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -77,11 +78,19 @@ export default function VendorAuth() {
   };
 
   return (
-    <div className="bg-[#faf7f2] min-h-screen font-['Courier_Prime',monospace] text-[#1a1410] flex items-center justify-center p-6 relative select-none">
+    <div className="bg-[#faf7f2] min-h-screen font-['Courier_Prime',monospace] text-[#1a1410] flex flex-col items-center justify-center p-6 relative select-none">
       
       {/* Background patterns/circles for premium look */}
       <div className="absolute top-0 left-0 w-64 h-64 bg-amber-100/30 rounded-full filter blur-3xl" />
       <div className="absolute bottom-0 right-0 w-80 h-80 bg-[#ede8df]/50 rounded-full filter blur-3xl" />
+
+      <button 
+        onClick={() => navigate('/')}
+        className="absolute top-6 left-6 md:top-10 md:left-10 inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-[2px] text-[#7f5700] hover:text-[#1a1410] transition-colors z-20"
+      >
+        <ChevronLeft className="w-3.5 h-3.5 stroke-[2.5]" />
+        <span>Back to Home</span>
+      </button>
 
       <div className="w-full max-w-[450px] bg-white border border-[rgba(26,20,16,0.1)] p-8 relative overflow-hidden shadow-sm animate-fade-in">
 
@@ -142,7 +151,7 @@ export default function VendorAuth() {
                     type="text"
                     required
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => setName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
                     placeholder="e.g. Jane Doe"
                     className="w-full pl-10 pr-4 py-3 bg-[#faf7f2] border border-[rgba(26,20,16,0.15)] text-[11px] focus:outline-none focus:border-[#7f5700] transition-colors"
                   />

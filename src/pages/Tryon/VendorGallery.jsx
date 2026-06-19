@@ -78,7 +78,7 @@ export default function VendorGallery() {
     <div className="bg-[#faf7f2] min-h-screen font-['Courier_Prime',monospace] text-[#1a1410] flex flex-col items-center py-12 px-6 relative">
       
       <div className="w-full max-w-[1000px] mb-8">
-        <Link to="/" className="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:text-[#1a1410] transition-colors mb-4">
+        <Link to="/workspace" className="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:text-[#1a1410] transition-colors mb-4">
           <ChevronLeft className="w-3.5 h-3.5 stroke-[2.5]" />
           <span>Back to Workspace</span>
         </Link>

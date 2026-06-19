@@ -5,6 +5,7 @@ import VendorGallery from './pages/Tryon/VendorGallery';
 import CustomerTryon from './pages/Tryon/CustomerTryon';
 import CustomerGallery from './pages/Tryon/CustomerGallery';
 import VendorAuth from './pages/Tryon/VendorAuth';
+import Landing from './pages/Landing/Landing';
 
 // Authentication Guard for Vendor Interface
 const VendorRoute = ({ children }) => {
@@ -17,11 +18,14 @@ export default function App() {
     <Router>
       <div className="w-full min-h-screen bg-[#ede8df]">
         <Routes>
+          {/* Public Landing */}
+          <Route path="/" element={<Landing />} />
+
           {/* Vendor Auth */}
           <Route path="/login" element={<VendorAuth />} />
 
           {/* Vendor Protected Interface */}
-          <Route path="/" element={<VendorRoute><TryonWorkspace onExit={() => {}} /></VendorRoute>} />
+          <Route path="/workspace" element={<VendorRoute><TryonWorkspace onExit={() => window.location.href = '/'} /></VendorRoute>} />
           <Route path="/gallery" element={<VendorRoute><VendorGallery /></VendorRoute>} />
 
           {/* Customer Interface (Public) */}

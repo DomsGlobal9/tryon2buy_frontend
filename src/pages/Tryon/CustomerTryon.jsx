@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { API_URL } from '../../config';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Sparkles, Check, ChevronLeft, RefreshCw, LogOut, Upload } from 'lucide-react';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import CustomerAuthModal from '../../components/CustomerAuthModal';
 
 
@@ -11,7 +12,11 @@ const BACKGROUND_OPTIONS = [
   { id: 'bg1', name: 'Ancient Temple',   image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg1.png' },
   { id: 'bg2', name: 'Festive Palace',   image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg2.png' },
   { id: 'bg3', name: 'Luxury Boutique',  image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg3.png' },
-  { id: 'bg4', name: 'Hotel Lobby',      image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg4.png' }
+  { id: 'bg4', name: 'Hotel Lobby',      image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg4.png' },
+  { id: 'bg5', name: 'Floral Archway',   image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg5.jpg' },
+  { id: 'bg6', name: 'Golden Palace',    image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg6.jpg' },
+  { id: 'bg7', name: 'Tropical Garden',  image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg7.jpg' },
+  { id: 'bg8', name: 'Beach Resort',     image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg8.png' }
 ];
 
 const SHOWCASE_BLOUSES = [
@@ -246,6 +251,16 @@ export default function CustomerTryon() {
     }
   };
 
+  const handleBack = () => {
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else if (sourceGeneration?.vendorId) {
+      navigate(`/shop/${sourceGeneration.vendorId}`);
+    } else {
+      navigate('/');
+    }
+  };
+
   if (loading) {
     return <div className="min-h-screen bg-[#ede8df] flex items-center justify-center font-['Courier_Prime',monospace] text-[12px] uppercase tracking-widest text-[#8c8278] animate-pulse">Loading dress details...</div>;
   }
@@ -279,15 +294,15 @@ export default function CustomerTryon() {
       
       {/* Header */}
       <header className="bg-[#faf7f2] border-b border-[rgba(26,20,16,0.1)] h-[60px] flex items-center justify-between px-[32px] shrink-0 relative">
-        {/* Back to Gallery (only if they came from the full gallery) */}
+        {/* Back Button */}
         <div className="w-[200px]">
-          {sourceGeneration?.vendorId && location.state?.fromGallery && (
+          {location.key !== 'default' && (
             <button
-              onClick={() => navigate(`/shop/${sourceGeneration.vendorId}`)}
+              onClick={handleBack}
               className="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:text-[#1a1410] transition-colors"
             >
               <ChevronLeft className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>Back to Gallery</span>
+              <span>Back</span>
             </button>
           )}
         </div>
@@ -324,6 +339,8 @@ export default function CustomerTryon() {
             </h2>
             <p className="text-[11px] text-[#8c8278] tracking-[0.5px]">
               Upload a clear, front-facing full-body photo of yourself to see how this beautiful piece looks on you.
+              <br /><br />
+              <strong className="text-[#1a1410]">Note:</strong> For best results, ensure your posture and hand placement match the product model.
             </p>
           </div>
 
@@ -477,12 +494,15 @@ export default function CustomerTryon() {
             )}
 
             {tryonState === 'generating' && (
-              <div className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center p-8 text-center animate-fade-in">
-                <div className="w-[180px] h-[240px] border border-[rgba(26,20,16,0.2)] relative overflow-hidden mb-8 shadow-inner bg-gray-50">
-                  <img src={selectedImage} alt="Scanning" className="w-full h-full object-cover blur-[3px] opacity-60" />
-                  <div className="absolute left-0 right-0 h-[2px] bg-[#c4933f] shadow-[0_0_12px_#c4933f] animate-scan" />
+              <div className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center p-8 text-center animate-fade-in z-20">
+                <div className="w-[280px] h-[280px]">
+                  <DotLottieReact
+                    src="https://lottie.host/60549870-6cf3-4b11-8125-00d065479f3c/NFmw4l5ycl.lottie"
+                    loop
+                    autoplay
+                  />
                 </div>
-                <h3 className="font-['EB_Garamond',serif] text-[20px] text-[#1a1410] mb-2">Architecting your fit...</h3>
+                <h3 className="font-['EB_Garamond',serif] text-[20px] text-[#1a1410] mt-2 mb-2">Architecting your fit...</h3>
                 <div className="w-[200px] bg-[#ede8df] h-1.5 overflow-hidden">
                   <div className="bg-[#c4933f] h-full transition-all duration-300" style={{ width: `${progress}%` }} />
                 </div>
@@ -491,11 +511,28 @@ export default function CustomerTryon() {
 
             {tryonState === 'generated' && (
               <div className="relative w-full h-full animate-fade-in group/canvas">
-                <img src={resultImageUrl} alt="Your Personal Try-On" className={`w-full h-full object-cover transition-opacity duration-700 ${isChangingBackground ? 'opacity-40 blur-[2px]' : 'opacity-100'}`} />
+                <img src={resultImageUrl} alt="Your Personal Try-On" className={`w-full h-full object-cover transition-opacity duration-700 ${(isChangingBackground || isModifying) ? 'opacity-40 blur-[2px]' : 'opacity-100'}`} />
+                
+                {/* Background Changing Animation */}
                 {isChangingBackground && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
                     <RefreshCw className="w-8 h-8 text-[#1a1410] animate-spin mb-3" />
-                    <span className="bg-white/90 px-4 py-2 text-[10px] font-bold uppercase tracking-widest shadow-sm">Applying Background...</span>
+                    <span className="bg-white/90 px-4 py-2 text-[10px] font-bold uppercase tracking-widest shadow-sm">
+                      Applying Background...
+                    </span>
+                  </div>
+                )}
+
+                {/* Outfit Modification Animation */}
+                {isModifying && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white/60 backdrop-blur-[2px]">
+                    <div className="w-[280px] h-[280px]">
+                      <DotLottieReact
+                        src="https://lottie.host/60549870-6cf3-4b11-8125-00d065479f3c/NFmw4l5ycl.lottie"
+                        loop
+                        autoplay
+                      />
+                    </div>
                   </div>
                 )}
               </div>

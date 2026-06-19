@@ -65,7 +65,7 @@ export default function CustomerAuthModal({ isOpen, onSuccess }) {
               type="text"
               required
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => setName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors bg-gray-50 focus:bg-white"
               placeholder="e.g. Aditi Sharma"
             />
@@ -77,10 +77,11 @@ export default function CustomerAuthModal({ isOpen, onSuccess }) {
               type="tel"
               required
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, '').slice(0, 10))}
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors bg-gray-50 focus:bg-white"
               placeholder="e.g. 9876543210"
               pattern="[0-9]*"
+              maxLength="10"
             />
           </div>
 
