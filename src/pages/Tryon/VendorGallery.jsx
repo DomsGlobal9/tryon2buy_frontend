@@ -85,7 +85,7 @@ export default function VendorGallery() {
 
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>
-            <h2 className="font-['EB_Garamond',serif] text-[36px] font-normal leading-tight text-[#1a1410]">
+            <h2 className="font-['EB_Garamond',serif] text-3xl md:text-[36px] font-normal leading-tight text-[#1a1410]">
               Vendor Gallery
             </h2>
             <p className="text-[11px] tracking-[1.5px] uppercase font-bold text-[#8c8278] mt-2">

@@ -4,6 +4,8 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Sparkles, Check, ChevronLeft, RefreshCw, LogOut, Upload } from 'lucide-react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import CustomerAuthModal from '../../components/CustomerAuthModal';
+import VendorLimitModal from '../../components/VendorLimitModal';
+import VendorUpgradeModal from '../../components/VendorUpgradeModal';
 
 
 // Display-only — no prompts or raw image logic here.
@@ -58,6 +60,17 @@ export default function CustomerTryon() {
 
   const [authToken, setAuthToken] = useState(localStorage.getItem('customer_token') || null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showVendorLimitModal, setShowVendorLimitModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  const handleAuthError = () => {
+    if (sessionStorage.getItem('guest_mode') === 'true') {
+      setShowVendorLimitModal(true);
+    } else {
+      setShowAuthModal(true);
+    }
+    setTryonState('initial');
+  };
 
   const getHeaders = () => {
     return {
@@ -78,9 +91,7 @@ export default function CustomerTryon() {
   };
 
   useEffect(() => {
-    if (!authToken) {
-      setShowAuthModal(true);
-    }
+    // Wait for explicit action before showing auth modal, allowing 1 free guest try-on
   }, [authToken]);
 
   useEffect(() => {
@@ -131,13 +142,18 @@ export default function CustomerTryon() {
         })
       });
 
-      if (res.status === 401 || res.status === 403) {
-        setShowAuthModal(true);
+      const data = await res.json();
+
+      if (res.status === 403 && data.error === 'INSUFFICIENT_CREDITS') {
+        setShowUpgradeModal(true);
         setIsChangingBackground(false);
         return;
       }
-      
-      const data = await res.json();
+      if (res.status === 401 || res.status === 403) {
+        handleAuthError();
+        setIsChangingBackground(false);
+        return;
+      }
       if (!res.ok) throw new Error(data.error || "Failed to change background");
       
       setResultImageUrl(data.url);
@@ -165,13 +181,18 @@ export default function CustomerTryon() {
         })
       });
 
-      if (response.status === 401 || response.status === 403) {
-        setShowAuthModal(true);
+      const result = await response.json();
+
+      if (response.status === 403 && result.error === 'INSUFFICIENT_CREDITS') {
+        setShowUpgradeModal(true);
         setIsModifying(false);
         return;
       }
-
-      const result = await response.json();
+      if (response.status === 401 || response.status === 403) {
+        handleAuthError();
+        setIsModifying(false);
+        return;
+      }
       if (!response.ok) throw new Error(result.error || 'API Error');
       setResultImageUrl(result.resultImageUrl);
     } catch (err) {
@@ -206,8 +227,8 @@ export default function CustomerTryon() {
         });
 
         if (uploadRes.status === 401 || uploadRes.status === 403) {
-          setShowAuthModal(true);
-          setTryonState('initial');
+          clearInterval(interval);
+          handleAuthError();
           return;
         }
 
@@ -223,17 +244,29 @@ export default function CustomerTryon() {
         method: 'POST',
         headers: getHeaders(),
         body: JSON.stringify({
-          mode: 'with_garment', // Just use the draped image as the base garment
+          mode: 'with_garment',
           garment_image_url: garment_image_url,
           human_image_url,
-          parent_generation_id: id // Link back to Phase 1
+          parent_generation_id: id 
         })
       });
 
-      if (genRes.status === 401 || genRes.status === 403) {
-        setShowAuthModal(true);
+      const errorData = await genRes.clone().json().catch(() => ({}));
+      if (genRes.status === 401 && errorData.error === 'GUEST_LIMIT_REACHED') {
+        clearInterval(interval);
+        handleAuthError();
+        return;
+      } else if (genRes.status === 403 && errorData.error === 'INSUFFICIENT_CREDITS') {
+        clearInterval(interval);
+        setShowUpgradeModal(true);
         setTryonState('initial');
         return;
+      } else if (genRes.status === 401 || genRes.status === 403) {
+        clearInterval(interval);
+        handleAuthError();
+        return;
+      } else if (!genRes.ok) {
+        throw new Error(errorData.error || 'Generation failed');
       }
 
       const genData = await genRes.json();
@@ -585,6 +618,16 @@ export default function CustomerTryon() {
       <CustomerAuthModal 
         isOpen={showAuthModal} 
         onSuccess={handleAuthSuccess} 
+      />
+      <VendorLimitModal 
+        isOpen={showVendorLimitModal} 
+        onClose={() => setShowVendorLimitModal(false)} 
+      />
+
+      <VendorUpgradeModal 
+        isOpen={showUpgradeModal} 
+        onClose={() => setShowUpgradeModal(false)} 
+        userType={sessionStorage.getItem('guest_mode') === 'true' ? 'vendor' : 'customer'}
       />
     </div>
   );

@@ -10,7 +10,8 @@ import Landing from './pages/Landing/Landing';
 // Authentication Guard for Vendor Interface
 const VendorRoute = ({ children }) => {
   const token = localStorage.getItem('vendor_token');
-  return token ? children : <Navigate to="/login" replace />;
+  const isGuest = sessionStorage.getItem('guest_mode') === 'true';
+  return token || isGuest ? children : <Navigate to="/login" replace />;
 };
 
 export default function App() {

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { API_URL } from '../../config';
 import { Sparkles, Upload, Check, ChevronLeft, ArrowRight, RefreshCw, LogOut, Shirt, UserCheck, Wind, Star, Layers, Image } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import VendorLimitModal from '../../components/VendorLimitModal';
+import VendorUpgradeModal from '../../components/VendorUpgradeModal';
 
 // Step 1 assets
 const imgSaree = "http://localhost:3845/assets/acdc2b8b07c17fbe38507a6bf5f4d4bfd0719563.png";
@@ -123,10 +125,17 @@ export default function TryonWorkspace({ onExit }) {
     return token ? { 'Authorization': `Bearer ${token}` } : {};
   };
 
+  const isGuestMode = sessionStorage.getItem('guest_mode') === 'true';
+
   const handleLogout = () => {
-    localStorage.removeItem('vendor_token');
-    localStorage.removeItem('vendor_data');
-    navigate('/login');
+    if (isGuestMode) {
+      sessionStorage.removeItem('guest_mode');
+      navigate('/');
+    } else {
+      localStorage.removeItem('vendor_token');
+      localStorage.removeItem('vendor_data');
+      navigate('/login');
+    }
   };
 
   // Workspace Mode (null = selector screen, 'with_garment' = Image 1, 'without_garment' = Image 2)
@@ -156,6 +165,8 @@ export default function TryonWorkspace({ onExit }) {
   // Two-Step Flow State
   const [isPersonalizing, setIsPersonalizing] = useState(false);
   const [phase1Result, setPhase1Result] = useState(null);
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Customization states
   const [selectedBlouse, setSelectedBlouse] = useState(BLOUSE_COLORS[0]);
@@ -382,6 +393,20 @@ export default function TryonWorkspace({ onExit }) {
         })
       });
 
+      if (!genRes.ok) {
+        const errorData = await genRes.json();
+        clearInterval(interval);
+        setTryonState('initial');
+        if (genRes.status === 401 && errorData.error === 'GUEST_LIMIT_REACHED') {
+          setShowLimitModal(true);
+        } else if (genRes.status === 403 && errorData.error === 'INSUFFICIENT_CREDITS') {
+          setShowUpgradeModal(true);
+        } else {
+          alert('Generation failed: ' + (errorData.message || errorData.error || 'Unknown error'));
+        }
+        return;
+      }
+
       const genData = await genRes.json();
       
       clearInterval(interval);
@@ -437,6 +462,20 @@ export default function TryonWorkspace({ onExit }) {
           category
         })
       });
+
+      if (!genRes.ok) {
+        const errorData = await genRes.json();
+        clearInterval(interval);
+        setTryonState('initial');
+        if (genRes.status === 401 && errorData.error === 'GUEST_LIMIT_REACHED') {
+          setShowLimitModal(true);
+        } else if (genRes.status === 403 && errorData.error === 'INSUFFICIENT_CREDITS') {
+          setShowUpgradeModal(true);
+        } else {
+          alert('Personal Generation failed: ' + (errorData.message || errorData.error || 'Unknown error'));
+        }
+        return;
+      }
 
       const genData = await genRes.json();
       
@@ -576,7 +615,7 @@ export default function TryonWorkspace({ onExit }) {
       `}} />
 
       {/* Header */}
-      <header className="bg-[#faf7f2] border-b border-[rgba(26,20,16,0.1)] h-[60px] flex items-center justify-between px-[64px] relative shrink-0 z-20">
+      <header className="bg-[#faf7f2] border-b border-[rgba(26,20,16,0.1)] h-[60px] flex items-center justify-between px-4 md:px-[64px] relative shrink-0 z-20">
         <div className="flex items-center gap-[48px]">
           <h1 
             onClick={onExit}
@@ -597,28 +636,30 @@ export default function TryonWorkspace({ onExit }) {
             <img src={imgCartIcon} alt="Bag" className="h-[14px] w-[14px] object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
           </button>
           
-          <button 
-            onClick={() => navigate('/gallery')}
-            className="text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 opacity-70 hover:opacity-100 transition-opacity text-[#8c8278] hover:text-[#1a1410]"
-          >
-            <Image className="w-3.5 h-3.5" />
-            <span>MY TRYON GALLERY</span>
-          </button>
+          {!isGuestMode && (
+            <button 
+              onClick={() => navigate('/gallery')}
+              className="text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 opacity-70 hover:opacity-100 transition-opacity text-[#8c8278] hover:text-[#1a1410]"
+            >
+              <Image className="w-3.5 h-3.5" />
+              <span>MY TRYON GALLERY</span>
+            </button>
+          )}
 
-          <div className="h-4 w-px bg-[rgba(26,20,16,0.15)]" />
+          {!isGuestMode && <div className="h-4 w-px bg-[rgba(26,20,16,0.15)]" />}
 
           <button 
-            onClick={() => setIsLoggedIn(false)}
+            onClick={handleLogout}
             className="text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 opacity-70 hover:opacity-100 transition-opacity text-[#8c8278] hover:text-[#1a1410]"
           >
             <LogOut className="w-3.5 h-3.5" />
-            <span>LOGOUT</span>
+            <span>{isGuestMode ? 'EXIT GUEST MODE' : 'LOGOUT'}</span>
           </button>
         </div>
       </header>
 
       {/* Main Content Pane */}
-      <div className="flex-1 flex flex-col md:flex-row relative z-10 overflow-clip">
+      <div className="flex-1 flex flex-col-reverse md:flex-row relative z-10 overflow-y-auto md:overflow-clip">
         
         {/* Left Side Console Column */}
         <aside className="w-full md:w-[420px] bg-[#faf7f2] border-r border-[rgba(26,20,16,0.1)] overflow-y-auto px-6 py-5 shrink-0 flex flex-col gap-4 custom-scrollbar">
@@ -951,7 +992,7 @@ export default function TryonWorkspace({ onExit }) {
         </aside>
 
         {/* Right Side Result Canvas Column */}
-        <main className="flex-1 bg-[#ede8df] relative overflow-hidden flex flex-col items-center justify-center p-8">
+        <main className="flex-1 bg-[#ede8df] relative overflow-hidden flex flex-col items-center justify-center p-4 md:p-8 min-h-[500px] md:min-h-0 shrink-0 md:shrink">
           
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="absolute border-[rgba(26,20,16,0.2)] border-r border-t right-[-192px] size-[384px] top-[-192px]" />
@@ -1095,6 +1136,16 @@ export default function TryonWorkspace({ onExit }) {
 
         </main>
       </div>
+
+      <VendorLimitModal 
+        isOpen={showLimitModal} 
+        onClose={() => setShowLimitModal(false)} 
+      />
+
+      <VendorUpgradeModal 
+        isOpen={showUpgradeModal} 
+        onClose={() => setShowUpgradeModal(false)} 
+      />
 
     </div>
   );

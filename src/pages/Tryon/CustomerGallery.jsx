@@ -75,7 +75,7 @@ export default function CustomerGallery() {
     <div className="bg-[#faf7f2] min-h-screen font-['Courier_Prime',monospace] text-[#1a1410] flex flex-col">
 
       {/* Header */}
-      <header className="bg-[#faf7f2] border-b border-[rgba(26,20,16,0.1)] h-[60px] flex items-center justify-center px-[64px] shrink-0">
+      <header className="bg-[#faf7f2] border-b border-[rgba(26,20,16,0.1)] h-[60px] flex items-center justify-center px-4 md:px-[64px] shrink-0">
         <span className="font-['EB_Garamond',serif] tracking-[0.2em] text-[18px] font-normal">
           TRYON2BUY <span className="opacity-40 px-2">|</span> COLLECTION
         </span>
@@ -84,7 +84,7 @@ export default function CustomerGallery() {
       {/* Page Title */}
       <div className="flex flex-col items-center py-12 px-6">
         <div className="w-full max-w-[1040px] mb-10">
-          <h1 className="font-['EB_Garamond',serif] text-[36px] font-normal leading-tight text-[#1a1410]">
+          <h1 className="font-['EB_Garamond',serif] text-3xl md:text-[36px] font-normal leading-tight text-[#1a1410]">
             Curated Collection
           </h1>
           <p className="text-[11px] tracking-[1.5px] uppercase font-bold text-[#8c8278] mt-2">

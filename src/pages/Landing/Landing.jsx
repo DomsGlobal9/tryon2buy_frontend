@@ -1,8 +1,16 @@
-import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Sparkles, CheckCircle2, CameraOff, Clock, LayoutGrid, Zap, ShieldCheck } from 'lucide-react';
 
 export default function Landing() {
+  const [showGuestModal, setShowGuestModal] = useState(false);
+  const navigate = useNavigate();
+
+  const handleGuestWorkspace = () => {
+    sessionStorage.setItem('guest_mode', 'true');
+    navigate('/workspace');
+  };
+
   useEffect(() => {
     // Inject fonts
     const linkGaramond = document.createElement('link');
@@ -84,6 +92,9 @@ export default function Landing() {
               <Link to="/login" state={{ isLogin: false }} className="bg-[#1a1410] text-white px-8 py-4 text-[11px] md:text-[12px] uppercase tracking-widest font-bold hover:bg-[#7f5700] transition-colors flex items-center gap-2">
                 Create An Account <ArrowRight className="w-4 h-4" />
               </Link>
+              <button onClick={() => setShowGuestModal(true)} className="bg-transparent border-2 border-[#1a1410] text-[#1a1410] px-8 py-4 text-[11px] md:text-[12px] uppercase tracking-widest font-bold hover:bg-[#1a1410] hover:text-white transition-colors flex items-center gap-2">
+                Continue as Guest <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
 
             <div className="mt-12 md:mt-16 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -328,6 +339,63 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+
+      {/* Guest Choice Modal */}
+      {showGuestModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-[#faf7f2] border border-[#1a1410] max-w-2xl w-full p-8 md:p-12 relative shadow-2xl rounded-3xl">
+            <button 
+              onClick={() => setShowGuestModal(false)}
+              className="absolute top-6 right-6 text-[#1a1410] hover:text-[#7f5700] transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            
+            <div className="text-center mb-10">
+              <h2 className="font-['EB_Garamond',serif] text-3xl md:text-4xl text-[#1a1410] mb-3">Choose Your Experience</h2>
+              <p className="text-[11px] tracking-[1.5px] uppercase font-bold text-[#8c8278]">Select how you want to try our technology</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Option A: Demo Products */}
+              <button 
+                onClick={() => navigate('/shop/demo')}
+                className="group border border-[rgba(26,20,16,0.1)] hover:border-[#7f5700] bg-white p-8 text-left transition-all hover:shadow-lg flex flex-col items-start gap-4 rounded-2xl"
+              >
+                <div className="bg-[#ede8df] p-4 rounded-full group-hover:bg-[#7f5700]/10 transition-colors">
+                  <LayoutGrid className="w-6 h-6 text-[#1a1410] group-hover:text-[#7f5700] transition-colors" />
+                </div>
+                <div>
+                  <h3 className="font-['EB_Garamond',serif] text-xl font-semibold text-[#1a1410] mb-2">Try Demo Products</h3>
+                  <p className="text-[12px] text-[#5c544d] font-sans leading-relaxed">Browse our curated master gallery and try on beautiful pre-uploaded garments instantly.</p>
+                </div>
+                <div className="mt-auto pt-4 text-[10px] font-bold tracking-[2px] uppercase text-[#1a1410] group-hover:text-[#7f5700] flex items-center gap-2">
+                  <span>ENTER GALLERY</span>
+                  <ArrowRight className="w-3 h-3 stroke-[2.5]" />
+                </div>
+              </button>
+
+              {/* Option B: Your Garment */}
+              <button 
+                onClick={handleGuestWorkspace}
+                className="group border border-[rgba(26,20,16,0.1)] hover:border-[#7f5700] bg-white p-8 text-left transition-all hover:shadow-lg flex flex-col items-start gap-4 rounded-2xl"
+              >
+                <div className="bg-[#ede8df] p-4 rounded-full group-hover:bg-[#7f5700]/10 transition-colors">
+                  <CameraOff className="w-6 h-6 text-[#1a1410] group-hover:text-[#7f5700] transition-colors" />
+                </div>
+                <div>
+                  <h3 className="font-['EB_Garamond',serif] text-xl font-semibold text-[#1a1410] mb-2">Try Your Garment</h3>
+                  <p className="text-[12px] text-[#5c544d] font-sans leading-relaxed">Upload a photo of your own clothing and let our AI drape it professionally.</p>
+                </div>
+                <div className="mt-auto pt-4 text-[10px] font-bold tracking-[2px] uppercase text-[#1a1410] group-hover:text-[#7f5700] flex items-center gap-2">
+                  <span>ENTER WORKSPACE</span>
+                  <ArrowRight className="w-3 h-3 stroke-[2.5]" />
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
