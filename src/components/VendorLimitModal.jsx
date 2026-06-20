@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 
-export default function VendorLimitModal({ isOpen, onClose }) {
+export default function VendorLimitModal({ isOpen, onClose, userType = 'guest' }) {
   const navigate = useNavigate();
 
   if (!isOpen) return null;
@@ -19,18 +19,30 @@ export default function VendorLimitModal({ isOpen, onClose }) {
         <div className="bg-[#ede8df] p-4 rounded-full mx-auto w-16 h-16 flex items-center justify-center mb-6">
           <LogOut className="w-8 h-8 text-[#1a1410]" />
         </div>
-        <h2 className="font-['EB_Garamond',serif] text-3xl text-[#1a1410] mb-3">Free Trial Ended</h2>
+        
+        <h2 className="font-['EB_Garamond',serif] text-3xl text-[#1a1410] mb-3">
+          {userType === 'vendor' ? 'Credit Limit Reached' : 'Free Trial Ended'}
+        </h2>
+        
         <p className="text-[12px] text-[#5c544d] font-sans leading-relaxed mb-8">
-          You've used your free try-on generations! Create a free merchant account to get <strong>5 free credits</strong> and unlock the full studio.
+          {userType === 'vendor' 
+            ? "You've used all your allocated try-on credits for this feature. Please Contact Us to upgrade your plan."
+            : "You've used your 10 free trial credits! Create a free merchant account to unlock more credits and full studio features."
+          }
         </p>
+        
         <button 
           onClick={() => {
-            sessionStorage.removeItem('guest_mode');
-            navigate('/login');
+            if (userType === 'vendor') {
+              window.location.href = "mailto:contact@tryon2buy.com";
+            } else {
+              sessionStorage.removeItem('guest_mode');
+              navigate('/login');
+            }
           }} 
           className="w-full bg-[#1a1410] hover:bg-[#7f5700] text-white py-4 text-[11px] font-bold tracking-[2px] uppercase transition-colors rounded-xl"
         >
-          Create Free Account
+          {userType === 'vendor' ? 'Contact Us' : 'Login as Vendor'}
         </button>
       </div>
     </div>

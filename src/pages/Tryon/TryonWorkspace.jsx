@@ -138,8 +138,8 @@ export default function TryonWorkspace({ onExit }) {
     }
   };
 
-  // Workspace Mode (null = selector screen, 'with_garment' = Image 1, 'without_garment' = Image 2)
-  const [workspaceMode, setWorkspaceMode] = useState(null);
+  // Workspace Mode ('with_garment' is now default since 'with_catalog' is disabled)
+  const [workspaceMode, setWorkspaceMode] = useState('with_garment');
 
   // Workspace configuration states
   const [category, setCategory] = useState("SAREE");
@@ -156,6 +156,7 @@ export default function TryonWorkspace({ onExit }) {
   const [defaultModels, setDefaultModels] = useState([]);
   const [catalogDressesData, setCatalogDressesData] = useState({});
   const [resultImageUrl, setResultImageUrl] = useState(null);
+  const [showGuestSaveModal, setShowGuestSaveModal] = useState(false);
 
   // Try-on generation state ('initial', 'generating', 'generated')
   const [tryonState, setTryonState] = useState('initial');
@@ -500,9 +501,13 @@ export default function TryonWorkspace({ onExit }) {
     return (
       <div className="bg-[#faf7f2] min-h-screen flex flex-col font-['Courier_Prime',monospace] text-[#1a1410] antialiased select-none relative">
         <header className="bg-[#faf7f2] border-b border-[rgba(26,20,16,0.1)] h-[80px] flex items-center justify-between px-[64px] shrink-0 z-20">
-          <h1 onClick={onExit} className="font-['EB_Garamond',serif] text-[22px] tracking-tight cursor-pointer hover:opacity-80 transition-opacity">
-            TRYON2BUY
-          </h1>
+          <div className="flex items-center gap-[48px]">
+            <h1 onClick={onExit} className="font-['EB_Garamond',serif] text-[22px] tracking-tight cursor-pointer hover:opacity-80 transition-opacity">
+              TRYON2BUY
+            </h1>
+            <nav className="hidden md:flex gap-[32px] text-[12px] tracking-[1.6px] uppercase font-bold">
+            </nav>
+          </div>
           <button 
             onClick={handleLogout}
             className="text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 text-[#8c8278] hover:text-[#1a1410] transition-colors"
@@ -635,17 +640,15 @@ export default function TryonWorkspace({ onExit }) {
             <img src={imgCartIcon} alt="Bag" className="h-[14px] w-[14px] object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
           </button>
           
-          {!isGuestMode && (
-            <button 
-              onClick={() => navigate('/gallery')}
-              className="text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 opacity-70 hover:opacity-100 transition-opacity text-[#8c8278] hover:text-[#1a1410]"
-            >
-              <Image className="w-3.5 h-3.5" />
-              <span>MY TRYON GALLERY</span>
-            </button>
-          )}
+          <button 
+            onClick={() => navigate(isGuestMode ? '/shop/demo' : '/gallery')}
+            className="text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 opacity-70 hover:opacity-100 transition-opacity text-[#8c8278] hover:text-[#1a1410]"
+          >
+            <Image className="w-3.5 h-3.5" />
+            <span>MY TRYON GALLERY</span>
+          </button>
 
-          {!isGuestMode && <div className="h-4 w-px bg-[rgba(26,20,16,0.15)]" />}
+          <div className="h-4 w-px bg-[rgba(26,20,16,0.15)]" />
 
           <button 
             onClick={handleLogout}
@@ -663,23 +666,20 @@ export default function TryonWorkspace({ onExit }) {
         {/* Left Side Console Column */}
         <aside className="w-full md:w-[420px] bg-[#faf7f2] border-r border-[rgba(26,20,16,0.1)] overflow-y-auto px-6 py-5 shrink-0 flex flex-col gap-4 custom-scrollbar">
           
-          {/* Back button to Choice Screen */}
-          <button 
-            onClick={() => {
-              if (isPersonalizing) {
+          {/* Back button to Choice Screen (only shown during personalization now) */}
+          {isPersonalizing && (
+            <button 
+              onClick={() => {
                 setIsPersonalizing(false);
                 setTryonState('generated');
                 setResultImageUrl(phase1Result);
-              } else {
-                setWorkspaceMode(null);
-                setTryonState('initial');
-              }
-            }}
-            className="self-start text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:underline flex items-center gap-1.5"
-          >
-            <ChevronLeft className="w-3 h-3 stroke-[2.5]" />
-            <span>{isPersonalizing ? 'Back to Draped Model' : 'Switch Flow'}</span>
-          </button>
+              }}
+              className="self-start text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:underline flex items-center gap-1.5"
+            >
+              <ChevronLeft className="w-3 h-3 stroke-[2.5]" />
+              <span>Back to Draped Model</span>
+            </button>
+          )}
 
           {/* Workspace Header */}
           <div className="space-y-0.5">
@@ -1124,7 +1124,11 @@ export default function TryonWorkspace({ onExit }) {
 
             <button 
               onClick={() => {
-                navigate('/gallery');
+                if (isGuestMode) {
+                  setShowGuestSaveModal(true);
+                } else {
+                  navigate('/gallery');
+                }
               }}
               className="bg-[#1a1410] hover:bg-black text-[#faf7f2] py-3.5 text-[9px] font-bold tracking-[1.5px] uppercase transition-colors flex items-center justify-center gap-1.5"
             >
@@ -1138,13 +1142,53 @@ export default function TryonWorkspace({ onExit }) {
 
       <VendorLimitModal 
         isOpen={showLimitModal} 
-        onClose={() => setShowLimitModal(false)} 
+        onClose={() => setShowLimitModal(false)}
+        userType={isGuestMode ? 'guest' : 'vendor'}
       />
 
       <VendorUpgradeModal 
         isOpen={showUpgradeModal} 
         onClose={() => setShowUpgradeModal(false)} 
       />
+
+      {/* Guest Save Modal */}
+      {showGuestSaveModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-[#faf7f2] border border-[#1a1410] max-w-md w-full p-8 relative shadow-2xl text-center rounded-2xl">
+            <button 
+              onClick={() => setShowGuestSaveModal(false)} 
+              className="absolute top-4 right-4 text-[#1a1410] hover:text-[#7f5700] transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <h2 className="font-['EB_Garamond',serif] text-3xl text-[#1a1410] mb-3 mt-4">
+              Save to Library
+            </h2>
+            <p className="text-[12px] text-[#5c544d] font-sans leading-relaxed mb-6">
+              To save your custom drapes to a personal library, please create a free Merchant Account. 
+              <br/><br/>
+              Alternatively, you can visit the Demo Gallery to try on existing collection pieces!
+            </p>
+            <div className="flex flex-col gap-3">
+              <button 
+                onClick={() => {
+                  sessionStorage.removeItem('guest_mode');
+                  navigate('/login');
+                }}
+                className="w-full bg-[#1a1410] hover:bg-[#7f5700] text-white py-3.5 text-[11px] font-bold tracking-[2px] uppercase transition-colors rounded-xl"
+              >
+                Create Account
+              </button>
+              <button 
+                onClick={() => navigate('/shop/demo')}
+                className="w-full bg-transparent border border-[#1a1410] hover:bg-[rgba(26,20,16,0.05)] text-[#1a1410] py-3.5 text-[11px] font-bold tracking-[2px] uppercase transition-colors rounded-xl"
+              >
+                View Demo Gallery
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { API_URL } from '../../config';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Sparkles, ShoppingBag, Copy, Check } from 'lucide-react';
+import { Sparkles, ShoppingBag, Copy, Check, ChevronLeft } from 'lucide-react';
 
 export default function CustomerGallery() {
   const { vendorId } = useParams();
@@ -75,10 +75,24 @@ export default function CustomerGallery() {
     <div className="bg-[#faf7f2] min-h-screen font-['Courier_Prime',monospace] text-[#1a1410] flex flex-col">
 
       {/* Header */}
-      <header className="bg-[#faf7f2] border-b border-[rgba(26,20,16,0.1)] h-[60px] flex items-center justify-center px-4 md:px-[64px] shrink-0">
-        <span className="font-['EB_Garamond',serif] tracking-[0.2em] text-[18px] font-normal">
-          TRYON2BUY <span className="opacity-40 px-2">|</span> COLLECTION
-        </span>
+      <header className="bg-[#faf7f2] border-b border-[rgba(26,20,16,0.1)] h-[60px] flex items-center justify-between px-4 md:px-[64px] shrink-0 relative">
+        <div className="w-[150px] md:w-[200px]">
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:text-[#1a1410] transition-colors"
+          >
+            <ChevronLeft className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Back</span>
+          </button>
+        </div>
+        
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center">
+          <span className="font-['EB_Garamond',serif] tracking-[0.2em] text-[18px] font-normal">
+            TRYON2BUY <span className="opacity-40 px-2">|</span> COLLECTION
+          </span>
+        </div>
+        
+        <div className="w-[150px] md:w-[200px]"></div>
       </header>
 
       {/* Page Title */}

@@ -3,7 +3,6 @@ import { API_URL } from '../../config';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Sparkles, Check, ChevronLeft, RefreshCw, LogOut, Upload } from 'lucide-react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import CustomerAuthModal from '../../components/CustomerAuthModal';
 import VendorLimitModal from '../../components/VendorLimitModal';
 import VendorUpgradeModal from '../../components/VendorUpgradeModal';
 
@@ -58,17 +57,14 @@ export default function CustomerTryon() {
   const [activeTab, setActiveTab] = useState('sleeve');
   const [isModifying, setIsModifying] = useState(false);
 
-  const [authToken, setAuthToken] = useState(localStorage.getItem('customer_token') || null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authToken, setAuthToken] = useState(
+    localStorage.getItem('vendor_token') || null
+  );
   const [showVendorLimitModal, setShowVendorLimitModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const handleAuthError = () => {
-    if (sessionStorage.getItem('guest_mode') === 'true') {
-      setShowVendorLimitModal(true);
-    } else {
-      setShowAuthModal(true);
-    }
+    setShowVendorLimitModal(true);
     setTryonState('initial');
   };
 
@@ -79,19 +75,12 @@ export default function CustomerTryon() {
     };
   };
 
-  const handleAuthSuccess = (token, customerData) => {
-    setAuthToken(token);
-    setShowAuthModal(false);
-  };
-
   const logout = () => {
-    localStorage.removeItem('customer_token');
-    localStorage.removeItem('customer_data');
     setAuthToken(null);
   };
 
   useEffect(() => {
-    // Wait for explicit action before showing auth modal, allowing 1 free guest try-on
+    // Wait for explicit action
   }, [authToken]);
 
   useEffect(() => {
@@ -615,19 +604,16 @@ export default function CustomerTryon() {
           </aside>
         )}
       </div>
-      <CustomerAuthModal 
-        isOpen={showAuthModal} 
-        onSuccess={handleAuthSuccess} 
-      />
       <VendorLimitModal 
         isOpen={showVendorLimitModal} 
-        onClose={() => setShowVendorLimitModal(false)} 
+        onClose={() => setShowVendorLimitModal(false)}
+        userType="guest"
       />
 
       <VendorUpgradeModal 
         isOpen={showUpgradeModal} 
         onClose={() => setShowUpgradeModal(false)} 
-        userType={sessionStorage.getItem('guest_mode') === 'true' ? 'vendor' : 'customer'}
+        userType="vendor"
       />
     </div>
   );
