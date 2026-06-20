@@ -241,8 +241,7 @@ export default function TryonWorkspace({ onExit }) {
   const getUploadSlots = (cat) => {
     if (cat === "SAREE") {
       return [
-        { id: 'saree', label: 'Saree', required: true },
-        { id: 'blouse', label: 'Blouse', required: false }
+        { id: 'saree', label: 'Saree', required: true }
       ];
     }
     return [
