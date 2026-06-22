@@ -359,10 +359,12 @@ export default function CustomerTryon() {
             <h2 className="font-['EB_Garamond',serif] text-[24px] font-normal leading-tight text-[#1a1410]">
               Try On This Look
             </h2>
-            <p className="text-[11px] text-[#8c8278] tracking-[0.5px]">
+            <p className="text-red-500 text-[13px] font-bold tracking-[0.5px]">
               Upload a clear, front-facing full-body photo of yourself to see how this beautiful piece looks on you.
               <br /><br />
-              <strong className="text-[#1a1410]">Note:</strong> For best results, ensure your posture and hand placement match the product model.
+              <span className="text-red-500 text-[13px] font-bold">
+                Note: For best results, ensure your posture and hand placement match the product model.
+              </span>
             </p>
           </div>
 
