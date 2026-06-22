@@ -57,8 +57,8 @@ export default function Landing() {
       
       {/* Navigation */}
       <nav className="flex items-center justify-between px-6 md:px-16 xl:px-24 py-6 max-w-[1800px] mx-auto w-full sticky top-0 z-50 bg-[#faf7f2]/90 backdrop-blur-md border-b border-[#8c8278]/10">
-        <div className="font-['EB_Garamond',serif] tracking-[0.25em] text-[20px] md:text-[24px] font-medium">
-          TRYON2BUY
+        <div className="flex items-center gap-2">
+          <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-10 md:h-12 object-contain" />
         </div>
         <div className="flex items-center gap-6 md:gap-8">
           <a href="#about" className="text-[10px] md:text-[11px] uppercase tracking-widest font-bold hover:text-[#7f5700] transition-colors hidden sm:block">
