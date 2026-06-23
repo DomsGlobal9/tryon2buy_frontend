@@ -97,9 +97,7 @@ export default function VendorAuth() {
 
         {/* Brand Header */}
         <div className="text-center mb-8">
-          <span className="font-['EB_Garamond',serif] tracking-[0.25em] text-[20px] font-medium block">
-            TRYON2BUY
-          </span>
+          <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="mx-auto h-12 object-contain" />
           <span className="text-[9px] uppercase tracking-[2px] text-[#8c8278] block mt-1.5">
             Merchant Studio Portal
           </span>

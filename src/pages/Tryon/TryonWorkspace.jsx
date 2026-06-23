@@ -229,7 +229,7 @@ export default function TryonWorkspace({ onExit }) {
       .catch(err => console.error("Failed to load catalog dresses:", err));
   }, []);
 
-  // Update selected dress when category changes
+  // Update selected dress when category changes or when data loads
   useEffect(() => {
     const list = catalogDressesData[category] || [];
     if (list.length > 0) {
@@ -237,12 +237,13 @@ export default function TryonWorkspace({ onExit }) {
     } else {
       setSelectedCatalogDress(null);
     }
-  }, [category]);
+  }, [category, catalogDressesData]);
 
   const getUploadSlots = (cat) => {
     if (cat === "SAREE") {
       return [
-        { id: 'saree', label: 'Saree', required: true }
+        { id: 'saree', label: 'Saree', required: true },
+        { id: 'blouse', label: 'Blouse', required: false }
       ];
     }
     return [
@@ -621,12 +622,12 @@ export default function TryonWorkspace({ onExit }) {
       {/* Header */}
       <header className="bg-[#faf7f2] border-b border-[rgba(26,20,16,0.1)] h-[60px] flex items-center justify-between px-4 md:px-[64px] relative shrink-0 z-20">
         <div className="flex items-center gap-[48px]">
-          <h1 
+          <img 
             onClick={onExit}
-            className="font-['EB_Garamond',serif] font-normal text-[#1a1410] text-[22px] tracking-tight cursor-pointer hover:opacity-80 transition-opacity"
-          >
-            TRYON2BUY
-          </h1>
+            src="/TRYON2BUY%20LOGO%20(black%20).png" 
+            alt="TryOn2Buy Logo" 
+            className="h-10 md:h-12 object-contain cursor-pointer hover:opacity-80 transition-opacity"
+          />
           <nav className="hidden md:flex gap-[32px] text-[12px] tracking-[1.6px] uppercase font-bold">
             <span className="text-[#7f5700] border-[#7f5700] border-b border-solid pb-[2px] leading-[24px] cursor-pointer">VIRTUAL TRY-ON</span>
           </nav>
@@ -780,6 +781,12 @@ export default function TryonWorkspace({ onExit }) {
                   <div className="bg-[#1a1410] text-[#faf7f2] size-4 flex items-center justify-center text-[9px] font-bold">2</div>
                   <h3 className="text-[10px] tracking-[1px] uppercase font-bold text-[#1a1410]">UPLOAD GARMENT</h3>
                 </div>
+                
+                {category === 'SAREE' && (
+                  <p className="text-[9px] text-[#8c8278] leading-relaxed -mt-2">
+                    Upload the saree as a flat lay or draped on a mannequin. Blouse is optional — if not uploaded, the blouse from the saree image will be used.
+                  </p>
+                )}
 
                 <div className={`grid gap-2 ${activeSlots.length > 2 ? 'grid-cols-2' : 'grid-cols-2'}`}>
                   {activeSlots.map((slot) => {

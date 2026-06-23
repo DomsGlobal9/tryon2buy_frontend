@@ -331,9 +331,13 @@ export default function CustomerTryon() {
 
         {/* Centered Branding */}
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
-          <span className="font-serif tracking-[0.2em] text-sm font-medium">
-            TRYON2BUY <span className="opacity-40 px-2">|</span> PERSONAL FITTING
-          </span>
+          <div 
+            onClick={() => navigate('/workspace')}
+            className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
+          >
+            <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-8 md:h-10 object-contain mr-2" />
+            <span className="font-['EB_Garamond',serif] font-normal text-[#1a1410] text-[18px] md:text-[22px] tracking-tight flex items-center"><span className="opacity-40 px-2">|</span> PERSONAL FITTING</span>
+          </div>
         </div>
 
         {/* Right spacer with Logout */}
@@ -359,10 +363,12 @@ export default function CustomerTryon() {
             <h2 className="font-['EB_Garamond',serif] text-[24px] font-normal leading-tight text-[#1a1410]">
               Try On This Look
             </h2>
-            <p className="text-[11px] text-[#8c8278] tracking-[0.5px]">
+            <p className="text-red-500 text-[13px] font-bold tracking-[0.5px]">
               Upload a clear, front-facing full-body photo of yourself to see how this beautiful piece looks on you.
               <br /><br />
-              <strong className="text-[#1a1410]">Note:</strong> For best results, ensure your posture and hand placement match the product model.
+              <span className="text-red-500 text-[13px] font-bold">
+                Note: For best results, ensure your posture and hand placement match the product model.
+              </span>
             </p>
           </div>
 

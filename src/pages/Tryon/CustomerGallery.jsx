@@ -87,9 +87,10 @@ export default function CustomerGallery() {
         </div>
         
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center">
-          <span className="font-['EB_Garamond',serif] tracking-[0.2em] text-[18px] font-normal">
-            TRYON2BUY <span className="opacity-40 px-2">|</span> COLLECTION
-          </span>
+          <div className="flex items-center">
+            <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-8 md:h-10 object-contain mr-2" />
+            <span className="font-['EB_Garamond',serif] font-normal text-[#1a1410] text-[18px] md:text-[22px] tracking-tight flex items-center"><span className="opacity-40 px-2">|</span> COLLECTION</span>
+          </div>
         </div>
         
         <div className="w-[150px] md:w-[200px]"></div>

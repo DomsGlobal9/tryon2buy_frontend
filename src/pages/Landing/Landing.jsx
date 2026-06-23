@@ -41,7 +41,7 @@ export default function Landing() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#faf7f2] font-['Courier_Prime',monospace] text-[#1a1410] selection:bg-[#7f5700] selection:text-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#faf7f2] font-['Courier_Prime',monospace] text-[#1a1410] selection:bg-[#ed7b22] selection:text-white overflow-x-hidden">
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes scrollMarquee {
           0% { transform: translateX(0); }
@@ -57,17 +57,17 @@ export default function Landing() {
       
       {/* Navigation */}
       <nav className="flex items-center justify-between px-6 md:px-16 xl:px-24 py-6 max-w-[1800px] mx-auto w-full sticky top-0 z-50 bg-[#faf7f2]/90 backdrop-blur-md border-b border-[#8c8278]/10">
-        <div className="font-['EB_Garamond',serif] tracking-[0.25em] text-[20px] md:text-[24px] font-medium">
-          TRYON2BUY
+        <div className="flex items-center gap-2">
+          <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-10 md:h-12 object-contain" />
         </div>
         <div className="flex items-center gap-6 md:gap-8">
-          <a href="#about" className="text-[10px] md:text-[11px] uppercase tracking-widest font-bold hover:text-[#7f5700] transition-colors hidden sm:block">
+          <a href="#about" className="text-[10px] md:text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors hidden sm:block">
             ABOUT US
           </a>
-          <Link to="/login" state={{ isLogin: false }} className="text-[10px] md:text-[11px] uppercase tracking-widest font-bold hover:text-[#7f5700] transition-colors hidden sm:block">
+          <Link to="/login" state={{ isLogin: false }} className="text-[10px] md:text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors hidden sm:block">
             SIGNUP
           </Link>
-          <Link to="/login" state={{ isLogin: true }} className="bg-[#1a1410] text-white px-5 md:px-6 py-2.5 text-[10px] md:text-[11px] uppercase tracking-widest font-bold hover:bg-[#7f5700] transition-colors flex items-center gap-2">
+          <Link to="/login" state={{ isLogin: true }} className="bg-[#1a1410] text-white px-5 md:px-6 py-2.5 text-[10px] md:text-[11px] uppercase tracking-widest font-bold hover:bg-[#ed7b22] transition-colors flex items-center gap-2">
             LOGIN <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -89,26 +89,26 @@ export default function Landing() {
             </p>
             
             <div className="flex flex-wrap items-center gap-4 md:gap-6">
-              <button onClick={handleGuestWorkspace} className="bg-[#1a1410] text-white px-8 py-4 text-[11px] md:text-[12px] uppercase tracking-widest font-bold hover:bg-[#7f5700] transition-colors flex items-center gap-2">
+              <button onClick={handleGuestWorkspace} className="bg-[#1a1410] text-white px-8 py-4 text-[11px] md:text-[12px] uppercase tracking-widest font-bold hover:bg-[#ed7b22] transition-colors flex items-center gap-2">
                 Continue as Guest <ArrowRight className="w-4 h-4" />
               </button>
             </div>
 
             <div className="mt-12 md:mt-16 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-4 h-4 text-[#7f5700] shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-[#ed7b22] shrink-0" />
                 <span className="text-[11px] uppercase tracking-wider font-bold">Zero Photoshoot Costs</span>
               </div>
               <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-4 h-4 text-[#7f5700] shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-[#ed7b22] shrink-0" />
                 <span className="text-[11px] uppercase tracking-wider font-bold">Immersive Try-On</span>
               </div>
               <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-4 h-4 text-[#7f5700] shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-[#ed7b22] shrink-0" />
                 <span className="text-[11px] uppercase tracking-wider font-bold">Studio-Grade Quality</span>
               </div>
               <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-4 h-4 text-[#7f5700] shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-[#ed7b22] shrink-0" />
                 <span className="text-[11px] uppercase tracking-wider font-bold">Multi-Category Support</span>
               </div>
             </div>
@@ -166,19 +166,19 @@ export default function Landing() {
       <section className="border-y border-[#8c8278]/10 bg-white/40 py-12">
         <div className="max-w-[1400px] mx-auto px-6 md:px-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           <div>
-            <div className="font-['EB_Garamond',serif] text-4xl md:text-5xl text-[#7f5700] mb-2">10x</div>
+            <div className="font-['EB_Garamond',serif] text-4xl md:text-5xl text-[#ed7b22] mb-2">10x</div>
             <div className="text-[10px] uppercase tracking-widest font-bold text-[#8c8278]">Faster Cataloging</div>
           </div>
           <div>
-            <div className="font-['EB_Garamond',serif] text-4xl md:text-5xl text-[#7f5700] mb-2">100%</div>
+            <div className="font-['EB_Garamond',serif] text-4xl md:text-5xl text-[#ed7b22] mb-2">100%</div>
             <div className="text-[10px] uppercase tracking-widest font-bold text-[#8c8278]">Digital Workflow</div>
           </div>
           <div>
-            <div className="font-['EB_Garamond',serif] text-4xl md:text-5xl text-[#7f5700] mb-2">40%</div>
+            <div className="font-['EB_Garamond',serif] text-4xl md:text-5xl text-[#ed7b22] mb-2">40%</div>
             <div className="text-[10px] uppercase tracking-widest font-bold text-[#8c8278]">Conversion Increase</div>
           </div>
           <div>
-            <div className="font-['EB_Garamond',serif] text-4xl md:text-5xl text-[#7f5700] mb-2">24/7</div>
+            <div className="font-['EB_Garamond',serif] text-4xl md:text-5xl text-[#ed7b22] mb-2">24/7</div>
             <div className="text-[10px] uppercase tracking-widest font-bold text-[#8c8278]">Virtual Fitting Room</div>
           </div>
         </div>
@@ -198,7 +198,7 @@ export default function Landing() {
           <div className="hidden md:block absolute top-12 left-1/6 right-1/6 h-[1px] bg-[#8c8278]/20 z-0"></div>
 
           {/* Step 1 */}
-          <div className="relative z-10 bg-[#faf7f2] p-8 text-center border border-[#8c8278]/10 hover:border-[#7f5700]/30 transition-colors shadow-sm">
+          <div className="relative z-10 bg-[#faf7f2] p-8 text-center border border-[#8c8278]/10 hover:border-[#ed7b22]/30 transition-colors shadow-sm">
             <div className="w-16 h-16 mx-auto bg-[#1a1410] text-white flex items-center justify-center rounded-full mb-6 shadow-xl">
               <CameraOff className="w-6 h-6" />
             </div>
@@ -209,8 +209,8 @@ export default function Landing() {
           </div>
 
           {/* Step 2 */}
-          <div className="relative z-10 bg-[#faf7f2] p-8 text-center border border-[#8c8278]/10 hover:border-[#7f5700]/30 transition-colors shadow-sm">
-            <div className="w-16 h-16 mx-auto bg-[#7f5700] text-white flex items-center justify-center rounded-full mb-6 shadow-xl">
+          <div className="relative z-10 bg-[#faf7f2] p-8 text-center border border-[#8c8278]/10 hover:border-[#ed7b22]/30 transition-colors shadow-sm">
+            <div className="w-16 h-16 mx-auto bg-[#ed7b22] text-white flex items-center justify-center rounded-full mb-6 shadow-xl">
               <Zap className="w-6 h-6" />
             </div>
             <h3 className="text-[14px] uppercase font-bold tracking-widest mb-4">2. Digital Draping</h3>
@@ -220,7 +220,7 @@ export default function Landing() {
           </div>
 
           {/* Step 3 */}
-          <div className="relative z-10 bg-[#faf7f2] p-8 text-center border border-[#8c8278]/10 hover:border-[#7f5700]/30 transition-colors shadow-sm">
+          <div className="relative z-10 bg-[#faf7f2] p-8 text-center border border-[#8c8278]/10 hover:border-[#ed7b22]/30 transition-colors shadow-sm">
             <div className="w-16 h-16 mx-auto bg-[#1a1410] text-white flex items-center justify-center rounded-full mb-6 shadow-xl">
               <LayoutGrid className="w-6 h-6" />
             </div>
@@ -242,7 +242,7 @@ export default function Landing() {
                 alt="Virtual Dressing Room" 
                 className="w-full h-auto object-cover rounded-sm opacity-90 shadow-2xl"
               />
-              <div className="absolute -bottom-8 -right-8 w-48 h-48 bg-[#7f5700] -z-10 hidden md:block"></div>
+              <div className="absolute -bottom-8 -right-8 w-48 h-48 bg-[#ed7b22] -z-10 hidden md:block"></div>
             </div>
             
             <div className="order-1 lg:order-2">
@@ -290,7 +290,7 @@ export default function Landing() {
           <p className="text-[#5c544d] font-['Inter',sans-serif] text-[16px] leading-relaxed mb-10 max-w-xl mx-auto">
             Join the modern fashion boutiques using TryOn2Buy to digitize their draping process and deliver unparalleled shopping experiences.
           </p>
-          <Link to="/login" className="inline-flex items-center gap-3 bg-[#7f5700] text-white px-10 py-5 text-[12px] uppercase tracking-[3px] font-bold hover:bg-[#1a1410] transition-colors shadow-xl hover:shadow-2xl hover:-translate-y-1 transform duration-200">
+          <Link to="/login" className="inline-flex items-center gap-3 bg-[#ed7b22] text-white px-10 py-5 text-[12px] uppercase tracking-[3px] font-bold hover:bg-[#1a1410] transition-colors shadow-xl hover:shadow-2xl hover:-translate-y-1 transform duration-200">
             Create Your Merchant Account <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -300,8 +300,8 @@ export default function Landing() {
       <footer className="bg-[#1a1410] text-white py-16 px-6 md:px-12">
         <div className="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 border-b border-[#3a3430] pb-12 mb-8">
           <div className="col-span-1 md:col-span-2">
-            <div className="font-['EB_Garamond',serif] tracking-[0.25em] text-[24px] font-medium mb-6">
-              TRYON2BUY
+            <div className="mb-6">
+              <img src="/assets/footer_logo.png" alt="TryOn2Buy Logo" className="h-8 md:h-10 object-contain" />
             </div>
             <p className="text-[#a69c92] font-['Inter',sans-serif] text-[14px] max-w-sm leading-relaxed">
               The premier digital draping and virtual fitting room technology for modern luxury fashion e-commerce.
