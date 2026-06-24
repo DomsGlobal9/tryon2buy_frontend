@@ -131,9 +131,9 @@ export default function Landing() {
               <div className="relative overflow-hidden group shadow-xl rounded-sm">
                 <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors z-10" />
                 <img 
-                  src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=600&h=800&q=80" 
+                  src="/assets/ui/landing_sharara.png" 
                   alt="Bridal Lehenga Example"
-                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                  className="w-full h-full object-cover scale-110 transition-transform duration-1000 group-hover:scale-[1.15]"
                 />
               </div>
 

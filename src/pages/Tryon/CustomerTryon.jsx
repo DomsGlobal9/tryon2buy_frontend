@@ -525,14 +525,10 @@ export default function CustomerTryon() {
               <div className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center p-8 text-center animate-fade-in z-20">
                 <div className="w-[280px] h-[280px]">
                   <DotLottieReact
-                    src="https://lottie.host/60549870-6cf3-4b11-8125-00d065479f3c/NFmw4l5ycl.lottie"
+                    src="https://lottie.host/1014dfd1-04b7-4311-bee6-0807da37a820/KcoFjrbtZT.lottie"
                     loop
                     autoplay
                   />
-                </div>
-                <h3 className="font-['EB_Garamond',serif] text-[20px] text-[#1a1410] mt-2 mb-2">Architecting your fit...</h3>
-                <div className="w-[200px] bg-[#ede8df] h-1.5 overflow-hidden">
-                  <div className="bg-[#c4933f] h-full transition-all duration-300" style={{ width: `${progress}%` }} />
                 </div>
               </div>
             )}
@@ -543,11 +539,15 @@ export default function CustomerTryon() {
                 
                 {/* Background Changing Animation */}
                 {isChangingBackground && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
-                    <RefreshCw className="w-8 h-8 text-[#1a1410] animate-spin mb-3" />
-                    <span className="bg-white/90 px-4 py-2 text-[10px] font-bold uppercase tracking-widest shadow-sm">
-                      Applying Background...
-                    </span>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white/60 backdrop-blur-[2px]">
+                    <div className="w-[280px] h-[280px]">
+                      <DotLottieReact
+                        src="https://lottie.host/daaf6e95-096e-4581-9f9b-57fd2fb31511/RNiTHsdDkt.lottie"
+                        loop
+                        autoplay
+                        speed={0.5}
+                      />
+                    </div>
                   </div>
                 )}
 
@@ -556,7 +556,7 @@ export default function CustomerTryon() {
                   <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white/60 backdrop-blur-[2px]">
                     <div className="w-[280px] h-[280px]">
                       <DotLottieReact
-                        src="https://lottie.host/60549870-6cf3-4b11-8125-00d065479f3c/NFmw4l5ycl.lottie"
+                        src="https://lottie.host/1014dfd1-04b7-4311-bee6-0807da37a820/KcoFjrbtZT.lottie"
                         loop
                         autoplay
                       />

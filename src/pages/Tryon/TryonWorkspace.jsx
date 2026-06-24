@@ -783,7 +783,7 @@ export default function TryonWorkspace({ onExit }) {
                 </div>
                 
                 {category === 'SAREE' && (
-                  <p className="text-[9px] text-[#8c8278] leading-relaxed -mt-2">
+                  <p className="text-[12px] text-red-600 font-medium leading-relaxed -mt-2">
                     Upload the saree as a flat lay or draped on a mannequin. Blouse is optional — if not uploaded, the blouse from the saree image will be used.
                   </p>
                 )}
