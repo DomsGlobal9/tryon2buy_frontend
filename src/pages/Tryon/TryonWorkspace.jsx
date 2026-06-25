@@ -390,7 +390,8 @@ export default function TryonWorkspace({ onExit }) {
           mode: workspaceMode,
           garment_image_url,
           human_image_url,
-          category
+          category,
+          target_folder: workspaceMode === 'with_garment' ? 'vendor-drapes' : 'results/tryon-results'
         })
       });
 
@@ -460,7 +461,8 @@ export default function TryonWorkspace({ onExit }) {
           mode: 'with_garment', 
           garment_image_url: phase1Result,
           human_image_url,
-          category
+          category,
+          target_folder: 'results/tryon-results'
         })
       });
 

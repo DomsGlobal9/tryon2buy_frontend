@@ -236,7 +236,8 @@ export default function CustomerTryon() {
           mode: 'with_garment',
           garment_image_url: garment_image_url,
           human_image_url,
-          parent_generation_id: id 
+          parent_generation_id: id,
+          target_folder: 'results/tryon-results'
         })
       });
 
