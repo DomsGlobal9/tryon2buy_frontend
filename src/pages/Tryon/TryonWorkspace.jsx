@@ -370,7 +370,7 @@ export default function TryonWorkspace({ onExit }) {
         if (selectedFile) {
           const formData = new FormData();
           formData.append('image', selectedFile);
-          const uploadRes = await fetch(`${API_URL}/api/tryon/upload?folder=human-images`, { 
+          const uploadRes = await fetch(`${API_URL}/api/tryon/upload?folder=user-uploads`, { 
             method: 'POST', 
             headers: getUploadHeaders(),
             body: formData 
@@ -446,7 +446,7 @@ export default function TryonWorkspace({ onExit }) {
       if (selectedFile) {
         const formData = new FormData();
         formData.append('image', selectedFile);
-        const uploadRes = await fetch(`${API_URL}/api/tryon/upload?folder=human-images`, { method: 'POST', body: formData });
+        const uploadRes = await fetch(`${API_URL}/api/tryon/upload?folder=user-uploads`, { method: 'POST', body: formData });
         const uploadData = await uploadRes.json();
         human_image_url = uploadData.url;
       } else {
