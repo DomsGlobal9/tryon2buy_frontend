@@ -38,6 +38,7 @@ export default function CustomerTryon() {
   const location = useLocation();
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
+  const intervalRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -101,9 +102,30 @@ export default function CustomerTryon() {
       });
   }, [id]);
 
+  // Clean up blob URLs and intervals to prevent massive memory leaks on mobile
+  useEffect(() => {
+    return () => {
+      if (selectedImage && selectedImage.startsWith('blob:')) {
+        URL.revokeObjectURL(selectedImage);
+      }
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [selectedImage]);
+
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      if (file.size > 10 * 1024 * 1024) {
+        alert("File is too large. Please upload an image under 10MB.");
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        if (cameraInputRef.current) cameraInputRef.current.value = '';
+        return;
+      }
+      if (selectedImage && selectedImage.startsWith('blob:')) {
+        URL.revokeObjectURL(selectedImage);
+      }
       setSelectedFile(file);
       setSelectedImage(URL.createObjectURL(file));
       setTryonState('initial');
@@ -112,9 +134,14 @@ export default function CustomerTryon() {
 
   const clearImage = (e) => {
     e.stopPropagation();
+    if (selectedImage && selectedImage.startsWith('blob:')) {
+      URL.revokeObjectURL(selectedImage);
+    }
     setSelectedImage(null);
     setSelectedFile(null);
     setTryonState('initial');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (cameraInputRef.current) cameraInputRef.current.value = '';
   };
 
   const triggerFileBrowser = (e) => {
@@ -134,6 +161,13 @@ export default function CustomerTryon() {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
       if (file.type.startsWith('image/')) {
+        if (file.size > 10 * 1024 * 1024) {
+          alert("File is too large. Please upload an image under 10MB.");
+          return;
+        }
+        if (selectedImage && selectedImage.startsWith('blob:')) {
+          URL.revokeObjectURL(selectedImage);
+        }
         setSelectedFile(file);
         setSelectedImage(URL.createObjectURL(file));
         setTryonState('initial');
@@ -243,7 +277,7 @@ export default function CustomerTryon() {
     setTryonState('generating');
     setProgress(0);
 
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       setProgress((prev) => {
         const next = prev + Math.floor(Math.random() * 8) + 2;
         return next > 95 ? 95 : next;
@@ -262,7 +296,7 @@ export default function CustomerTryon() {
         });
 
         if (uploadRes.status === 401 || uploadRes.status === 403) {
-          clearInterval(interval);
+          if (intervalRef.current) clearInterval(intervalRef.current);
           handleAuthError();
           return;
         }
@@ -271,6 +305,10 @@ export default function CustomerTryon() {
         human_image_url = uploadData.url;
       } else {
         human_image_url = selectedImage;
+      }
+
+      if (!human_image_url || human_image_url.startsWith('blob:')) {
+        throw new Error("Invalid image source. Please upload a fresh photo.");
       }
 
       const garment_image_url = sourceGeneration.resultImageUrl || sourceGeneration.garmentImageUrl;
@@ -289,16 +327,16 @@ export default function CustomerTryon() {
 
       const errorData = await genRes.clone().json().catch(() => ({}));
       if (genRes.status === 401 && errorData.error === 'GUEST_LIMIT_REACHED') {
-        clearInterval(interval);
+        if (intervalRef.current) clearInterval(intervalRef.current);
         handleAuthError();
         return;
       } else if (genRes.status === 403 && errorData.error === 'INSUFFICIENT_CREDITS') {
-        clearInterval(interval);
+        if (intervalRef.current) clearInterval(intervalRef.current);
         setShowUpgradeModal(true);
         setTryonState('initial');
         return;
       } else if (genRes.status === 401 || genRes.status === 403) {
-        clearInterval(interval);
+        if (intervalRef.current) clearInterval(intervalRef.current);
         handleAuthError();
         return;
       } else if (!genRes.ok) {
@@ -307,14 +345,14 @@ export default function CustomerTryon() {
 
       const genData = await genRes.json();
       
-      clearInterval(interval);
+      if (intervalRef.current) clearInterval(intervalRef.current);
       setProgress(100);
       setResultImageUrl(genData.result_image_url || garment_image_url);
       setTimeout(() => setTryonState('generated'), 400);
 
     } catch (err) {
       console.error(err);
-      clearInterval(interval);
+      if (intervalRef.current) clearInterval(intervalRef.current);
       setTryonState('initial');
       alert('Try-On failed: ' + err.message);
     }
@@ -366,7 +404,7 @@ export default function CustomerTryon() {
         {/* Back Button */}
         <div className="flex-1 md:w-[200px] md:flex-none">
           <button
-            onClick={() => window.history.length > 2 ? navigate(-1) : navigate('/')}
+            onClick={handleBack}
             className="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:text-[#1a1410] transition-colors"
           >
             <ChevronLeft className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -465,7 +503,7 @@ export default function CustomerTryon() {
                       <img src={selectedImage} alt="Your Portrait" className="h-[120px] w-auto object-contain rounded-md shadow-sm" />
                       <button 
                         onClick={clearImage}
-                        className="absolute top-1 right-1 bg-black/40 hover:bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-20"
+                        className="absolute top-1 right-1 bg-black/40 hover:bg-red-500 text-white rounded-full p-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all z-20"
                         title="Remove image"
                       >
                         <X className="w-3.5 h-3.5" />
@@ -537,12 +575,18 @@ export default function CustomerTryon() {
 
           {tryonState === 'generated' && selectedImage && (
             <div className="mb-4 animate-fade-in mt-4">
-              <div className="bg-white border-2 border-[#f6ad55] flex flex-col items-center justify-center text-center relative overflow-hidden group p-2 min-h-[140px] rounded-xl mb-3">
-                <img src={selectedImage} alt="Your Portrait" className="h-[120px] w-auto object-contain shadow-sm rounded-lg" />
+              <div 
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                className={`bg-white border-2 flex flex-col items-center justify-center text-center relative overflow-hidden group p-2 min-h-[140px] rounded-xl mb-3 transition-all ${isDragging ? 'border-[#dd6b20] border-dashed bg-[#fffaf0] scale-[1.02] shadow-md' : 'border-[#f6ad55]'}`}
+              >
+                <img src={selectedImage} alt="Your Portrait" className="h-[120px] w-auto object-contain shadow-sm rounded-lg pointer-events-none" />
                 
                 <button 
                   onClick={clearImage}
-                  className="absolute top-1 right-1 bg-black/40 hover:bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-20"
+                  className="absolute top-1 right-1 bg-black/40 hover:bg-red-500 text-white rounded-full p-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all z-20"
                   title="Remove image"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -568,7 +612,8 @@ export default function CustomerTryon() {
           {tryonState === 'generated' && (
             <button
               onClick={startGeneration}
-              className="w-full mb-6 py-4 text-[11px] font-bold tracking-[2px] uppercase flex items-center justify-center gap-2 transition-all bg-transparent border border-[rgba(26,20,16,0.3)] text-[#1a1410] hover:border-[#1a1410] animate-fade-in"
+              disabled={isChangingBackground || isModifying}
+              className="w-full mb-6 py-4 text-[11px] font-bold tracking-[2px] uppercase flex items-center justify-center gap-2 transition-all bg-transparent border border-[rgba(26,20,16,0.3)] text-[#1a1410] hover:border-[#1a1410] animate-fade-in disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-[rgba(26,20,16,0.3)]"
             >
               <RefreshCw className="h-4 w-4" />
               <span>REGENERATE</span>
@@ -641,8 +686,8 @@ export default function CustomerTryon() {
 
               <button
                 onClick={applyModification}
-                disabled={isModifying}
-                className="w-full mt-6 bg-[#1a1410] text-[#faf7f2] py-4 text-[11px] font-bold tracking-[1.5px] uppercase transition-colors hover:bg-black shadow-md flex items-center justify-center gap-2 disabled:opacity-70"
+                disabled={isModifying || isChangingBackground}
+                className="w-full mt-6 bg-[#1a1410] text-[#faf7f2] py-4 text-[11px] font-bold tracking-[1.5px] uppercase transition-colors hover:bg-black shadow-md flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {isModifying ? (
                   <>
@@ -751,9 +796,9 @@ export default function CustomerTryon() {
               {BACKGROUND_OPTIONS.map((bg) => (
                 <button
                   key={bg.id}
-                  disabled={isChangingBackground}
+                  disabled={isChangingBackground || isModifying}
                   onClick={() => setSelectedBg(bg.id)}
-                  className={`relative aspect-[4/3] overflow-hidden group border transition-all ${selectedBg === bg.id ? 'border-[#c4933f] ring-2 ring-[#c4933f] scale-[1.02] shadow-md' : 'border-[rgba(26,20,16,0.1)]'} ${isChangingBackground ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-[#1a1410]'}`}
+                  className={`relative aspect-[4/3] overflow-hidden group border transition-all ${selectedBg === bg.id ? 'border-[#c4933f] ring-2 ring-[#c4933f] scale-[1.02] shadow-md' : 'border-[rgba(26,20,16,0.1)]'} ${(isChangingBackground || isModifying) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-[#1a1410]'}`}
                 >
                   <img src={bg.image} alt={bg.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-2">
@@ -765,7 +810,7 @@ export default function CustomerTryon() {
 
             <button 
               onClick={applyBackground}
-              disabled={!selectedBg || isChangingBackground}
+              disabled={!selectedBg || isChangingBackground || isModifying}
               className="w-full bg-[#1a1410] text-[#faf7f2] py-4 text-[11px] font-bold tracking-[1.5px] uppercase transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black flex items-center justify-center gap-2 shadow-md"
             >
               {isChangingBackground && <RefreshCw className="w-4 h-4 animate-spin" />}
