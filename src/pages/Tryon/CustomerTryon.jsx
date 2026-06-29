@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { API_URL } from '../../config';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Sparkles, Check, ChevronLeft, RefreshCw, LogOut, Upload, Lightbulb, CloudUpload, FolderOpen, Heart, Lock, ShieldCheck, Shield, Camera } from 'lucide-react';
+import { Sparkles, Check, ChevronLeft, RefreshCw, LogOut, Upload, Lightbulb, CloudUpload, FolderOpen, Heart, Lock, ShieldCheck, Shield, Camera, X } from 'lucide-react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import VendorLimitModal from '../../components/VendorLimitModal';
 import VendorUpgradeModal from '../../components/VendorUpgradeModal';
@@ -108,6 +108,13 @@ export default function CustomerTryon() {
       setSelectedImage(URL.createObjectURL(file));
       setTryonState('initial');
     }
+  };
+
+  const clearImage = (e) => {
+    e.stopPropagation();
+    setSelectedImage(null);
+    setSelectedFile(null);
+    setTryonState('initial');
   };
 
   const triggerFileBrowser = (e) => {
@@ -397,6 +404,10 @@ export default function CustomerTryon() {
         {/* Left Side: Instructions & Upload */}
         <aside className="w-full md:w-[400px] bg-[#faf7f2] border-r border-[rgba(26,20,16,0.1)] p-3 md:p-4 shrink-0 flex flex-col justify-start overflow-y-auto style={{scrollbarWidth: 'thin'}}">
           
+          {/* Global Hidden Inputs for Camera and File Browser */}
+          <input ref={cameraInputRef} type="file" accept="image/*" capture="camera" onChange={handleFileChange} className="hidden" />
+          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+
           <div className="flex flex-col animate-fade-in w-full">
             <h2 className={`font-['EB_Garamond',serif] text-[24px] font-normal leading-tight text-[#1a1410] ${tryonState === 'generated' ? 'mb-4 mt-4' : 'mb-0 hidden'}`}>
               Try On This Look
@@ -441,23 +452,39 @@ export default function CustomerTryon() {
 
               {/* Upload Area */}
               <div 
-                onClick={triggerFileBrowser}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
-                className={`border-2 border-dashed rounded-xl p-3 flex flex-col items-center justify-center text-center bg-white cursor-pointer transition-all relative group mb-3 min-h-[160px] ${isDragging ? 'border-[#dd6b20] bg-[#fffaf0] scale-[1.02] shadow-md' : 'border-[#f6ad55] hover:bg-[#fffaf0]'}`}
+                className={`border-2 border-dashed rounded-xl p-3 flex flex-col items-center justify-center text-center bg-white transition-all relative group mb-3 min-h-[160px] ${isDragging ? 'border-[#dd6b20] bg-[#fffaf0] scale-[1.02] shadow-md' : 'border-[#f6ad55]'}`}
               >
-                <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
-                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
 
                 {selectedImage ? (
-                  <div className="relative w-full h-full flex flex-col items-center justify-center">
-                    <img src={selectedImage} alt="Your Portrait" className="h-[120px] w-auto object-contain rounded-md shadow-sm" />
-                    <div className="absolute inset-0 bg-white/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm rounded-md">
-                      <span className="text-[#dd6b20] text-[12px] font-bold flex items-center gap-1.5 font-sans">
-                        <FolderOpen className="w-4 h-4" /> Change File
-                      </span>
+                  <div className="w-full h-full flex flex-col items-center justify-center group">
+                    <div className="relative mb-3">
+                      <img src={selectedImage} alt="Your Portrait" className="h-[120px] w-auto object-contain rounded-md shadow-sm" />
+                      <button 
+                        onClick={clearImage}
+                        className="absolute top-1 right-1 bg-black/40 hover:bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-20"
+                        title="Remove image"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-2 z-10 justify-center">
+                      <button 
+                        onClick={triggerCamera} 
+                        className="lg:hidden border border-[#dd6b20] text-[#dd6b20] bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[10px] font-sans hover:bg-[#dd6b20] hover:text-white transition-colors"
+                      >
+                        <Camera className="w-3.5 h-3.5" /> Take Photo
+                      </button>
+                      <button 
+                        onClick={triggerFileBrowser} 
+                        className="border border-[#dd6b20] text-[#dd6b20] bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[10px] font-sans hover:bg-[#dd6b20] hover:text-white transition-colors"
+                      >
+                        <FolderOpen className="w-3.5 h-3.5" /> Browse Files
+                      </button>
                     </div>
                   </div>
                 ) : (
@@ -510,18 +537,30 @@ export default function CustomerTryon() {
 
           {tryonState === 'generated' && selectedImage && (
             <div className="mb-4 animate-fade-in mt-4">
-              <div 
-                onClick={triggerFileBrowser}
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                className="bg-white border-2 border-dashed border-[#f6ad55] hover:border-[#dd6b20] transition-all flex flex-col items-center justify-center text-center cursor-pointer relative overflow-hidden group p-2 min-h-[140px] rounded-xl"
-              >
+              <div className="bg-white border-2 border-[#f6ad55] flex flex-col items-center justify-center text-center relative overflow-hidden group p-2 min-h-[140px] rounded-xl mb-3">
                 <img src={selectedImage} alt="Your Portrait" className="h-[120px] w-auto object-contain shadow-sm rounded-lg" />
-                <div className="absolute inset-0 bg-white/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <span className="text-[#dd6b20] text-[12px] font-bold px-3 py-1.5 uppercase tracking-wider">Change Photo</span>
-                </div>
+                
+                <button 
+                  onClick={clearImage}
+                  className="absolute top-1 right-1 bg-black/40 hover:bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-20"
+                  title="Remove image"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <div className="flex items-center gap-2 z-10 justify-center">
+                <button 
+                  onClick={triggerCamera} 
+                  className="lg:hidden border border-[#dd6b20] text-[#dd6b20] bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[10px] font-sans hover:bg-[#dd6b20] hover:text-white transition-colors"
+                >
+                  <Camera className="w-3.5 h-3.5" /> Take Photo
+                </button>
+                <button 
+                  onClick={triggerFileBrowser} 
+                  className="border border-[#dd6b20] text-[#dd6b20] bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[10px] font-sans hover:bg-[#dd6b20] hover:text-white transition-colors"
+                >
+                  <FolderOpen className="w-3.5 h-3.5" /> Browse Files
+                </button>
               </div>
             </div>
           )}
