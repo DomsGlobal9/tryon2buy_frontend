@@ -178,7 +178,7 @@ export default function TryonWorkspace({ onExit }) {
   useEffect(() => {
     // Inject fonts
     const linkGaramond = document.createElement('link');
-    linkGaramond.href = 'https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap';
+    linkGaramond.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap';
     linkGaramond.rel = 'stylesheet';
     document.head.appendChild(linkGaramond);
 
@@ -205,39 +205,10 @@ export default function TryonWorkspace({ onExit }) {
     setDefaultModels(localModels);
     setSelectedModel(localModels[0].name);
 
-    // Fetch Catalog Dresses
-    fetch(`${API_URL}/api/tryon/catalog-dresses`)
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.length > 0) {
-          const grouped = { "SAREE": [], "LEHANGA": [], "ANARKALI": [], "KURTHI": [], "SHARARA": [] };
-          data.forEach(item => {
-            const cat = item.category?.toUpperCase() || "SAREE";
-            const targetGroup = grouped[cat] ? cat : "SAREE";
-            
-            grouped[targetGroup].push({
-              id: item.id,
-              name: item.name,
-              img: item.thumbnail || item.front_view_url || FALLBACK_DRESS_ICON,
-              fallback: FALLBACK_DRESS_ICON,
-              draped: item.front_view_url || FALLBACK_DRESS_ICON
-            });
-          });
-          setCatalogDressesData(grouped);
-        }
-      })
-      .catch(err => console.error("Failed to load catalog dresses:", err));
+    
   }, []);
 
-  // Update selected dress when category changes or when data loads
-  useEffect(() => {
-    const list = catalogDressesData[category] || [];
-    if (list.length > 0) {
-      setSelectedCatalogDress(list[0]);
-    } else {
-      setSelectedCatalogDress(null);
-    }
-  }, [category, catalogDressesData]);
+  
 
   const getUploadSlots = (cat) => {
     if (cat === "SAREE") {
@@ -312,103 +283,43 @@ export default function TryonWorkspace({ onExit }) {
   };
 
   const startGeneration = async () => {
-    if (workspaceMode === 'with_garment' && (!isGarmentUploadValid() || !selectedModel)) return;
-    if (workspaceMode === 'without_garment' && (!selectedImage || !selectedCatalogDress)) return;
-    
+    if (!isGarmentUploadValid() || !selectedModel) return;
     setTryonState('generating');
-    setProgress(0);
-    setProgressStage(0);
-
-    // Fake progress bar for visual effect
+    setProgress(0); setProgressStage(0);
     const interval = setInterval(() => {
       setProgress((prev) => {
         const next = prev + Math.floor(Math.random() * 8) + 2;
         const bounded = next > 95 ? 95 : next;
-        if (bounded < 35) setProgressStage(0);
-        else if (bounded < 70) setProgressStage(1);
-        else setProgressStage(2);
+        if (bounded < 35) setProgressStage(0); else if (bounded < 70) setProgressStage(1); else setProgressStage(2);
         return bounded;
       });
     }, 300);
-
     try {
-      let garment_image_url = null;
-      let human_image_url = null;
-
-      // 1. Upload files if necessary
-      if (workspaceMode === 'with_garment') {
-        const garment_urls = {};
-        
-        // Upload all provided slots
-        for (const slot of activeSlots) {
-          const slotData = garmentUploads[slot.id];
-          if (slotData && slotData.file) {
-            const formData = new FormData();
-            formData.append('image', slotData.file);
-            const uploadRes = await fetch(`${API_URL}/api/tryon/upload?folder=garments`, { 
-              method: 'POST', 
-              headers: getUploadHeaders(),
-              body: formData 
-            });
-            const uploadData = await uploadRes.json();
-            garment_urls[slot.id] = uploadData.url;
-          } else if (slotData && slotData.url) {
-            garment_urls[slot.id] = slotData.url; // sample fallback
-          }
-        }
-        garment_image_url = JSON.stringify(garment_urls);
-        
-        // Find selected model URL
-        const sm = defaultModels.find(m => m.name === selectedModel);
-        human_image_url = sm ? sm.img : imgModelClassicStudio;
-
-      } else {
-        // Without Garment Flow
-        garment_image_url = selectedCatalogDress.draped; // front view from catalog
-        
-        // Upload the user's portrait
-        if (selectedFile) {
-          const formData = new FormData();
-          formData.append('image', selectedFile);
-          const uploadRes = await fetch(`${API_URL}/api/tryon/upload?folder=user-uploads`, { 
-            method: 'POST', 
-            headers: getUploadHeaders(),
-            body: formData 
-          });
-          const uploadData = await uploadRes.json();
-          human_image_url = uploadData.url;
-        } else {
-          human_image_url = selectedImage; // sample portrait
+      const garment_urls = {};
+      for (const slot of activeSlots) {
+        const slotData = garmentUploads[slot.id];
+        if (slotData && slotData.file) {
+          const formData = new FormData(); formData.append('image', slotData.file);
+          const uploadRes = await fetch(`${API_URL}/api/tryon/upload?folder=garments`, { method: 'POST', headers: getUploadHeaders(), body: formData });
+          const uploadData = await uploadRes.json(); garment_urls[slot.id] = uploadData.url;
+        } else if (slotData && slotData.url) {
+          garment_urls[slot.id] = slotData.url;
         }
       }
-
-      // 2. Call Generation endpoint
+      const garment_image_url = JSON.stringify(garment_urls);
+      const sm = defaultModels.find(m => m.name === selectedModel);
+      const human_image_url = sm ? sm.img : imgModelClassicStudio;
       const genRes = await fetch(`${API_URL}/api/tryon/generate`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify({
-          mode: workspaceMode,
-          garment_image_url,
-          human_image_url,
-          category,
-          target_folder: workspaceMode === 'with_garment' ? 'vendor-drapes' : 'results/tryon-results'
-        })
+        method: 'POST', headers: getHeaders(),
+        body: JSON.stringify({ mode: 'with_garment', garment_image_url, human_image_url, category, target_folder: 'vendor-drapes' })
       });
-
       if (!genRes.ok) {
-        const errorData = await genRes.json();
-        clearInterval(interval);
-        setTryonState('initial');
-        if (genRes.status === 401 && errorData.error === 'GUEST_LIMIT_REACHED') {
-          setShowLimitModal(true);
-        } else if (genRes.status === 403 && errorData.error === 'INSUFFICIENT_CREDITS') {
-          setShowUpgradeModal(true);
-        } else {
-          alert('Generation failed: ' + (errorData.message || errorData.error || 'Unknown error'));
-        }
+        const errorData = await genRes.json(); clearInterval(interval); setTryonState('initial');
+        if (genRes.status === 401 && errorData.error === 'GUEST_LIMIT_REACHED') setShowLimitModal(true);
+        else if (genRes.status === 403 && errorData.error === 'INSUFFICIENT_CREDITS') setShowUpgradeModal(true);
+        else alert('Generation failed: ' + (errorData.message || errorData.error || 'Unknown error'));
         return;
       }
-
       const genData = await genRes.json();
       
       clearInterval(interval);
@@ -424,184 +335,11 @@ export default function TryonWorkspace({ onExit }) {
     }
   };
 
-  const startPersonalGeneration = async () => {
-    if (!selectedImage || !phase1Result) return;
-    
-    setTryonState('generating');
-    setProgress(0);
-    setProgressStage(0);
-
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        const next = prev + Math.floor(Math.random() * 8) + 2;
-        const bounded = next > 95 ? 95 : next;
-        if (bounded < 35) setProgressStage(0);
-        else if (bounded < 70) setProgressStage(1);
-        else setProgressStage(2);
-        return bounded;
-      });
-    }, 300);
-
-    try {
-      let human_image_url = null;
-      if (selectedFile) {
-        const formData = new FormData();
-        formData.append('image', selectedFile);
-        const uploadRes = await fetch(`${API_URL}/api/tryon/upload?folder=user-uploads`, { method: 'POST', body: formData });
-        const uploadData = await uploadRes.json();
-        human_image_url = uploadData.url;
-      } else {
-        human_image_url = selectedImage;
-      }
-
-      const genRes = await fetch(`${API_URL}/api/tryon/generate`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify({
-          mode: 'with_garment', 
-          garment_image_url: phase1Result,
-          human_image_url,
-          category,
-          target_folder: 'results/tryon-results'
-        })
-      });
-
-      if (!genRes.ok) {
-        const errorData = await genRes.json();
-        clearInterval(interval);
-        setTryonState('initial');
-        if (genRes.status === 401 && errorData.error === 'GUEST_LIMIT_REACHED') {
-          setShowLimitModal(true);
-        } else if (genRes.status === 403 && errorData.error === 'INSUFFICIENT_CREDITS') {
-          setShowUpgradeModal(true);
-        } else {
-          alert('Personal Generation failed: ' + (errorData.message || errorData.error || 'Unknown error'));
-        }
-        return;
-      }
-
-      const genData = await genRes.json();
-      
-      clearInterval(interval);
-      setProgress(100);
-      setResultImageUrl(genData.result_image_url || phase1Result);
-      setTimeout(() => {
-        setIsPersonalizing(false); // return to normal flow
-        setTryonState('generated');
-      }, 400);
-
-    } catch (err) {
-      console.error(err);
-      clearInterval(interval);
-      setTryonState('generated');
-      alert('Personal Generation failed: ' + err.message);
-    }
-  };
   // 1. AUTH GATE / SIGNUP SCREEN (REMOVED - HANDLED BY ROUTER)
-
-  // 2. FLOW SELECTOR / CHOICE SCREEN
-  if (workspaceMode === null) {
-    return (
-      <div className="bg-[#faf7f2] min-h-screen flex flex-col font-['Courier_Prime',monospace] text-[#1a1410] antialiased select-none relative">
-        <header className="bg-[#faf7f2] border-b border-[rgba(26,20,16,0.1)] h-[80px] flex items-center justify-between px-[64px] shrink-0 z-20">
-          <div className="flex items-center gap-[48px]">
-            <h1 onClick={onExit} className="font-['EB_Garamond',serif] text-[22px] tracking-tight cursor-pointer hover:opacity-80 transition-opacity">
-              TRYON2BUY
-            </h1>
-            <nav className="hidden md:flex gap-[32px] text-[12px] tracking-[1.6px] uppercase font-bold">
-            </nav>
-          </div>
-          <button 
-            onClick={handleLogout}
-            className="text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 text-[#8c8278] hover:text-[#1a1410] transition-colors"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>LOGOUT</span>
-          </button>
-        </header>
-
-        <main className="flex-1 flex flex-col items-center justify-center p-8 bg-[#ede8df] relative">
-          <div className="max-w-[800px] w-full text-center space-y-2 mb-12 animate-fade-in">
-            <span className="text-[11px] tracking-[2px] uppercase font-bold text-[#7f5700]">
-              TRYON2BUY · VIRTUAL FITTING
-            </span>
-            <h2 className="font-['EB_Garamond',serif] text-[36px] text-[#1a1410] font-normal leading-tight">
-              Select Virtual Try-On Flow
-            </h2>
-            <p className="text-[12px] text-[#8c8278] uppercase tracking-[1px]">
-              CHOOSE THE ARCHITECTURAL TRY-ON SIMULATION THAT BEST SUITS YOUR NEEDS.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-[800px] w-full animate-fade-in">
-            
-            {/* Card A: WITH GARMENT */}
-            <div 
-              onClick={() => {
-                setWorkspaceMode('with_garment');
-                setSelectedImage(null);
-                setTryonState('initial');
-                setIsPersonalizing(false);
-              }}
-              className="bg-[#faf7f2] border border-[rgba(26,20,16,0.15)] p-10 flex flex-col items-center text-center justify-between hover:border-[#7f5700] hover:shadow-xl hover:scale-[1.01] transition-all duration-300 cursor-pointer group"
-            >
-              <div className="flex flex-col items-center gap-6">
-                <div className="bg-[#ede8df] p-6 rounded-full group-hover:bg-[#7f5700]/10 transition-colors">
-                  <Shirt className="w-8 h-8 text-[#1a1410] group-hover:text-[#7f5700] transition-colors" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="font-['EB_Garamond',serif] text-[22px] font-semibold text-[#1a1410]">
-                    WITH GARMENT
-                  </h3>
-                  <p className="text-[9px] tracking-[1.5px] uppercase font-bold text-[#c4933f]">
-                    Drape Custom Garment on Model
-                  </p>
-                  <p className="text-[12px] text-[#8c8278] font-sans leading-relaxed pt-2">
-                    Upload your own textile reference, photo, or pattern design, select a professional stock model, and drape it seamlessly.
-                  </p>
-                </div>
-              </div>
-              <button className="mt-8 text-[11px] font-bold tracking-[2px] uppercase text-[#1a1410] group-hover:text-[#7f5700] flex items-center gap-2">
-                <span>START VIRTUAL TRY-ON</span>
-                <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
-              </button>
-            </div>
-
-            {/* Card B: WITH CATALOG (DISABLED) */}
-            <div 
-              className="bg-[#faf7f2]/60 border border-[rgba(26,20,16,0.1)] p-10 flex flex-col items-center text-center justify-between opacity-50 cursor-not-allowed select-none"
-            >
-              <div className="flex flex-col items-center gap-6">
-                <div className="bg-[rgba(26,20,16,0.05)] p-6 rounded-full">
-                  <UserCheck className="w-8 h-8 text-[#8c8278]" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="font-['EB_Garamond',serif] text-[22px] font-semibold text-[#8c8278]">
-                    WITH CATALOG
-                  </h3>
-                  <p className="text-[9px] tracking-[1.5px] uppercase font-bold text-[#8c8278]">
-                    Try Catalog Dresses on Yourself
-                  </p>
-                  <p className="text-[12px] text-[#8c8278] font-sans leading-relaxed pt-2">
-                    Browse and select existing dresses from the boutique's catalog, upload your own personal portrait reference, and visualize the try-on.
-                  </p>
-                </div>
-              </div>
-              <button disabled className="mt-8 text-[11px] font-bold tracking-[2px] uppercase text-[#8c8278] flex items-center gap-2 cursor-not-allowed">
-                <span>COMING SOON</span>
-                <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
-              </button>
-            </div>
-
-          </div>
-        </main>
-      </div>
-    );
-  }
 
   // 3. MAIN ATELIER / WORKSPACE FLOW
   return (
-    <div className="bg-[#faf7f2] min-h-screen flex flex-col font-['Courier_Prime',monospace] text-[#1a1410] antialiased select-none select-text relative">
+    <div className="bg-[#FAF7F2] min-h-screen flex flex-col font-['Courier_Prime',monospace] text-[#1A1410] antialiased select-none select-text relative">
       
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes scan {
@@ -622,7 +360,7 @@ export default function TryonWorkspace({ onExit }) {
       `}} />
 
       {/* Header */}
-      <header className="bg-[#faf7f2] border-b border-[rgba(26,20,16,0.1)] h-[60px] flex items-center justify-between px-4 md:px-[64px] relative shrink-0 z-20">
+      <header className="bg-[#FAF7F2] border-b border-[rgba(26,20,16,0.08)] h-[60px] flex items-center justify-between px-4 md:px-[64px] relative shrink-0 z-20">
         <div className="flex items-center gap-[48px]">
           <img 
             onClick={onExit}
@@ -645,7 +383,7 @@ export default function TryonWorkspace({ onExit }) {
           
           <button 
             onClick={() => navigate(isGuestMode ? '/shop/demo' : '/gallery')}
-            className="text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 opacity-70 hover:opacity-100 transition-opacity text-[#8c8278] hover:text-[#1a1410]"
+            className="text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 opacity-70 hover:opacity-100 transition-opacity text-[#8c8278] hover:text-[#1A1410]"
           >
             <Image className="w-3.5 h-3.5" />
             <span>MY TRYON GALLERY</span>
@@ -655,7 +393,7 @@ export default function TryonWorkspace({ onExit }) {
 
           <button 
             onClick={handleLogout}
-            className="text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 opacity-70 hover:opacity-100 transition-opacity text-[#8c8278] hover:text-[#1a1410]"
+            className="text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 opacity-70 hover:opacity-100 transition-opacity text-[#8c8278] hover:text-[#1A1410]"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>{isGuestMode ? 'EXIT GUEST MODE' : 'LOGOUT'}</span>
@@ -667,86 +405,29 @@ export default function TryonWorkspace({ onExit }) {
       <div className="flex-1 flex flex-col-reverse md:flex-row relative z-10 overflow-y-auto md:overflow-clip">
         
         {/* Left Side Console Column */}
-        <aside className="w-full md:w-[420px] bg-[#faf7f2] border-r border-[rgba(26,20,16,0.1)] overflow-y-auto px-6 py-5 shrink-0 flex flex-col gap-4 custom-scrollbar">
+        <aside className="w-full md:w-[420px] bg-[#FAF7F2] border-r border-[rgba(26,20,16,0.08)] overflow-y-auto px-6 py-5 shrink-0 flex flex-col gap-4 custom-scrollbar">
           
           {/* Back button to Choice Screen (only shown during personalization now) */}
-          {isPersonalizing && (
-            <button 
-              onClick={() => {
-                setIsPersonalizing(false);
-                setTryonState('generated');
-                setResultImageUrl(phase1Result);
-              }}
-              className="self-start text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:underline flex items-center gap-1.5"
-            >
-              <ChevronLeft className="w-3 h-3 stroke-[2.5]" />
-              <span>Back to Draped Model</span>
-            </button>
-          )}
+          
 
           {/* Workspace Header */}
           <div className="space-y-0.5">
             <span className="text-[9px] tracking-[1.5px] uppercase font-bold text-[#c4933f] block">
               TRYON2BUY VIRTUAL FITTING
             </span>
-            <h2 className="font-['EB_Garamond',serif] text-[18px] font-normal leading-tight text-[#1a1410]">
+            <h2 className="font-['Playfair_Display',serif] text-[18px] font-normal leading-tight text-[#1A1410]">
               Virtual Fitting Room
             </h2>
           </div>
 
-          {/* DYNAMIC SCREEN LAYOUT DETERMINED BY WORKSPACE MODE */}
-          
-          {workspaceMode === 'with_garment' ? (
-            /* ========================================================
-               IMAGE 1 SCREEN: WITH GARMENT FLOW
-               Steps: 1. SELECT CATEGORY -> 2. UPLOAD GARMENT -> 3. SELECT MODEL
-               ======================================================== */
-            <>
-              {isPersonalizing ? (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-[#1a1410] text-[#faf7f2] size-4 flex items-center justify-center text-[9px] font-bold">1</div>
-                    <h3 className="text-[10px] tracking-[1px] uppercase font-bold text-[#1a1410]">YOUR IMAGE</h3>
-                  </div>
-
-                  <div 
-                    onClick={triggerFileBrowser}
-                    onDrop={handleHumanDrop}
-                    onDragOver={handleDragOver}
-                    className="bg-[rgba(237,232,223,0.5)] border border-dashed border-[rgba(26,20,16,0.3)] hover:border-[#1a1410] transition-colors p-4 flex items-center justify-center text-center cursor-pointer min-h-[70px] relative overflow-hidden group"
-                  >
-                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-
-                    {selectedImage ? (
-                      <div className="relative h-[60px] flex items-center justify-center">
-                        <img src={selectedImage} alt="Upload Preview" className="max-h-full max-w-full object-contain shadow-sm" />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <span className="bg-white text-black text-[8px] font-bold px-2 py-1 uppercase tracking-wider">Change</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex flex-row items-center gap-4">
-                        <img src={imgCloudUploadIcon} alt="" className="h-4 w-5 object-contain opacity-70" onError={(e) => { e.target.style.display = 'none'; }} />
-                        <div className="text-left space-y-0.5">
-                          <p className="text-[9px] font-bold tracking-[1px] uppercase text-[#1a1410]">
-                            UPLOAD YOUR IMAGE
-                          </p>
-                          <p className="text-[8px] text-[#8c8278] font-sans">JPG, PNG up to 10MB</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <>
-                  {/* Step 1: SELECT CATEGORY */}
+          {/* Step 1: SELECT CATEGORY */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <div className="bg-[#1a1410] text-[#faf7f2] size-5 flex items-center justify-center text-[10px] font-bold">1</div>
-                  <h3 className="text-[11px] tracking-[1.5px] uppercase font-bold text-[#1a1410]">SELECT CATEGORY</h3>
+                  <h3 className="text-[11px] tracking-[1.5px] uppercase font-bold text-[#1A1410]">SELECT CATEGORY</h3>
                 </div>
                 
-                <div className="grid grid-cols-5 gap-2.5">
+                <div className="grid grid-cols-5 gap-3">
                   {[
                     { key: "SAREE", icon: Wind },
                     { key: "LEHANGA", icon: Sparkles },
@@ -759,16 +440,16 @@ export default function TryonWorkspace({ onExit }) {
                       <button
                         key={cat.key}
                         onClick={() => handleCategorySelect(cat.key)}
-                        className={`group h-[64px] flex flex-col items-center justify-center p-1.5 gap-1.5 border transition-all duration-300 ${
+                        className={`group h-[72px] flex flex-col items-center justify-center p-1.5 gap-1.5 border transition-all duration-300 ${
                           isActive 
-                            ? 'bg-[#ede8df] border-[#7f5700] ring-[1px] ring-[#7f5700]' 
-                            : 'bg-white border-[rgba(26,20,16,0.1)] hover:border-[#1a1410]'
+                            ? 'bg-[#FFFFFF] border-[#7f5700] ring-[1px] ring-[#7f5700]' 
+                            : 'bg-white border-[rgba(26,20,16,0.08)] hover:border-[#7F5700] hover:shadow-[0_4px_15px_rgb(127,87,0,0.1)] hover:scale-[1.01]'
                         }`}
                       >
-                        <div className={`h-[32px] w-full flex items-center justify-center transition-colors ${isActive ? 'text-[#7f5700]' : 'text-[#8c8278] group-hover:text-[#1a1410]'}`}>
-                          <cat.icon className="w-5 h-5 stroke-[1.5]" />
+                        <div className={`h-[36px] w-full flex items-center justify-center transition-colors ${isActive ? 'text-[#7f5700]' : 'text-[#8c8278] group-hover:text-[#1A1410]'}`}>
+                          <cat.icon className="w-6 h-6 stroke-[1.5]" />
                         </div>
-                        <span className="text-[7px] font-bold tracking-[0.5px] uppercase text-[#1a1410] block whitespace-nowrap">
+                        <span className="text-[7px] font-bold tracking-[0.5px] uppercase text-[#1A1410] block whitespace-nowrap">
                           {cat.key}
                         </span>
                       </button>
@@ -778,10 +459,10 @@ export default function TryonWorkspace({ onExit }) {
               </div>
 
               {/* Step 2: UPLOAD GARMENT */}
-              <div className="space-y-3">
+              <div className="space-y-5">
                 <div className="flex items-center gap-2">
                   <div className="bg-[#1a1410] text-[#faf7f2] size-4 flex items-center justify-center text-[9px] font-bold">2</div>
-                  <h3 className="text-[10px] tracking-[1px] uppercase font-bold text-[#1a1410]">UPLOAD GARMENT</h3>
+                  <h3 className="text-[10px] tracking-[1px] uppercase font-bold text-[#1A1410]">UPLOAD GARMENT</h3>
                 </div>
                 
                 {category === 'SAREE' && (
@@ -799,11 +480,11 @@ export default function TryonWorkspace({ onExit }) {
                         htmlFor={`file-${slot.id}`}
                         onDrop={(e) => handleGarmentDrop(slot.id, e)}
                         onDragOver={handleDragOver}
-                        className="relative border border-dashed border-[rgba(26,20,16,0.3)] bg-[rgba(237,232,223,0.5)] flex flex-col items-center justify-center min-h-[90px] group cursor-pointer hover:border-[#1a1410] transition-all"
+                        className="relative border border-dashed border-[rgba(26,20,16,0.2)] bg-[#FFFFFF] shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex flex-col items-center justify-center min-h-[100px] group cursor-pointer hover:border-[#7F5700] hover:shadow-[0_4px_15px_rgb(127,87,0,0.1)] hover:scale-[1.01] transition-all"
                       >
                         <input id={`file-${slot.id}`} type="file" accept="image/*" onChange={(e) => handleGarmentSlotChange(slot.id, e)} className="hidden" />
                         
-                        <div className="absolute top-1 left-1 bg-white/80 px-1.5 py-0.5 text-[7px] uppercase font-bold tracking-wider z-10 text-[#1a1410]">
+                        <div className="absolute top-1 left-1 bg-white/80 px-2 py-1 text-[8px] uppercase font-bold tracking-wider z-10 text-[#1A1410]">
                           {slot.label} {slot.required && <span className="text-red-600">*</span>}
                         </div>
 
@@ -811,7 +492,7 @@ export default function TryonWorkspace({ onExit }) {
                           <div className="relative w-full h-[80px] flex items-center justify-center p-2">
                             <img src={slotData.url} alt={slot.label} className="max-h-full max-w-full object-contain" />
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                              <span className="bg-white text-[#1a1410] text-[7px] font-bold px-2 py-1 uppercase">Change</span>
+                              <span className="bg-white text-[#1A1410] text-[7px] font-bold px-2 py-1 uppercase">Change</span>
                             </div>
                           </div>
                         ) : (
@@ -827,13 +508,13 @@ export default function TryonWorkspace({ onExit }) {
               </div>
 
               {/* Step 3: SELECT MODEL */}
-              <div className="space-y-3">
+              <div className="space-y-5">
                 <div className="flex items-center gap-2">
                   <div className="bg-[#1a1410] text-[#faf7f2] size-4 flex items-center justify-center text-[9px] font-bold">3</div>
-                  <h3 className="text-[10px] tracking-[1px] uppercase font-bold text-[#1a1410]">SELECT MODEL</h3>
+                  <h3 className="text-[10px] tracking-[1px] uppercase font-bold text-[#1A1410]">SELECT MODEL</h3>
                 </div>
 
-                <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar pr-2">
+                <div className="grid grid-cols-4 gap-3 w-full">
                   {(defaultModels.length > 0 ? defaultModels : [
                     { name: "Classic Studio", img: imgModelClassicStudio },
                     { name: "Heritage Court", img: imgModelHeritageCourt }
@@ -843,7 +524,7 @@ export default function TryonWorkspace({ onExit }) {
                       <button
                         key={model.name}
                         onClick={() => setSelectedModel(model.name)}
-                        className={`w-[80px] shrink-0 border p-0.5 relative flex flex-col transition-all duration-300 ${
+                        className={`w-full border p-0.5 relative flex flex-col transition-all duration-300 ${
                           isSelected ? 'border-[#7f5700]' : 'border-[rgba(0,0,0,0)] opacity-75 hover:opacity-100'
                         }`}
                       >
@@ -859,161 +540,34 @@ export default function TryonWorkspace({ onExit }) {
                   })}
                 </div>
               </div>
-                </>
-              )}
-            </>
-          ) : (
-            /* ========================================================
-               IMAGE 2 SCREEN: WITHOUT GARMENT FLOW
-               Steps: 1. SELECT CATEGORY -> 2. SELECT DRESS (Catalog items) -> 3. YOUR IMAGE (User Upload)
-               ======================================================== */
-            <>
-              {/* Step 1: SELECT CATEGORY */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="bg-[#1a1410] text-[#faf7f2] size-4 flex items-center justify-center text-[9px] font-bold">1</div>
-                  <h3 className="text-[10px] tracking-[1px] uppercase font-bold text-[#1a1410]">SELECT CATEGORY</h3>
-                </div>
                 
-                <div className="grid grid-cols-5 gap-2.5">
-                  {[
-                    { key: "SAREE", icon: Wind },
-                    { key: "LEHANGA", icon: Sparkles },
-                    { key: "ANARKALI", icon: Star },
-                    { key: "KURTHI", icon: Shirt },
-                    { key: "SHARARA", icon: Layers }
-                  ].map((cat) => {
-                    const isActive = category === cat.key;
-                    return (
-                      <button
-                        key={cat.key}
-                        onClick={() => handleCategorySelect(cat.key)}
-                        className={`group h-[64px] flex flex-col items-center justify-center p-1.5 gap-1.5 border transition-all duration-300 ${
-                          isActive 
-                            ? 'bg-[#ede8df] border-[#7f5700] ring-[1px] ring-[#7f5700]' 
-                            : 'bg-white border-[rgba(26,20,16,0.1)] hover:border-[#1a1410]'
-                        }`}
-                      >
-                        <div className={`h-[32px] w-full flex items-center justify-center transition-colors ${isActive ? 'text-[#7f5700]' : 'text-[#8c8278] group-hover:text-[#1a1410]'}`}>
-                          <cat.icon className="w-5 h-5 stroke-[1.5]" />
-                        </div>
-                        <span className="text-[7px] font-bold tracking-[0.5px] uppercase text-[#1a1410] block whitespace-nowrap">
-                          {cat.key}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Step 2: SELECT DRESS (Catalog items) */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="bg-[#1a1410] text-[#faf7f2] size-4 flex items-center justify-center text-[9px] font-bold">2</div>
-                  <h3 className="text-[10px] tracking-[1px] uppercase font-bold text-[#1a1410]">SELECT DRESS</h3>
-                </div>
-
-                <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar pr-2">
-                  {(catalogDressesData[category] || []).map((dress) => {
-                    const isSelected = selectedCatalogDress?.id === dress.id;
-                    return (
-                      <button
-                        key={dress.id}
-                        onClick={() => setSelectedCatalogDress(dress)}
-                        className={`w-[80px] shrink-0 border p-0.5 relative flex flex-col transition-all duration-300 ${
-                          isSelected ? 'border-[#7f5700]' : 'border-[rgba(0,0,0,0)] opacity-75 hover:opacity-100'
-                        }`}
-                      >
-                        <div className="aspect-[3/4] w-full overflow-hidden relative">
-                          <img src={dress.img} alt={dress.name} className="w-full h-full object-cover" onError={(e) => { e.target.src = dress.fallback; }} />
-                          <div className="absolute bottom-0 left-0 right-0 bg-[rgba(26,20,16,0.85)] p-1.5 flex items-center justify-between">
-                            <span className="text-[7px] font-bold tracking-[0.5px] text-[#faf7f2] uppercase truncate max-w-[85%]">{dress.name}</span>
-                            {isSelected && <img src={imgCheckIcon} alt="selected" className="size-[6px] object-contain invert shrink-0" onError={(e) => { e.target.style.display = 'none'; }} />}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Step 3: YOUR IMAGE (User portrait upload) */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="bg-[#1a1410] text-[#faf7f2] size-4 flex items-center justify-center text-[9px] font-bold">3</div>
-                  <h3 className="text-[10px] tracking-[1px] uppercase font-bold text-[#1a1410]">YOUR IMAGE</h3>
-                </div>
-
-                <div 
-                  onClick={triggerFileBrowser}
-                  onDrop={handleHumanDrop}
-                  onDragOver={handleDragOver}
-                  className="bg-[rgba(237,232,223,0.5)] border border-dashed border-[rgba(26,20,16,0.3)] hover:border-[#1a1410] transition-colors p-4 flex items-center justify-center text-center cursor-pointer min-h-[70px] relative overflow-hidden group"
-                >
-                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-
-                  {selectedImage ? (
-                    <div className="relative h-[60px] flex items-center justify-center">
-                      <img src={selectedImage} alt="Upload Preview" className="max-h-full max-w-full object-contain shadow-sm" />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <span className="bg-white text-black text-[8px] font-bold px-2 py-1 uppercase tracking-wider">Change</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-row items-center gap-4">
-                      <img src={imgCloudUploadIcon} alt="" className="h-4 w-5 object-contain opacity-70" onError={(e) => { e.target.style.display = 'none'; }} />
-                      <div className="text-left space-y-0.5">
-                        <p className="text-[9px] font-bold tracking-[1px] uppercase text-[#1a1410]">
-                          UPLOAD YOUR IMAGE
-                        </p>
-                        <p className="text-[8px] text-[#8c8278] font-sans">JPG, PNG up to 10MB</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
-
           {/* Primary Action Button: GENERATE TRY-ON */}
           <button
-            onClick={isPersonalizing ? startPersonalGeneration : startGeneration}
-            disabled={
-              tryonState === 'generating' ||
-              (isPersonalizing && !selectedImage) ||
-              (!isPersonalizing && workspaceMode === 'with_garment' && (!isGarmentUploadValid() || !selectedModel)) ||
-              (!isPersonalizing && workspaceMode === 'without_garment' && (!selectedImage || !selectedCatalogDress))
-            }
-            className={`w-full py-3 mt-4 text-[10px] font-bold tracking-[2.5px] uppercase flex items-center justify-center gap-2 transition-all shrink-0 ${
-              tryonState !== 'generating' && 
-              ((isPersonalizing && selectedImage) ||
-               (!isPersonalizing && workspaceMode === 'with_garment' && isGarmentUploadValid() && selectedModel) ||
-               (!isPersonalizing && workspaceMode === 'without_garment' && selectedImage && selectedCatalogDress))
-                ? 'bg-[#1a1410] hover:bg-black text-[#faf7f2] cursor-pointer shadow-md active:scale-[0.99]'
-                : 'bg-[rgba(26,20,16,0.2)] text-[#8c8278] cursor-not-allowed'
-            }`}
+            onClick={startGeneration}
+            disabled={tryonState === 'generating' || !isGarmentUploadValid() || !selectedModel}
+            className={`w-full py-4 mt-8 text-[12px] font-bold tracking-[3px] uppercase flex items-center justify-center gap-2 transition-all shrink-0 ${tryonState !== 'generating' && isGarmentUploadValid() && selectedModel ? 'bg-[#1A1410] hover:bg-black text-[#FAF7F2] cursor-pointer shadow-md active:scale-[0.99]' : 'bg-[rgba(26,20,16,0.2)] text-[#8c8278] cursor-not-allowed'}`}
           >
             <img src={imgSparkleIcon} alt="" className="h-3 w-3 object-contain invert" onError={(e) => { e.target.style.display = 'none'; }} />
-            <span>{isPersonalizing ? 'GENERATE PERSONAL TRY-ON' : 'GENERATE TRY-ON'}</span>
+            <span>GENERATE TRY-ON</span>
           </button>
 
         </aside>
 
         {/* Right Side Result Canvas Column */}
-        <main className="flex-1 bg-[#ede8df] relative overflow-hidden flex flex-col items-center justify-center p-4 md:p-8 min-h-[500px] md:min-h-0 shrink-0 md:shrink">
+        <main className="flex-1 bg-[#FFFFFF] relative overflow-hidden flex flex-col items-center justify-center p-4 md:p-8 min-h-[600px] md:min-h-0 shrink-0 md:shrink">
           
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="absolute border-[rgba(26,20,16,0.2)] border-r border-t right-[-192px] size-[384px] top-[-192px]" />
             <div className="absolute border-[rgba(26,20,16,0.2)] border-b border-l bottom-[-128px] left-[-128px] size-[256px]" />
           </div>
 
-          <div className="aspect-[3/4] bg-[#faf7f2] w-full max-w-[480px] shadow-2xl border border-[rgba(26,20,16,0.05)] relative overflow-hidden flex items-center justify-center animate-fade-in z-10">
+          <div className="aspect-[3/4] bg-[#FAF7F2] w-full max-w-[500px] shadow-2xl border border-[rgba(26,20,16,0.05)] relative overflow-hidden flex items-center justify-center animate-fade-in z-10">
             
             {/* STATE A: Initial silhouette */}
             {tryonState === 'initial' && (
               <div className="flex flex-col items-center text-center p-8 opacity-45 select-none animate-fade-in">
-                <img src={imgSilhouetteIcon} alt="" className="h-[127px] w-[80px] object-contain mb-4" onError={(e) => { e.target.style.display = 'none'; }} />
-                <h4 className="font-['EB_Garamond',serif] text-[16px] tracking-[1.5px] uppercase text-[#1a1410] font-normal mb-1">
+                <img src={imgSilhouetteIcon} alt="" className="h-[140px] w-[88px] object-contain mb-4" onError={(e) => { e.target.style.display = 'none'; }} />
+                <h4 className="font-['Playfair_Display',serif] text-[16px] tracking-[1.5px] uppercase text-[#1A1410] font-normal mb-1">
                   READY FOR DRAPING
                 </h4>
                 <div className="flex items-center gap-1 justify-center">
@@ -1027,42 +581,42 @@ export default function TryonWorkspace({ onExit }) {
             {/* STATE B: Generating Loading Animation */}
             {tryonState === 'generating' && (
               <div className="absolute inset-0 flex flex-col items-center justify-center p-8 bg-white/95 animate-fade-in text-center">
-                <div className="w-[180px] h-[240px] bg-white border border border-[rgba(26,20,16,0.1)] relative overflow-hidden mb-6 shadow-md">
+                <div className="w-[180px] h-[240px] bg-white border border border-[rgba(26,20,16,0.08)] relative overflow-hidden mb-6 shadow-md">
                   <img src={selectedImage || (Object.values(garmentUploads)[0]?.url) || imgSilhouetteIcon} alt="Scanning preview" className="w-full h-full object-cover blur-[5px] opacity-75" />
                   <div className="absolute left-0 right-0 h-[2px] bg-[#c4933f] shadow-[0_0_8px_#c4933f] animate-scan" />
                 </div>
 
                 <div className="space-y-4 w-full max-w-[280px] text-left">
-                  <div className="flex items-start gap-2.5">
+                  <div className="flex items-start gap-3">
                     <div className="mt-0.5 size-3.5 border border-[#1a1410] rounded-sm flex items-center justify-center">
                       {progressStage >= 0 && <Check className="w-2.5 h-2.5 text-[#c4933f] stroke-[3]" />}
                     </div>
                     <div>
-                      <h5 className="text-[10px] font-bold uppercase tracking-wider text-[#1a1410]">Stage 1: silhouette extraction</h5>
+                      <h5 className="text-[10px] font-bold uppercase tracking-wider text-[#1A1410]">Stage 1: silhouette extraction</h5>
                       <p className="text-[8px] text-[#8c8278] font-sans">
                         {progressStage === 0 ? 'Analyzing fabric structure and silhouette...' : 'Completed silhouette identification.'}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-2.5">
+                  <div className="flex items-start gap-3">
                     <div className="mt-0.5 size-3.5 border border-[#1a1410] rounded-sm flex items-center justify-center">
                       {progressStage >= 1 && <Check className="w-2.5 h-2.5 text-[#c4933f] stroke-[3]" />}
                     </div>
                     <div>
-                      <h5 className={`text-[10px] font-bold uppercase tracking-wider ${progressStage >= 1 ? 'text-[#1a1410]' : 'text-[#8c8278]'}`}>Stage 2: digital drapery mapping</h5>
+                      <h5 className={`text-[10px] font-bold uppercase tracking-wider ${progressStage >= 1 ? 'text-[#1A1410]' : 'text-[#8c8278]'}`}>Stage 2: digital drapery mapping</h5>
                       <p className="text-[8px] text-[#8c8278] font-sans">
                         {progressStage < 1 ? 'Waiting...' : progressStage === 1 ? 'Aligning digital textile nodes on model...' : 'Completed grid nodes projection.'}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-2.5">
+                  <div className="flex items-start gap-3">
                     <div className="mt-0.5 size-3.5 border border-[#1a1410] rounded-sm flex items-center justify-center">
                       {progressStage >= 2 && <Check className="w-2.5 h-2.5 text-[#c4933f] stroke-[3]" />}
                     </div>
                     <div>
-                      <h5 className={`text-[10px] font-bold uppercase tracking-wider ${progressStage >= 2 ? 'text-[#1a1410]' : 'text-[#8c8278]'}`}>Stage 3: style compilation</h5>
+                      <h5 className={`text-[10px] font-bold uppercase tracking-wider ${progressStage >= 2 ? 'text-[#1A1410]' : 'text-[#8c8278]'}`}>Stage 3: style compilation</h5>
                       <p className="text-[8px] text-[#8c8278] font-sans">
                         {progressStage < 2 ? 'Waiting...' : 'Simulating lighting, wrinkles, and shadows...'}
                       </p>
@@ -1070,7 +624,7 @@ export default function TryonWorkspace({ onExit }) {
                   </div>
                 </div>
 
-                <div className="w-full max-w-[280px] border-t border-[rgba(26,20,16,0.1)] pt-4 mt-6 text-[8px] tracking-[1px] text-[#8c8278] uppercase font-bold text-left">
+                <div className="w-full max-w-[280px] border-t border-[rgba(26,20,16,0.08)] pt-4 mt-6 text-[8px] tracking-[1px] text-[#8c8278] uppercase font-bold text-left">
                   ESTIMATING: {Math.max(1, Math.floor((100 - progress) / 8))} SEC REMAINING ({progress}%)
                 </div>
               </div>
@@ -1092,8 +646,8 @@ export default function TryonWorkspace({ onExit }) {
                 />
 
                 {/* Metadata label bottom-left */}
-                <div className="absolute bottom-4 left-4 backdrop-blur-[6px] bg-white/85 border border-[rgba(26,20,16,0.1)] px-3 py-1.5 shadow-sm">
-                  <span className="text-[10px] font-bold text-[#1a1410]">
+                <div className="absolute bottom-4 left-4 backdrop-blur-[6px] bg-white/85 border border-[rgba(26,20,16,0.08)] px-3 py-1.5 shadow-sm">
+                  <span className="text-[10px] font-bold text-[#1A1410]">
                     {workspaceMode === 'with_garment' 
                       ? `${category} · ${selectedModel} · ${selectedBackdrop.name}`
                       : `${selectedCatalogDress?.name} · Personal Portrait · ${selectedBackdrop.name}`
@@ -1102,9 +656,9 @@ export default function TryonWorkspace({ onExit }) {
                 </div>
 
                 {/* AI tag top-right */}
-                <div className="absolute top-4 right-4 bg-white border border-[rgba(26,20,16,0.1)] px-2.5 py-1 flex items-center gap-1.5 shadow-sm">
+                <div className="absolute top-4 right-4 bg-white border border-[rgba(26,20,16,0.08)] px-2.5 py-1 flex items-center gap-1.5 shadow-sm">
                   <img src={imgSparkleIcon} alt="" className="h-2.5 w-2.5" onError={(e) => { e.target.style.display = 'none'; }} />
-                  <span className="text-[8px] font-bold uppercase tracking-wide text-[#1a1410]">
+                  <span className="text-[8px] font-bold uppercase tracking-wide text-[#1A1410]">
                     AI GENERATED
                   </span>
                 </div>
@@ -1117,7 +671,7 @@ export default function TryonWorkspace({ onExit }) {
 
           {/* Action buttons */}
           <div 
-            className={`mt-4 grid gap-4 w-full max-w-[480px] transition-all duration-500 grid-cols-2 ${
+            className={`mt-4 grid gap-4 w-full max-w-[500px] transition-all duration-500 grid-cols-2 ${
               tryonState === 'generated' ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden mt-0'
             }`}
           >
@@ -1125,7 +679,7 @@ export default function TryonWorkspace({ onExit }) {
               onClick={() => {
                 startGeneration();
               }}
-              className="border border-[#1a1410] hover:bg-[#1a1410]/5 py-3.5 text-[9px] font-bold tracking-[1.5px] uppercase text-[#1a1410] transition-colors flex items-center justify-center gap-1.5"
+              className="border border-[#1a1410] hover:bg-[#1a1410]/5 py-3.5 text-[9px] font-bold tracking-[1.5px] uppercase text-[#1A1410] transition-colors flex items-center justify-center gap-1.5"
             >
               <RefreshCw className="w-3 h-3" />
               <span>REGENERATE</span>
@@ -1163,14 +717,14 @@ export default function TryonWorkspace({ onExit }) {
       {/* Guest Save Modal */}
       {showGuestSaveModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-[#faf7f2] border border-[#1a1410] max-w-md w-full p-8 relative shadow-2xl text-center rounded-2xl">
+          <div className="bg-[#FAF7F2] border border-[#1a1410] max-w-md w-full p-8 relative shadow-2xl text-center rounded-2xl">
             <button 
               onClick={() => setShowGuestSaveModal(false)} 
-              className="absolute top-4 right-4 text-[#1a1410] hover:text-[#7f5700] transition-colors"
+              className="absolute top-4 right-4 text-[#1A1410] hover:text-[#7f5700] transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
-            <h2 className="font-['EB_Garamond',serif] text-3xl text-[#1a1410] mb-3 mt-4">
+            <h2 className="font-['Playfair_Display',serif] text-3xl text-[#1A1410] mb-3 mt-4">
               Save to Library
             </h2>
             <p className="text-[12px] text-[#5c544d] font-sans leading-relaxed mb-6">
@@ -1190,7 +744,7 @@ export default function TryonWorkspace({ onExit }) {
               </button>
               <button 
                 onClick={() => navigate('/shop/demo')}
-                className="w-full bg-transparent border border-[#1a1410] hover:bg-[rgba(26,20,16,0.05)] text-[#1a1410] py-3.5 text-[11px] font-bold tracking-[2px] uppercase transition-colors rounded-xl"
+                className="w-full bg-transparent border border-[#1a1410] hover:bg-[rgba(26,20,16,0.05)] text-[#1A1410] py-3.5 text-[11px] font-bold tracking-[2px] uppercase transition-colors rounded-xl"
               >
                 View Demo Gallery
               </button>
