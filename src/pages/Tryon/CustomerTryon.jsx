@@ -415,7 +415,15 @@ export default function CustomerTryon() {
         {/* Centered Branding */}
         <div className="flex justify-center items-center gap-2 md:gap-3">
           <div 
-            onClick={() => navigate('/workspace')}
+            onClick={() => {
+              if (authToken) {
+                navigate('/workspace');
+              } else if (sourceGeneration?.vendorId) {
+                navigate(`/shop/${sourceGeneration.vendorId}`);
+              } else {
+                navigate('/');
+              }
+            }}
             className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
           >
             <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-8 md:h-10 object-contain mr-2" />
