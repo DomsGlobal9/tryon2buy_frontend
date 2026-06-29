@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { API_URL } from '../../config';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Sparkles, Check, ChevronLeft, RefreshCw, LogOut, Upload } from 'lucide-react';
+import { Sparkles, Check, ChevronLeft, RefreshCw, LogOut, Upload, Lightbulb, CloudUpload, FolderOpen, Heart, Lock, ShieldCheck, Shield, Camera } from 'lucide-react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import VendorLimitModal from '../../components/VendorLimitModal';
 import VendorUpgradeModal from '../../components/VendorUpgradeModal';
@@ -37,6 +37,7 @@ export default function CustomerTryon() {
   const navigate = useNavigate();
   const location = useLocation();
   const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -56,6 +57,7 @@ export default function CustomerTryon() {
   const [showcaseNeck, setShowcaseNeck] = useState('round-neck');
   const [activeTab, setActiveTab] = useState('sleeve');
   const [isModifying, setIsModifying] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const [authToken, setAuthToken] = useState(
     localStorage.getItem('vendor_token') || null
@@ -108,8 +110,45 @@ export default function CustomerTryon() {
     }
   };
 
-  const triggerFileBrowser = () => {
+  const triggerFileBrowser = (e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
     fileInputRef.current?.click();
+  };
+
+  const triggerCamera = (e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    cameraInputRef.current?.click();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      if (file.type.startsWith('image/')) {
+        setSelectedFile(file);
+        setSelectedImage(URL.createObjectURL(file));
+        setTryonState('initial');
+      }
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
   };
 
   const applyBackground = async () => {
@@ -316,40 +355,38 @@ export default function CustomerTryon() {
       `}} />
       
       {/* Header */}
-      <header className="bg-[#faf7f2] border-b border-[rgba(26,20,16,0.1)] h-[60px] flex items-center justify-between px-[32px] shrink-0 relative">
+      <header className="bg-[#faf7f2] border-b border-[rgba(26,20,16,0.1)] h-[60px] flex items-center justify-between px-4 md:px-[32px] shrink-0 relative">
         {/* Back Button */}
-        <div className="w-[200px]">
-          {location.key !== 'default' && (
-            <button
-              onClick={handleBack}
-              className="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:text-[#1a1410] transition-colors"
-            >
-              <ChevronLeft className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>Back</span>
-            </button>
-          )}
+        <div className="flex-1 md:w-[200px] md:flex-none">
+          <button
+            onClick={() => window.history.length > 2 ? navigate(-1) : navigate('/')}
+            className="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:text-[#1a1410] transition-colors"
+          >
+            <ChevronLeft className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span className="hidden md:inline">Back</span>
+          </button>
         </div>
 
         {/* Centered Branding */}
-        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
+        <div className="flex justify-center items-center gap-2 md:gap-3">
           <div 
             onClick={() => navigate('/workspace')}
             className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
           >
             <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-8 md:h-10 object-contain mr-2" />
-            <span className="font-['EB_Garamond',serif] font-normal text-[#1a1410] text-[18px] md:text-[22px] tracking-tight flex items-center"><span className="opacity-40 px-2">|</span> PERSONAL FITTING</span>
+            <span className="hidden md:flex font-['EB_Garamond',serif] font-normal text-[#1a1410] text-[18px] md:text-[22px] tracking-tight items-center"><span className="opacity-40 px-2">|</span> PERSONAL FITTING</span>
           </div>
         </div>
 
         {/* Right spacer with Logout */}
-        <div className="w-[200px] flex justify-end">
+        <div className="flex-1 md:w-[200px] md:flex-none flex justify-end">
           {authToken && (
             <button
               onClick={logout}
               className="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:text-[#1a1410] transition-colors"
             >
               <LogOut className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>Sign Out</span>
+              <span className="hidden md:inline">Sign Out</span>
             </button>
           )}
         </div>
@@ -358,48 +395,136 @@ export default function CustomerTryon() {
       <div className="flex-1 flex flex-col md:flex-row relative">
         
         {/* Left Side: Instructions & Upload */}
-        <aside className="w-full md:w-[400px] bg-[#faf7f2] border-r border-[rgba(26,20,16,0.1)] p-8 shrink-0 flex flex-col justify-center">
+        <aside className="w-full md:w-[400px] bg-[#faf7f2] border-r border-[rgba(26,20,16,0.1)] p-3 md:p-4 shrink-0 flex flex-col justify-start overflow-y-auto style={{scrollbarWidth: 'thin'}}">
           
-          <div className={`space-y-2 transition-all duration-500 ${tryonState === 'generated' ? 'mb-4' : 'mb-10'}`}>
-            <h2 className="font-['EB_Garamond',serif] text-[24px] font-normal leading-tight text-[#1a1410]">
+          <div className="flex flex-col animate-fade-in w-full">
+            <h2 className={`font-['EB_Garamond',serif] text-[24px] font-normal leading-tight text-[#1a1410] ${tryonState === 'generated' ? 'mb-4 mt-4' : 'mb-0 hidden'}`}>
               Try On This Look
             </h2>
-            <p className="text-red-500 text-[13px] font-bold tracking-[0.5px]">
-              Upload a clear, front-facing full-body photo of yourself to see how this beautiful piece looks on you.
-              <br /><br />
-              <span className="text-red-500 text-[13px] font-bold">
-                Note: For best results, ensure your posture and hand placement match the product model.
-              </span>
-            </p>
           </div>
 
-          <div 
-            onClick={triggerFileBrowser}
-            className={`bg-[rgba(237,232,223,0.5)] border-2 border-dashed border-[#c4933f]/30 hover:border-[#c4933f] transition-all flex flex-col items-center justify-center text-center cursor-pointer relative overflow-hidden group mb-6 ${selectedImage ? (tryonState === 'generated' ? 'p-2 min-h-[140px]' : 'p-4 min-h-[260px]') : 'p-6 min-h-[160px]'}`}
-          >
-            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+          {tryonState !== 'generated' && (
+            <div className="flex flex-col animate-fade-in w-full pt-4">
 
-            {selectedImage ? (
-              <div className="relative w-full h-full flex flex-col items-center justify-center">
-                <img src={selectedImage} alt="Your Portrait" className={`w-auto object-contain shadow-sm transition-all duration-500 ${tryonState === 'generated' ? 'h-[120px]' : 'h-[240px]'}`} />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <span className="text-white text-[10px] font-bold px-3 py-1.5 uppercase tracking-wider border border-white">Change Photo</span>
+              {/* Header */}
+              <div className="text-center mb-3">
+                <h2 className="text-[#1a202c] text-[18px] md:text-[20px] font-bold flex items-center justify-center gap-1.5 mb-1 font-sans">
+                  Upload Your Photo
+                </h2>
+                <p className="text-[#718096] text-[10px] md:text-[11px] font-sans leading-tight">
+                  For the best try-on experience, please follow the guidelines below.
+                </p>
+              </div>
+
+              {/* Framing example */}
+              <div className="flex items-center justify-center mb-3">
+                <div className="h-[1px] w-8 bg-[#ed8936]"></div>
+                <span className="px-2 text-[#1a202c] font-bold text-[11px] font-sans">Framing example</span>
+                <div className="h-[1px] w-8 bg-[#ed8936]"></div>
+              </div>
+
+              <div className="flex justify-center mb-3">
+                <div className="w-[100px] h-[150px] bg-[#f8f9fa] rounded-lg shadow-[0_1px_6px_rgba(0,0,0,0.06)] border border-[#e2e8f0] overflow-hidden flex items-center justify-center">
+                  <img src="https://res.cloudinary.com/doiezptnn/image/upload/v1782733465/79061311-f8ef-4542-88ea-4783015af68d_z2bhdi.png" alt="Full image" className="w-full h-full object-cover object-top" />
                 </div>
               </div>
-            ) : (
-              <div className="flex flex-col items-center gap-4">
-                <div className="bg-[#ede8df] p-4 rounded-full group-hover:bg-[#c4933f]/10 transition-colors">
-                  <Upload className="h-6 w-6 opacity-70" />
+
+              {/* Tip Box -> Note Box */}
+              <div className="bg-[#fffaf0] rounded-lg p-3 flex items-center gap-3 mb-3 border border-[#fefcbf]">
+                <div className="bg-[#feebc8] rounded-full p-1.5 shrink-0">
+                  <Lightbulb className="w-4 h-4 text-[#dd6b20]" />
                 </div>
-                <div className="space-y-1">
-                  <p className="text-[11px] font-bold tracking-[1.5px] uppercase text-[#1a1410]">
-                    UPLOAD YOUR PHOTO
-                  </p>
-                  <p className="text-[9px] text-[#8c8278]">JPG, PNG up to 10MB</p>
+                <p className="text-[#4a5568] text-[10px] font-sans leading-relaxed">
+                  <span className="font-bold text-[#1a202c]">Note:</span> For the best fit visualization, please upload a clear, front-facing full-body photo. Ensure your posture and hand placement closely match the product model.
+                </p>
+              </div>
+
+              {/* Upload Area */}
+              <div 
+                onClick={triggerFileBrowser}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                className={`border-2 border-dashed rounded-xl p-3 flex flex-col items-center justify-center text-center bg-white cursor-pointer transition-all relative group mb-3 min-h-[160px] ${isDragging ? 'border-[#dd6b20] bg-[#fffaf0] scale-[1.02] shadow-md' : 'border-[#f6ad55] hover:bg-[#fffaf0]'}`}
+              >
+                <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+
+                {selectedImage ? (
+                  <div className="relative w-full h-full flex flex-col items-center justify-center">
+                    <img src={selectedImage} alt="Your Portrait" className="h-[120px] w-auto object-contain rounded-md shadow-sm" />
+                    <div className="absolute inset-0 bg-white/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm rounded-md">
+                      <span className="text-[#dd6b20] text-[12px] font-bold flex items-center gap-1.5 font-sans">
+                        <FolderOpen className="w-4 h-4" /> Change File
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="bg-[#fffaf0] rounded-full p-2 mb-2 group-hover:scale-110 transition-transform">
+                      <CloudUpload className="w-6 h-6 text-[#dd6b20]" />
+                    </div>
+                    <h3 className="text-[#1a202c] text-[13px] font-bold mb-2 font-sans">Drag & drop your image here</h3>
+                    
+                    <div className="flex items-center justify-center w-full max-w-[160px] mb-2">
+                      <div className="flex-1 h-[1px] bg-[#e2e8f0]"></div>
+                      <span className="px-2 text-[#a0aec0] text-[10px] font-sans">or</span>
+                      <div className="flex-1 h-[1px] bg-[#e2e8f0]"></div>
+                    </div>
+
+                    <div className="flex items-center gap-2 mb-2 z-10">
+                      <button 
+                        onClick={triggerCamera} 
+                        className="lg:hidden border border-[#dd6b20] text-[#dd6b20] bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[10px] font-sans hover:bg-[#dd6b20] hover:text-white transition-colors"
+                      >
+                        <Camera className="w-3.5 h-3.5" /> Take Photo
+                      </button>
+                      <button 
+                        onClick={triggerFileBrowser} 
+                        className="border border-[#dd6b20] text-[#dd6b20] bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[10px] font-sans hover:bg-[#dd6b20] hover:text-white transition-colors"
+                      >
+                        <FolderOpen className="w-3.5 h-3.5" /> Browse Files
+                      </button>
+                    </div>
+
+                    <p className="text-[#a0aec0] text-[9px] font-sans">PNG, JPG, HEIC · Max 10 MB</p>
+                  </>
+                )}
+              </div>
+
+              {/* Note Box */}
+              <div className="bg-white rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.04)] border border-[#e2e8f0] p-3 mb-4">
+                <div className="flex items-start gap-2 mb-2">
+                  <Lock className="w-3 h-3 text-[#dd6b20] shrink-0 mt-0.5" />
+                  <span className="text-[#4a5568] text-[10px] font-medium font-sans leading-relaxed">Uploaded images will be used solely to generate virtual try-on previews.</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Heart className="w-3 h-3 text-[#dd6b20] shrink-0 mt-0.5" />
+                  <span className="text-[#4a5568] text-[10px] font-medium font-sans leading-relaxed">Your privacy is important to us. We do not share your images with anyone.</span>
                 </div>
               </div>
-            )}
-          </div>
+
+            </div>
+          )}
+
+          {tryonState === 'generated' && selectedImage && (
+            <div className="mb-4 animate-fade-in mt-4">
+              <div 
+                onClick={triggerFileBrowser}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                className="bg-white border-2 border-dashed border-[#f6ad55] hover:border-[#dd6b20] transition-all flex flex-col items-center justify-center text-center cursor-pointer relative overflow-hidden group p-2 min-h-[140px] rounded-xl"
+              >
+                <img src={selectedImage} alt="Your Portrait" className="h-[120px] w-auto object-contain shadow-sm rounded-lg" />
+                <div className="absolute inset-0 bg-white/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <span className="text-[#dd6b20] text-[12px] font-bold px-3 py-1.5 uppercase tracking-wider">Change Photo</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {tryonState === 'generated' && (
             <button
@@ -498,13 +623,12 @@ export default function CustomerTryon() {
           <button
             onClick={startGeneration}
             disabled={!selectedImage || tryonState === 'generating'}
-            className={`w-full py-4 text-[11px] font-bold tracking-[2px] uppercase flex items-center justify-center gap-2 transition-all shadow-lg ${
+            className={`w-full py-4 text-[11px] font-bold tracking-[2px] uppercase flex items-center justify-center gap-2 transition-all shadow-lg rounded-full ${
               selectedImage && tryonState !== 'generating'
-                ? 'bg-[#1a1410] hover:bg-black text-[#faf7f2] cursor-pointer hover:shadow-xl active:scale-[0.99]'
+                ? 'bg-[#dd6b20] hover:bg-[#c05621] text-white cursor-pointer hover:shadow-xl active:scale-[0.99]'
                 : 'bg-[rgba(26,20,16,0.1)] text-[#8c8278] cursor-not-allowed shadow-none'
             } ${tryonState === 'generated' ? 'hidden' : ''}`}
           >
-            <Sparkles className="h-4 w-4" />
             <span>{tryonState === 'generating' ? 'FITTING IN PROGRESS...' : 'SEE MYSELF IN THIS'}</span>
           </button>
 
