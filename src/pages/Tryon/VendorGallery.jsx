@@ -32,8 +32,8 @@ export default function VendorGallery() {
     })
       .then(res => res.json())
       .then(data => {
-        // Show only Phase 1 vendor drapings (exclude customer Phase 2 try-ons)
-        const vendorGens = data.filter(g => g.mode === 'with_garment' && g.phase === 1);
+        // Show only Phase 1 vendor drapings with successful AI results (exclude fallbacks/failed images)
+        const vendorGens = data.filter(g => g.mode === 'with_garment' && g.phase === 1 && !!g.resultImageUrl);
         setGenerations(vendorGens);
         setLoading(false);
       })
