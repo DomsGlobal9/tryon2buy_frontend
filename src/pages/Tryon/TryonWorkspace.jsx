@@ -183,6 +183,7 @@ export default function TryonWorkspace({ onExit }) {
   const [garmentUploads, setGarmentUploads] = useState({}); // multi-slot state for with_garment
   const [currentGenerationId, setCurrentGenerationId] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   
   const [selectedModel, setSelectedModel] = useState(null); // model selection
   const [selectedCatalogDress, setSelectedCatalogDress] = useState(null); // catalog dress selection
@@ -314,6 +315,7 @@ export default function TryonWorkspace({ onExit }) {
   const startGeneration = async () => {
     if (!isGarmentUploadValid() || !selectedModel) return;
     setTryonState('generating');
+    setIsSaved(false);
     setProgress(0); setProgressStage(0);
     const interval = setInterval(() => {
       setProgress((prev) => {
@@ -354,7 +356,7 @@ export default function TryonWorkspace({ onExit }) {
       clearInterval(interval);
       setProgress(100);
       setResultImageUrl(genData.result_image_url || FALLBACK_SAREE_ICON);
-      if (genData.id) setCurrentGenerationId(genData.id);
+      if (genData.generation_id) setCurrentGenerationId(genData.generation_id);
       setTimeout(() => setTryonState('generated'), 400);
 
     } catch (err) {
@@ -722,7 +724,6 @@ export default function TryonWorkspace({ onExit }) {
                   return;
                 }
                 if (!currentGenerationId) {
-                  navigate('/gallery');
                   return;
                 }
                 setIsSaving(true);
@@ -734,7 +735,7 @@ export default function TryonWorkspace({ onExit }) {
                   });
                   if (!res.ok) throw new Error('Failed to save');
                   setCurrentGenerationId(null);
-                  navigate('/gallery');
+                  setIsSaved(true);
                 } catch (err) {
                   console.error(err);
                   alert('Error saving to library');
@@ -742,11 +743,11 @@ export default function TryonWorkspace({ onExit }) {
                   setIsSaving(false);
                 }
               }}
-              disabled={isSaving}
+              disabled={isSaving || isSaved || !currentGenerationId || !resultImageUrl || resultImageUrl === FALLBACK_SAREE_ICON}
               className="bg-[#1a1410] hover:bg-black text-[#faf7f2] py-3.5 text-[9px] font-bold tracking-[1.5px] uppercase transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSaving ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
-              <span>{isSaving ? 'SAVING...' : 'SAVE TO LIBRARY'}</span>
+              {isSaving ? <RefreshCw className="w-3 h-3 animate-spin" /> : isSaved ? <Check className="w-3 h-3" /> : <Check className="w-3 h-3" />}
+              <span>{isSaving ? 'SAVING...' : isSaved ? 'SAVED TO LIBRARY' : 'SAVE TO LIBRARY'}</span>
             </button>
           </div>
 

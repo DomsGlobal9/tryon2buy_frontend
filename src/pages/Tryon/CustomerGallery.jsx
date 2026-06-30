@@ -44,7 +44,8 @@ export default function CustomerGallery() {
         return res.json();
       })
       .then(data => {
-        setGenerations(data.generations || []);
+        // Filter out any generations that do not have a successful AI result image
+        setGenerations((data.generations || []).filter(g => !!g.resultImageUrl));
         setLoading(false);
       })
       .catch(err => {
