@@ -110,6 +110,39 @@ const BACKDROPS = [
   { id: 2, image: imgBackdropHeritage, fallback: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=150&h=150&q=80", name: "Heritage Court" }
 ];
 
+const DEFAULT_MODELS_BY_CATEGORY = {
+  "SAREE": [
+    { name: "Saree Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/41.jpeg" },
+    { name: "Saree Model 2", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/42.jpeg" },
+    { name: "Saree Model 3", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/43.jpeg" },
+    { name: "Saree Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/44.jpeg" }
+  ],
+  "LEHANGA": [
+    { name: "Lehanga Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga1.jpg" },
+    { name: "Lehanga Model 2", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga2.jpg" },
+    { name: "Lehanga Model 3", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga3.jpg" },
+    { name: "Lehanga Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga4.jpg" }
+  ],
+  "ANARKALI": [
+    { name: "Anarkali Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/anarkali1.jpg" },
+    { name: "Anarkali Model 2", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/anarkali2.jpg" },
+    { name: "Anarkali Model 3", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/anarkali3.jpg" },
+    { name: "Anarkali Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/anarkali4.jpg" }
+  ],
+  "KURTHI": [
+    { name: "Kurthi Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/kurti/kurti1.jpg" },
+    { name: "Kurthi Model 2", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/kurti/kurti2.jpg" },
+    { name: "Kurthi Model 3", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/kurti/kurti3.jpg" },
+    { name: "Kurthi Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/kurti/kurti4.jpg" }
+  ],
+  "SHARARA": [
+    { name: "Sharara Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/sharara/shrara1.jpg" },
+    { name: "Sharara Model 2", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/sharara/shrara2.jpg" },
+    { name: "Sharara Model 3", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/sharara/shrara3.jpg" },
+    { name: "Sharara Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/sharara/sharara4.jpg" }
+  ]
+};
+
 export default function TryonWorkspace({ onExit }) {
   const navigate = useNavigate();
   const getHeaders = () => {
@@ -148,6 +181,8 @@ export default function TryonWorkspace({ onExit }) {
   const [selectedImage, setSelectedImage] = useState(null); // portrait image for without_garment
   const [selectedFile, setSelectedFile] = useState(null); // portrait file for without_garment
   const [garmentUploads, setGarmentUploads] = useState({}); // multi-slot state for with_garment
+  const [currentGenerationId, setCurrentGenerationId] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
   
   const [selectedModel, setSelectedModel] = useState(null); // model selection
   const [selectedCatalogDress, setSelectedCatalogDress] = useState(null); // catalog dress selection
@@ -193,20 +228,14 @@ export default function TryonWorkspace({ onExit }) {
     };
   }, []);
 
-  // Fetch dynamic data (Default Models & Catalog Dresses)
+  // Fetch dynamic data (Default Models based on category)
   useEffect(() => {
-    // Fetch Default Models
-    const localModels = [
-      { name: "Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/41.jpeg" },
-      { name: "Model 2", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/42.jpeg" },
-      { name: "Model 3", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/43.jpeg" },
-      { name: "Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/44.jpeg" }
-    ];
+    const localModels = DEFAULT_MODELS_BY_CATEGORY[category] || DEFAULT_MODELS_BY_CATEGORY["SAREE"];
     setDefaultModels(localModels);
-    setSelectedModel(localModels[0].name);
-
-    
-  }, []);
+    if (localModels.length > 0) {
+      setSelectedModel(localModels[0].name);
+    }
+  }, [category]);
 
   
 
@@ -325,6 +354,7 @@ export default function TryonWorkspace({ onExit }) {
       clearInterval(interval);
       setProgress(100);
       setResultImageUrl(genData.result_image_url || FALLBACK_SAREE_ICON);
+      if (genData.id) setCurrentGenerationId(genData.id);
       setTimeout(() => setTryonState('generated'), 400);
 
     } catch (err) {
@@ -686,17 +716,37 @@ export default function TryonWorkspace({ onExit }) {
             </button>
 
             <button 
-              onClick={() => {
+              onClick={async () => {
                 if (isGuestMode) {
                   setShowGuestSaveModal(true);
-                } else {
+                  return;
+                }
+                if (!currentGenerationId) {
                   navigate('/gallery');
+                  return;
+                }
+                setIsSaving(true);
+                try {
+                  const res = await fetch(`${API_URL}/api/tryon/save-to-library`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ generationId: currentGenerationId })
+                  });
+                  if (!res.ok) throw new Error('Failed to save');
+                  setCurrentGenerationId(null);
+                  navigate('/gallery');
+                } catch (err) {
+                  console.error(err);
+                  alert('Error saving to library');
+                } finally {
+                  setIsSaving(false);
                 }
               }}
-              className="bg-[#1a1410] hover:bg-black text-[#faf7f2] py-3.5 text-[9px] font-bold tracking-[1.5px] uppercase transition-colors flex items-center justify-center gap-1.5"
+              disabled={isSaving}
+              className="bg-[#1a1410] hover:bg-black text-[#faf7f2] py-3.5 text-[9px] font-bold tracking-[1.5px] uppercase transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Check className="w-3 h-3" />
-              <span>SAVE TO LIBRARY</span>
+              {isSaving ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+              <span>{isSaving ? 'SAVING...' : 'SAVE TO LIBRARY'}</span>
             </button>
           </div>
 
