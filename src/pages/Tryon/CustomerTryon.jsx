@@ -628,13 +628,14 @@ export default function CustomerTryon() {
             </button>
           )}
 
-          {tryonState === 'generated' && sourceGeneration?.category === 'SAREE' && (
+          {tryonState === 'generated' && (!sourceGeneration?.category || sourceGeneration?.category.toUpperCase() === 'SAREE') && (
             <div className="mb-6 animate-fade-in border-t border-[rgba(26,20,16,0.1)] pt-6">
               
               <div className="bg-[rgba(26,20,16,0.05)] rounded-full p-1 flex">
                 <button
                   onClick={() => setActiveTab('sleeve')}
-                  className={`flex-1 py-3 text-[10px] font-bold tracking-[1.5px] uppercase rounded-full transition-all duration-300 ${
+                  disabled={isModifying || isChangingBackground}
+                  className={`flex-1 py-3 text-[10px] font-bold tracking-[1.5px] uppercase rounded-full transition-all duration-300 ${(isModifying || isChangingBackground) ? 'opacity-50 cursor-not-allowed' : ''} ${
                     activeTab === 'sleeve'
                       ? 'bg-white shadow-sm text-[#1a1410]'
                       : 'text-[#8c8278] hover:text-[#1a1410]'
@@ -644,7 +645,8 @@ export default function CustomerTryon() {
                 </button>
                 <button
                   onClick={() => setActiveTab('neck')}
-                  className={`flex-1 py-3 text-[10px] font-bold tracking-[1.5px] uppercase rounded-full transition-all duration-300 ${
+                  disabled={isModifying || isChangingBackground}
+                  className={`flex-1 py-3 text-[10px] font-bold tracking-[1.5px] uppercase rounded-full transition-all duration-300 ${(isModifying || isChangingBackground) ? 'opacity-50 cursor-not-allowed' : ''} ${
                     activeTab === 'neck'
                       ? 'bg-white shadow-sm text-[#1a1410]'
                       : 'text-[#8c8278] hover:text-[#1a1410]'
@@ -660,7 +662,8 @@ export default function CustomerTryon() {
                     <button
                       key={b.id}
                       onClick={() => setShowcaseBlouse(b.id)}
-                      className={`relative aspect-square border overflow-hidden transition-all flex items-end justify-center pb-2 ${showcaseBlouse === b.id ? 'ring-2 ring-[#c4933f] border-transparent scale-[1.02] shadow-sm' : 'border-[rgba(26,20,16,0.2)] hover:border-[#1a1410]'}`}
+                      disabled={isModifying || isChangingBackground}
+                      className={`relative aspect-square border overflow-hidden transition-all flex items-end justify-center pb-2 ${(isModifying || isChangingBackground) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-[#1a1410]'} ${showcaseBlouse === b.id ? 'ring-2 ring-[#c4933f] border-transparent scale-[1.02] shadow-sm' : 'border-[rgba(26,20,16,0.2)]'}`}
                       title={b.name}
                     >
                       <img src={b.image} alt={b.name} className="absolute inset-0 w-full h-full object-cover" />
@@ -679,7 +682,8 @@ export default function CustomerTryon() {
                     <button
                       key={n.id}
                       onClick={() => setShowcaseNeck(n.id)}
-                      className={`relative aspect-square border overflow-hidden transition-all flex items-end justify-center pb-2 ${showcaseNeck === n.id ? 'ring-2 ring-[#c4933f] border-transparent scale-[1.02] shadow-sm' : 'border-[rgba(26,20,16,0.2)] hover:border-[#1a1410]'}`}
+                      disabled={isModifying || isChangingBackground}
+                      className={`relative aspect-square border overflow-hidden transition-all flex items-end justify-center pb-2 ${(isModifying || isChangingBackground) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-[#1a1410]'} ${showcaseNeck === n.id ? 'ring-2 ring-[#c4933f] border-transparent scale-[1.02] shadow-sm' : 'border-[rgba(26,20,16,0.2)]'}`}
                       title={n.name}
                     >
                       <img src={n.image} alt={n.name} className="absolute inset-0 w-full h-full object-cover" />
