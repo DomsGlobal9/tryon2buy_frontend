@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Sparkles, CheckCircle2, CameraOff, Clock, LayoutGrid, Zap, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Sparkles, CheckCircle2, CameraOff, Clock, LayoutGrid, Zap, ShieldCheck, User } from 'lucide-react';
 
 export default function Landing() {
   const [showGuestModal, setShowGuestModal] = useState(false);
@@ -130,9 +130,12 @@ export default function Landing() {
               </div>
               <div className="relative overflow-hidden group shadow-xl rounded-sm">
                 <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors z-10" />
-                <img 
-                  src="/assets/ui/landing_sharara.png" 
-                  alt="Bridal Lehenga Example"
+                <video 
+                  src="/assets/ui/vid.mp4" 
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
                   className="w-full h-full object-cover scale-110 transition-transform duration-1000 group-hover:scale-[1.15]"
                 />
               </div>
@@ -193,7 +196,7 @@ export default function Landing() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 relative">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 relative">
           {/* Connecting line for desktop */}
           <div className="hidden md:block absolute top-12 left-1/6 right-1/6 h-[1px] bg-[#8c8278]/20 z-0"></div>
 
@@ -227,6 +230,17 @@ export default function Landing() {
             <h3 className="text-[14px] uppercase font-bold tracking-widest mb-4">3. Publish & Sell</h3>
             <p className="text-[#5c544d] font-['Inter',sans-serif] text-[14px] leading-relaxed">
               Export stunning, high-resolution catalog images directly to your store and enable interactive virtual try-ons for your customers.
+            </p>
+          </div>
+
+          {/* Step 4 */}
+          <div className="relative z-10 bg-[#faf7f2] p-8 text-center border border-[#8c8278]/10 hover:border-[#ed7b22]/30 transition-colors shadow-sm">
+            <div className="w-16 h-16 mx-auto bg-[#ed7b22] text-white flex items-center justify-center rounded-full mb-6 shadow-xl">
+              <User className="w-6 h-6" />
+            </div>
+            <h3 className="text-[14px] uppercase font-bold tracking-widest mb-4">4. Customer Try-On</h3>
+            <p className="text-[#5c544d] font-['Inter',sans-serif] text-[14px] leading-relaxed">
+              Shoppers can upload their own photos to try on your garments, instantly customizing blouse styles and backgrounds.
             </p>
           </div>
         </div>
