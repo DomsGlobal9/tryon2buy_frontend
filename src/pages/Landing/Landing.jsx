@@ -23,9 +23,27 @@ export default function Landing() {
     linkCourier.rel = 'stylesheet';
     document.head.appendChild(linkCourier);
 
+    const linkOutfit = document.createElement('link');
+    linkOutfit.href = 'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap';
+    linkOutfit.rel = 'stylesheet';
+    document.head.appendChild(linkOutfit);
+
+    const linkMontserrat = document.createElement('link');
+    linkMontserrat.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap';
+    linkMontserrat.rel = 'stylesheet';
+    document.head.appendChild(linkMontserrat);
+
+    const linkMerriweather = document.createElement('link');
+    linkMerriweather.href = 'https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&display=swap';
+    linkMerriweather.rel = 'stylesheet';
+    document.head.appendChild(linkMerriweather);
+
     return () => {
       document.head.removeChild(linkGaramond);
       document.head.removeChild(linkCourier);
+      document.head.removeChild(linkOutfit);
+      document.head.removeChild(linkMontserrat);
+      document.head.removeChild(linkMerriweather);
     };
   }, []);
 
@@ -41,7 +59,7 @@ export default function Landing() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#faf7f2] font-['Courier_Prime',monospace] text-[#1a1410] selection:bg-[#ed7b22] selection:text-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#faf7f2] font-['Montserrat',sans-serif] text-[#1a1410] selection:bg-[#ed7b22] selection:text-white overflow-x-hidden">
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes scrollMarquee {
           0% { transform: translateX(0); }
@@ -61,13 +79,13 @@ export default function Landing() {
           <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-10 md:h-12 object-contain" />
         </div>
         <div className="flex items-center gap-6 md:gap-8">
-          <a href="#about" className="text-[10px] md:text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors hidden sm:block">
+          <a href="#about" className="text-[10px] md:text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors hidden sm:block font-['Merriweather',serif]">
             ABOUT US
           </a>
-          <Link to="/login" state={{ isLogin: false }} className="text-[10px] md:text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors hidden sm:block">
+          <Link to="/login" state={{ isLogin: false }} className="text-[10px] md:text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors hidden sm:block font-['Merriweather',serif]">
             SIGNUP
           </Link>
-          <Link to="/login" state={{ isLogin: true }} className="bg-[#1a1410] text-white px-5 md:px-6 py-2.5 text-[10px] md:text-[11px] uppercase tracking-widest font-bold hover:bg-[#ed7b22] transition-colors flex items-center gap-2">
+          <Link to="/login" state={{ isLogin: true }} className="bg-[#1a1410] text-white px-5 md:px-6 py-2.5 text-[10px] md:text-[11px] uppercase tracking-widest font-bold hover:bg-[#ed7b22] transition-colors flex items-center gap-2 font-['Merriweather',serif]">
             LOGIN <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -88,8 +106,8 @@ export default function Landing() {
               and allow your customers to try on your fashion collection from anywhere.
             </p>
             
-            <div className="flex flex-wrap items-center gap-4 md:gap-6">
-              <button onClick={handleGuestWorkspace} className="bg-[#1a1410] text-white px-8 py-4 text-[11px] md:text-[12px] uppercase tracking-widest font-bold hover:bg-[#ed7b22] transition-colors flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row gap-4 mb-10 max-w-md mx-auto xl:mx-0">
+              <button onClick={handleGuestWorkspace} className="bg-[#1a1410] text-white px-8 py-4 text-[11px] md:text-[12px] uppercase tracking-widest font-bold hover:bg-[#ed7b22] transition-colors flex items-center justify-center gap-2 font-['Merriweather',serif]">
                 Continue as Guest <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -97,19 +115,19 @@ export default function Landing() {
             <div className="mt-12 md:mt-16 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="w-4 h-4 text-[#ed7b22] shrink-0" />
-                <span className="text-[11px] uppercase tracking-wider font-bold">Zero Photoshoot Costs</span>
+                <span className="text-[12px] uppercase tracking-[0.08em] font-bold font-['Outfit',sans-serif]">Zero Photoshoot Costs</span>
               </div>
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="w-4 h-4 text-[#ed7b22] shrink-0" />
-                <span className="text-[11px] uppercase tracking-wider font-bold">Immersive Try-On</span>
+                <span className="text-[12px] uppercase tracking-[0.08em] font-bold font-['Outfit',sans-serif]">Immersive Try-On</span>
               </div>
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="w-4 h-4 text-[#ed7b22] shrink-0" />
-                <span className="text-[11px] uppercase tracking-wider font-bold">Studio-Grade Quality</span>
+                <span className="text-[12px] uppercase tracking-[0.08em] font-bold font-['Outfit',sans-serif]">Studio-Grade Quality</span>
               </div>
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="w-4 h-4 text-[#ed7b22] shrink-0" />
-                <span className="text-[11px] uppercase tracking-wider font-bold">Multi-Category Support</span>
+                <span className="text-[12px] uppercase tracking-[0.08em] font-bold font-['Outfit',sans-serif]">Multi-Category Support</span>
               </div>
             </div>
           </div>
@@ -304,7 +322,7 @@ export default function Landing() {
           <p className="text-[#5c544d] font-['Inter',sans-serif] text-[16px] leading-relaxed mb-10 max-w-xl mx-auto">
             Join the modern fashion boutiques using TryOn2Buy to digitize their draping process and deliver unparalleled shopping experiences.
           </p>
-          <Link to="/login" className="inline-flex items-center gap-3 bg-[#ed7b22] text-white px-10 py-5 text-[12px] uppercase tracking-[3px] font-bold hover:bg-[#1a1410] transition-colors shadow-xl hover:shadow-2xl hover:-translate-y-1 transform duration-200">
+          <Link to="/login" className="inline-flex items-center gap-3 bg-[#ed7b22] text-white px-10 py-5 text-[12px] uppercase tracking-[3px] font-bold hover:bg-[#1a1410] transition-colors shadow-xl hover:shadow-2xl hover:-translate-y-1 transform duration-200 font-['Merriweather',serif]">
             Create Your Merchant Account <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

@@ -265,6 +265,8 @@ export default function TryonWorkspace({ onExit }) {
     if (newCategory !== category) {
       setCategory(newCategory);
       setGarmentUploads({}); // clear slots when switching category
+      setResultImageUrl(null); // Clear previous results to show the new category preview
+      setTryonState('initial');
     }
   };
 
@@ -444,9 +446,6 @@ export default function TryonWorkspace({ onExit }) {
 
           {/* Workspace Header */}
           <div className="space-y-0.5">
-            <span className="text-[9px] tracking-[1.5px] uppercase font-bold text-[#c4933f] block">
-              TRYON2BUY VIRTUAL FITTING
-            </span>
             <h2 className="font-['Playfair_Display',serif] text-[18px] font-normal leading-tight text-[#1A1410]">
               Virtual Fitting Room
             </h2>
@@ -472,16 +471,13 @@ export default function TryonWorkspace({ onExit }) {
                       <button
                         key={cat.key}
                         onClick={() => handleCategorySelect(cat.key)}
-                        className={`group h-[72px] flex flex-col items-center justify-center p-1.5 gap-1.5 border transition-all duration-300 ${
+                        className={`group h-[48px] flex items-center justify-center px-2 border transition-all duration-300 ${
                           isActive 
                             ? 'bg-[#FFFFFF] border-[#7f5700] ring-[1px] ring-[#7f5700]' 
                             : 'bg-white border-[rgba(26,20,16,0.08)] hover:border-[#7F5700] hover:shadow-[0_4px_15px_rgb(127,87,0,0.1)] hover:scale-[1.01]'
                         }`}
                       >
-                        <div className={`h-[36px] w-full flex items-center justify-center transition-colors ${isActive ? 'text-[#7f5700]' : 'text-[#8c8278] group-hover:text-[#1A1410]'}`}>
-                          <cat.icon className="w-6 h-6 stroke-[1.5]" />
-                        </div>
-                        <span className="text-[7px] font-bold tracking-[0.5px] uppercase text-[#1A1410] block whitespace-nowrap">
+                        <span className={`text-[10px] font-bold tracking-[1px] uppercase whitespace-nowrap transition-colors ${isActive ? 'text-[#7f5700]' : 'text-[#8c8278] group-hover:text-[#1A1410]'}`}>
                           {cat.key}
                         </span>
                       </button>
@@ -498,9 +494,9 @@ export default function TryonWorkspace({ onExit }) {
                 </div>
                 
                 {category === 'SAREE' && (
-                  <p className="text-[12px] text-red-600 font-medium leading-relaxed -mt-2">
-                    Upload the saree as a flat lay or draped on a mannequin. Blouse is optional — if not uploaded, the blouse from the saree image will be used.
-                  </p>
+                  <div className="bg-[#faf7f2] px-4 py-3 border border-[#e8e4dc] rounded-md shadow-sm text-[11px] text-[#5c544d] font-['Inter',sans-serif] leading-relaxed -mt-2">
+                    <span className="font-bold text-[#1a1410]">Note:</span> Upload the saree as a flat lay or draped on a mannequin. Blouse is optional — if not uploaded, the blouse from the saree image will be used.
+                  </div>
                 )}
 
                 <div className={`grid gap-2 ${activeSlots.length > 2 ? 'grid-cols-2' : 'grid-cols-2'}`}>
@@ -555,7 +551,11 @@ export default function TryonWorkspace({ onExit }) {
                     return (
                       <button
                         key={model.name}
-                        onClick={() => setSelectedModel(model.name)}
+                        onClick={() => {
+                          setSelectedModel(model.name);
+                          setResultImageUrl(null);
+                          setTryonState('initial');
+                        }}
                         className={`w-full border p-0.5 relative flex flex-col transition-all duration-300 ${
                           isSelected ? 'border-[#7f5700]' : 'border-[rgba(0,0,0,0)] opacity-75 hover:opacity-100'
                         }`}
@@ -595,17 +595,27 @@ export default function TryonWorkspace({ onExit }) {
 
           <div className="aspect-[3/4] bg-[#FAF7F2] w-full max-w-[500px] shadow-2xl border border-[rgba(26,20,16,0.05)] relative overflow-hidden flex items-center justify-center animate-fade-in z-10">
             
-            {/* STATE A: Initial silhouette */}
+            {/* STATE A: Initial Model Preview */}
             {tryonState === 'initial' && (
-              <div className="flex flex-col items-center text-center p-8 opacity-45 select-none animate-fade-in">
-                <img src={imgSilhouetteIcon} alt="" className="h-[140px] w-[88px] object-contain mb-4" onError={(e) => { e.target.style.display = 'none'; }} />
-                <h4 className="font-['Playfair_Display',serif] text-[16px] tracking-[1.5px] uppercase text-[#1A1410] font-normal mb-1">
-                  READY FOR DRAPING
-                </h4>
-                <div className="flex items-center gap-1 justify-center">
-                  <div className="bg-[#c4933f] rounded-full size-1" />
-                  <div className="bg-[#c4933f] rounded-full size-1" />
-                  <div className="bg-[#c4933f] rounded-full size-1" />
+              <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-[#faf7f2] animate-fade-in">
+                <img 
+                  src={
+                    workspaceMode === 'with_garment' 
+                      ? (defaultModels.find(m => m.name === selectedModel)?.img || imgSilhouetteIcon)
+                      : (selectedCatalogDress?.img || imgSilhouetteIcon)
+                  } 
+                  alt="Base model preview" 
+                  className="w-full h-full object-cover transition-all duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col items-center justify-end pb-12 pointer-events-none">
+                  <h4 className="font-['Playfair_Display',serif] text-[18px] tracking-[2px] uppercase text-white drop-shadow-lg font-bold mb-2">
+                    SELECTED MODEL
+                  </h4>
+                  <div className="flex items-center gap-1.5 justify-center">
+                    <div className="bg-white/90 rounded-full size-1.5 shadow-sm" />
+                    <div className="bg-white/90 rounded-full size-1.5 shadow-sm" />
+                    <div className="bg-white/90 rounded-full size-1.5 shadow-sm" />
+                  </div>
                 </div>
               </div>
             )}
@@ -670,7 +680,7 @@ export default function TryonWorkspace({ onExit }) {
                   src={
                     resultImageUrl || 
                     (workspaceMode === 'with_garment' 
-                      ? (DRAPED_RESULT_MAP[category]?.[selectedModel] || DRAPED_RESULT_MAP["SAREE"]["Classic Studio"])
+                      ? (defaultModels.find(m => m.name === selectedModel)?.img || DRAPED_RESULT_MAP["SAREE"]["Classic Studio"])
                       : (selectedCatalogDress?.draped || DRAPED_RESULT_MAP["SAREE"]["Classic Studio"]))
                   } 
                   alt="Try-on output preview" 
@@ -681,8 +691,8 @@ export default function TryonWorkspace({ onExit }) {
                 <div className="absolute bottom-4 left-4 backdrop-blur-[6px] bg-white/85 border border-[rgba(26,20,16,0.08)] px-3 py-1.5 shadow-sm">
                   <span className="text-[10px] font-bold text-[#1A1410]">
                     {workspaceMode === 'with_garment' 
-                      ? `${category} · ${selectedModel} · ${selectedBackdrop.name}`
-                      : `${selectedCatalogDress?.name} · Personal Portrait · ${selectedBackdrop.name}`
+                      ? `${selectedModel} — ${selectedBackdrop.name}`
+                      : `${selectedCatalogDress?.name} — Personal Portrait — ${selectedBackdrop.name}`
                     }
                   </span>
                 </div>
