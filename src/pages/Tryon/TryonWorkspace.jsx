@@ -112,34 +112,34 @@ const BACKDROPS = [
 
 const DEFAULT_MODELS_BY_CATEGORY = {
   "SAREE": [
-    { name: "Saree Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/41.jpeg" },
-    { name: "Saree Model 2", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/42.jpeg" },
-    { name: "Saree Model 3", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/43.jpeg" },
-    { name: "Saree Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/44.jpeg" }
+    { name: "Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/41.jpeg" },
+    { name: "Model 2", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/42.jpeg" },
+    { name: "Model 3", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/43.jpeg" },
+    { name: "Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/44.jpeg" }
   ],
   "LEHANGA": [
-    { name: "Lehanga Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga1.jpg" },
-    { name: "Lehanga Model 2", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga2.jpg" },
-    { name: "Lehanga Model 3", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga3.jpg" },
-    { name: "Lehanga Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga4.jpg" }
+    { name: "Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga1.jpg" },
+    { name: "Model 2", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga2.jpg" },
+    { name: "Model 3", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga3.jpg" },
+    { name: "Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga4.jpg" }
   ],
   "ANARKALI": [
-    { name: "Anarkali Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/anarkali1.jpg" },
-    { name: "Anarkali Model 2", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/anarkali2.jpg" },
-    { name: "Anarkali Model 3", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/anarkali3.jpg" },
-    { name: "Anarkali Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/anarkali4.jpg" }
+    { name: "Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/anarkali1.jpg" },
+    { name: "Model 2", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/anarkali2.jpg" },
+    { name: "Model 3", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/anarkali3.jpg" },
+    { name: "Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/anarkali4.jpg" }
   ],
   "KURTHI": [
-    { name: "Kurthi Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/kurti/kurti1.jpg" },
-    { name: "Kurthi Model 2", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/kurti/kurti2.jpg" },
-    { name: "Kurthi Model 3", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/kurti/kurti3.jpg" },
-    { name: "Kurthi Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/kurti/kurti4.jpg" }
+    { name: "Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/kurti/kurti1.jpg" },
+    { name: "Model 2", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/kurti/kurti2.jpg" },
+    { name: "Model 3", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/kurti/kurti3.jpg" },
+    { name: "Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/kurti/kurti4.jpg" }
   ],
   "SHARARA": [
-    { name: "Sharara Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/sharara/shrara1.jpg" },
-    { name: "Sharara Model 2", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/sharara/shrara2.jpg" },
-    { name: "Sharara Model 3", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/sharara/shrara3.jpg" },
-    { name: "Sharara Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/sharara/sharara4.jpg" }
+    { name: "Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/sharara/shrara1.jpg" },
+    { name: "Model 2", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/sharara/shrara2.jpg" },
+    { name: "Model 3", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/sharara/shrara3.jpg" },
+    { name: "Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/sharara/sharara4.jpg" }
   ]
 };
 
@@ -493,9 +493,13 @@ export default function TryonWorkspace({ onExit }) {
                   <h3 className="text-[10px] tracking-[1px] uppercase font-bold text-[#1A1410]">UPLOAD GARMENT</h3>
                 </div>
                 
-                {category === 'SAREE' && (
-                  <div className="bg-[#faf7f2] px-4 py-3 border border-[#e8e4dc] rounded-md shadow-sm text-[11px] text-[#5c544d] font-['Inter',sans-serif] leading-relaxed -mt-2">
-                    <span className="font-bold text-[#1a1410]">Note:</span> Upload the saree as a flat lay or draped on a mannequin. Blouse is optional — if not uploaded, the blouse from the saree image will be used.
+                {category === 'SAREE' ? (
+                  <div className="bg-yellow-50/80 px-4 py-3 border border-yellow-200 rounded-md shadow-sm text-[11px] text-yellow-800 font-['Inter',sans-serif] leading-relaxed -mt-2">
+                    <span className="font-bold text-yellow-900">Note:</span> Upload the saree as a flat lay or draped on a mannequin. Blouse is optional — if not uploaded, the blouse from the saree image will be used.
+                  </div>
+                ) : (
+                  <div className="bg-yellow-50/80 px-4 py-3 border border-yellow-200 rounded-md shadow-sm text-[11px] text-yellow-800 font-['Inter',sans-serif] leading-relaxed -mt-2">
+                    <span className="font-bold text-yellow-900">Note:</span> Please upload flat lay or mannequin photos of the actual stitched {category.toLowerCase()}. Do not upload unstitched fabric pieces. Ensure each specific garment part is uploaded into its corresponding slot below for optimal draping.
                   </div>
                 )}
 
@@ -508,25 +512,28 @@ export default function TryonWorkspace({ onExit }) {
                         htmlFor={`file-${slot.id}`}
                         onDrop={(e) => handleGarmentDrop(slot.id, e)}
                         onDragOver={handleDragOver}
-                        className="relative border border-dashed border-[rgba(26,20,16,0.2)] bg-[#FFFFFF] shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex flex-col items-center justify-center min-h-[100px] group cursor-pointer hover:border-[#7F5700] hover:shadow-[0_4px_15px_rgb(127,87,0,0.1)] hover:scale-[1.01] transition-all"
+                        className="relative border-2 border-dashed border-[#dcd6cc] bg-[#fdfcf9] rounded-xl overflow-hidden flex flex-col items-center justify-center min-h-[120px] group cursor-pointer hover:border-[#7F5700] hover:bg-white hover:shadow-[0_8px_20px_rgb(127,87,0,0.08)] hover:-translate-y-0.5 transition-all duration-300"
                       >
                         <input id={`file-${slot.id}`} type="file" accept="image/*" onChange={(e) => handleGarmentSlotChange(slot.id, e)} className="hidden" />
                         
-                        <div className="absolute top-1 left-1 bg-white/80 px-2 py-1 text-[8px] uppercase font-bold tracking-wider z-10 text-[#1A1410]">
-                          {slot.label} {slot.required && <span className="text-red-600">*</span>}
+                        <div className="absolute top-0 left-0 bg-[#ede8df] text-[#5c544d] px-2.5 py-1 text-[8px] uppercase font-bold tracking-widest z-10 rounded-br-lg border-b border-r border-[#dcd6cc] group-hover:bg-[#7f5700] group-hover:border-[#7f5700] group-hover:text-white transition-colors">
+                          {slot.label} {slot.required && <span className="text-red-400 ml-0.5">*</span>}
                         </div>
 
                         {slotData ? (
-                          <div className="relative w-full h-[80px] flex items-center justify-center p-2">
-                            <img src={slotData.url} alt={slot.label} className="max-h-full max-w-full object-contain" />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                              <span className="bg-white text-[#1A1410] text-[7px] font-bold px-2 py-1 uppercase">Change</span>
+                          <div className="relative w-full h-[100px] flex items-center justify-center p-3 mt-4">
+                            <img src={slotData.url} alt={slot.label} className="max-h-full max-w-full object-contain drop-shadow-md group-hover:scale-105 transition-transform duration-500" />
+                            <div className="absolute inset-0 bg-[#1a1410]/50 opacity-0 group-hover:opacity-100 flex flex-col gap-1 items-center justify-center transition-all duration-300 backdrop-blur-[1px]">
+                              <Upload className="h-4 w-4 text-[#faf7f2]" />
+                              <span className="text-[#faf7f2] text-[8px] font-bold tracking-[1.5px] uppercase">Replace</span>
                             </div>
                           </div>
                         ) : (
-                          <div className="flex flex-col items-center gap-1 opacity-60">
-                            <Upload className="h-4 w-4 text-[#8c8278]" />
-                            <span className="text-[7px] uppercase font-bold text-center">Upload {slot.label}</span>
+                          <div className="flex flex-col items-center gap-2 opacity-50 group-hover:opacity-90 transition-opacity mt-3">
+                            <div className="bg-[#ede8df] p-2.5 rounded-full group-hover:bg-[#f2efe9] group-hover:scale-110 group-hover:shadow-sm transition-all duration-300">
+                              <Upload className="h-4 w-4 text-[#7f5700]" />
+                            </div>
+                            <span className="text-[9px] uppercase tracking-[1px] font-bold text-[#5c544d] text-center px-2">Upload<br/>{slot.label}</span>
                           </div>
                         )}
                       </label>
