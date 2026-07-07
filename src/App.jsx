@@ -6,6 +6,7 @@ import CustomerTryon from './pages/Tryon/CustomerTryon';
 import CustomerGallery from './pages/Tryon/CustomerGallery';
 import VendorAuth from './pages/Tryon/VendorAuth';
 import Landing from './pages/Landing/Landing';
+import AboutUs from './pages/Landing/AboutUs';
 
 // Authentication Guard for Vendor Interface
 const VendorRoute = ({ children }) => {
@@ -21,6 +22,7 @@ export default function App() {
         <Routes>
           {/* Public Landing */}
           <Route path="/" element={<Landing />} />
+          <Route path="/about" element={<AboutUs />} />
 
           {/* Vendor Auth */}
           <Route path="/login" element={<VendorAuth />} />
