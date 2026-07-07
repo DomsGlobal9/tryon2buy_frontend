@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Sparkles, CheckCircle2, CameraOff, Clock, LayoutGrid, Zap, ShieldCheck, User } from 'lucide-react';
+import { ArrowRight, Sparkles, CheckCircle2, CameraOff, Clock, LayoutGrid, Zap, ShieldCheck, User, Menu, X } from 'lucide-react';
 
 export default function Landing() {
   const [showGuestModal, setShowGuestModal] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleGuestWorkspace = () => {
@@ -71,25 +72,153 @@ export default function Landing() {
         .animate-marquee:hover {
           animation-play-state: paused;
         }
+
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-up { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+        
+        /* Custom Animated Hamburger Menu */
+        .menu__icon {
+          width: 32px;
+          height: 32px;
+          padding: 4px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          outline: none;
+        }
+        .menu__icon span {
+          display: block;
+          width: 100%;
+          height: 0.15rem;
+          border-radius: 2px;
+          background-color: #1a1410;
+          transition: background-color .4s;
+          position: relative;
+        }
+        .menu__icon span+span {
+          margin-top: .375rem;
+        }
+        .menu__icon.closed span:nth-child(1) { animation: ease .8s menu-icon-top-2 forwards; }
+        .menu__icon.closed span:nth-child(2) { animation: ease .8s menu-icon-scaled-2 forwards; }
+        .menu__icon.closed span:nth-child(3) { animation: ease .8s menu-icon-bottom-2 forwards; }
+        .menu__icon.open span { background-color: #faf7f2; }
+        .menu__icon.open span:nth-child(1) { animation: ease .8s menu-icon-top forwards; }
+        .menu__icon.open span:nth-child(2) { animation: ease .8s menu-icon-scaled forwards; }
+        .menu__icon.open span:nth-child(3) { animation: ease .8s menu-icon-bottom forwards; background-color: #ed7b22; }
+
+        @keyframes menu-icon-top { 0% { top: 0; transform: rotate(0); } 50% { top: .5rem; transform: rotate(0); } 100% { top: .5rem; transform: rotate(45deg); } }
+        @keyframes menu-icon-top-2 { 0% { top: .5rem; transform: rotate(45deg); } 50% { top: .5rem; transform: rotate(0); } 100% { top: 0; transform: rotate(0); } }
+        @keyframes menu-icon-bottom { 0% { bottom: 0; transform: rotate(0); } 50% { bottom: .5rem; transform: rotate(0); } 100% { bottom: .5rem; transform: rotate(135deg); } }
+        @keyframes menu-icon-bottom-2 { 0% { bottom: .5rem; transform: rotate(135deg); } 50% { bottom: .5rem; transform: rotate(0); } 100% { bottom: 0; transform: rotate(0); } }
+        @keyframes menu-icon-scaled { 50% { transform: scale(0); } 100% { transform: scale(0); } }
+        @keyframes menu-icon-scaled-2 { 0% { transform: scale(0); } 50% { transform: scale(0); } 100% { transform: scale(1); } }
       `}} />
       
       {/* Navigation */}
-      <nav className="flex items-center justify-between px-6 md:px-16 xl:px-24 py-6 max-w-[1800px] mx-auto w-full sticky top-0 z-50 bg-[#faf7f2]/90 backdrop-blur-md border-b border-[#8c8278]/10">
+      <nav className="flex items-center justify-between px-6 md:px-16 xl:px-24 py-4 md:py-6 max-w-[1800px] mx-auto w-full sticky top-0 z-[110] bg-[#faf7f2]/90 backdrop-blur-md border-b border-[#8c8278]/10">
         <div className="flex items-center gap-2">
-          <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-10 md:h-12 object-contain" />
+          <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-8 md:h-12 object-contain" />
         </div>
-        <div className="flex items-center gap-6 md:gap-8">
-          <a href="#about" className="text-[10px] md:text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors hidden sm:block font-['Merriweather',serif]">
+        
+        {/* Desktop Links */}
+        <div className="hidden md:flex items-center gap-8">
+          <Link to="/about" className="text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors font-['Merriweather',serif]">
             ABOUT US
-          </a>
-          <Link to="/login" state={{ isLogin: false }} className="text-[10px] md:text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors hidden sm:block font-['Merriweather',serif]">
+          </Link>
+          <Link to="/login" state={{ isLogin: false }} className="text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors font-['Merriweather',serif]">
             SIGNUP
           </Link>
-          <Link to="/login" state={{ isLogin: true }} className="bg-[#1a1410] text-white px-5 md:px-6 py-2.5 text-[10px] md:text-[11px] uppercase tracking-widest font-bold hover:bg-[#ed7b22] transition-colors flex items-center gap-2 font-['Merriweather',serif]">
+          <Link to="/login" state={{ isLogin: true }} className="bg-[#1a1410] text-white px-6 py-2.5 text-[11px] uppercase tracking-widest font-bold hover:bg-[#ed7b22] transition-colors flex items-center gap-2 font-['Merriweather',serif]">
             LOGIN <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
+
+        {/* Mobile Animated Hamburger Toggle */}
+        <button 
+          className={`md:hidden menu__icon ${isMobileMenuOpen ? 'open' : 'closed'}`}
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
       </nav>
+
+      {/* Mobile Full-Screen Menu Overlay (Dark Premium Mode) */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-[100] bg-[#1a1410] text-[#faf7f2] flex flex-col pt-28 overflow-hidden animate-fade-up">
+          
+          {/* Background Decorative Marquee */}
+          <div className="absolute top-1/2 left-0 -translate-y-1/2 w-full overflow-hidden opacity-5 pointer-events-none flex whitespace-nowrap -z-10">
+            <span className="text-[120px] font-['EB_Garamond',serif] italic font-bold">TRYON2BUY STUDIO&nbsp;</span>
+            <span className="text-[120px] font-['EB_Garamond',serif] italic font-bold">TRYON2BUY STUDIO&nbsp;</span>
+          </div>
+
+          <div className="flex-1 flex flex-col justify-center px-8 relative z-10">
+            <Link 
+              to="/about" 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="group flex items-end gap-6 py-8 border-b border-white/10 animate-fade-up delay-100"
+            >
+              <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">01</span>
+              <span className="font-['EB_Garamond',serif] text-5xl tracking-wide text-white group-hover:text-[#ed7b22] group-hover:italic transition-all duration-300">About Us</span>
+            </Link>
+            
+            <Link 
+              to="/login" 
+              state={{ isLogin: false }} 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="group flex items-end gap-6 py-8 border-b border-white/10 animate-fade-up delay-200"
+            >
+              <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">02</span>
+              <span className="font-['EB_Garamond',serif] text-5xl tracking-wide text-white group-hover:text-[#ed7b22] group-hover:italic transition-all duration-300">Sign Up</span>
+            </Link>
+
+            <Link 
+              to="/login" 
+              state={{ isLogin: true }} 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="group flex items-end gap-6 py-8 border-b border-white/10 animate-fade-up delay-300"
+            >
+              <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">03</span>
+              <span className="font-['EB_Garamond',serif] text-5xl tracking-wide text-[#ed7b22] group-hover:text-white transition-all duration-300">Login</span>
+            </Link>
+          </div>
+
+          <div className="px-8 pb-12 animate-fade-up delay-400 relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[#8c8278] font-bold leading-loose">
+              Tryon2Buy Technology <br/>
+              © {new Date().getFullYear()} All Rights Reserved
+            </p>
+            <div className="flex gap-2 md:gap-3 flex-wrap">
+              <a href="https://www.instagram.com/tryon2buy/?hl=en" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+                <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+              </a>
+              <a href="https://x.com/Tryon2buy" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              </a>
+              <a href="https://in.pinterest.com/tryon2buy/" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.951-7.252 4.168 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.625 0 12.017 0z"/>
+                </svg>
+              </a>
+              <a href="https://www.youtube.com/@Tryon2buy" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+                <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+              </a>
+              <a href="https://www.linkedin.com/company/132194315/admin/dashboard/" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+                <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Hero Section */}
       <section className="max-w-[1800px] mx-auto px-6 md:px-16 xl:px-24 pt-16 md:pt-24 pb-20 md:pb-32">
@@ -335,9 +464,29 @@ export default function Landing() {
             <div className="mb-6">
               <img src="/assets/footer_logo.png" alt="TryOn2Buy Logo" className="h-8 md:h-10 object-contain" />
             </div>
-            <p className="text-[#a69c92] font-['Inter',sans-serif] text-[14px] max-w-sm leading-relaxed">
+            <p className="text-[#a69c92] font-['Inter',sans-serif] text-[14px] max-w-sm leading-relaxed mb-8">
               The premier digital draping and virtual fitting room technology for modern luxury fashion e-commerce.
             </p>
+            {/* Social Icons */}
+            <div className="flex gap-4 flex-wrap">
+              <a href="https://www.instagram.com/tryon2buy/?hl=en" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+                <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+              </a>
+              <a href="https://x.com/Tryon2buy" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              </a>
+              <a href="https://in.pinterest.com/tryon2buy/" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.951-7.252 4.168 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.625 0 12.017 0z"/>
+                </svg>
+              </a>
+              <a href="https://www.youtube.com/@Tryon2buy" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+                <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+              </a>
+              <a href="https://www.linkedin.com/company/132194315/admin/dashboard/" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+                <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+              </a>
+            </div>
           </div>
           <div>
             <h4 className="text-[11px] uppercase tracking-[2px] font-bold mb-6 text-[#8c8278]">Platform</h4>

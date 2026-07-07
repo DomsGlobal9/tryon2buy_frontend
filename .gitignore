@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Scratch and Test Files
+scratch/
+test-external-api.js
+*.test.js
+*.spec.js
+tests/
+__tests__/
