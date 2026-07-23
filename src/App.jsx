@@ -5,6 +5,10 @@ import VendorGallery from './pages/Tryon/VendorGallery';
 import CustomerTryon from './pages/Tryon/CustomerTryon';
 import CustomerGallery from './pages/Tryon/CustomerGallery';
 import VendorAuth from './pages/Tryon/VendorAuth';
+import ClientAuth from './pages/Vendor/ClientAuth';
+import VendorCatalog from './pages/Vendor/VendorCatalog';
+import VendorUpload from './pages/Vendor/VendorUpload';
+import VendorTryon from './pages/Vendor/VendorTryon';
 import Landing from './pages/Landing/Landing';
 import AboutUs from './pages/Landing/AboutUs';
 
@@ -24,12 +28,16 @@ export default function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/about" element={<AboutUs />} />
 
-          {/* Vendor Auth */}
+          {/* Auth Routes */}
           <Route path="/login" element={<VendorAuth />} />
+          <Route path="/client-login" element={<ClientAuth />} />
 
           {/* Vendor Protected Interface */}
           <Route path="/workspace" element={<VendorRoute><TryonWorkspace onExit={() => window.location.href = '/'} /></VendorRoute>} />
           <Route path="/gallery" element={<VendorRoute><VendorGallery /></VendorRoute>} />
+          <Route path="/vendor/catalog" element={<VendorRoute><VendorCatalog /></VendorRoute>} />
+          <Route path="/vendor/upload" element={<VendorRoute><VendorUpload /></VendorRoute>} />
+          <Route path="/vendor/preview/:id" element={<VendorRoute><VendorTryon /></VendorRoute>} />
 
           {/* Customer Interface (Public) */}
           <Route path="/tryon/:id" element={<CustomerTryon />} />

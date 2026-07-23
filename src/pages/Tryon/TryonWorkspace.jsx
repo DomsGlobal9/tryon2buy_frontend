@@ -34,6 +34,23 @@ const imgSample1 = "http://localhost:3845/assets/eb3723735f4918d0fea490acc7cf28d
 const imgSample2 = "http://localhost:3845/assets/12485f59679dfaa84d051008c4f9b1fa8b47cad3.png";
 const imgSample3 = "http://localhost:3845/assets/2be0b27cbf3bdfc0adec50cbe945bd6dc6e92fe2.png";
 
+// Real samples provided by user
+const realSampleSaree1 = "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/garments/_DSC0149.jpg";
+const realSampleSaree2 = "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/garments/91be8c6a-9213-4627-b78d-088db18a08f3.jpg";
+const realSampleBlouse1 = "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/garments/blouse1.JPG";
+const realSampleBlouse2 = "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/garments/blouse2.JPG";
+
+// Anarkali Samples
+const anarkaliFull1 = "https://res.cloudinary.com/doiezptnn/image/upload/v1784805925/content_3_oudsco.jpg";
+const anarkaliTop1 = "https://res.cloudinary.com/doiezptnn/image/upload/v1784805925/content_5_ljagq5.jpg";
+const anarkaliBottom1 = "https://res.cloudinary.com/doiezptnn/image/upload/v1784805925/content_4_neb0xd.jpg";
+const anarkaliBack1 = "https://res.cloudinary.com/doiezptnn/image/upload/v1784805925/content_6_xqeqjs.jpg";
+
+const anarkaliFull2 = "https://res.cloudinary.com/doiezptnn/image/upload/v1784806111/content_xaru3w.jpg";
+const anarkaliTop2 = "https://res.cloudinary.com/doiezptnn/image/upload/v1784806100/content_1_faort2.jpg";
+const anarkaliBottom2 = "https://res.cloudinary.com/doiezptnn/image/upload/v1784806110/content_7_c3zqmk.jpg";
+const anarkaliBack2 = "https://res.cloudinary.com/doiezptnn/image/upload/v1784806100/content_2_fwjs9l.jpg";
+
 // Fallbacks for Unsplash
 const FALLBACK_SAREE_ICON = "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=120&h=120&q=80";
 const FALLBACK_KURTI_ICON = "https://images.unsplash.com/photo-1608748010899-18f300247112?auto=format&fit=crop&w=120&h=120&q=80";
@@ -204,6 +221,7 @@ export default function TryonWorkspace({ onExit }) {
   const [phase1Result, setPhase1Result] = useState(null);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showSampleModal, setShowSampleModal] = useState(false);
 
   // Customization states
   const [selectedBlouse, setSelectedBlouse] = useState(BLOUSE_COLORS[0]);
@@ -540,6 +558,16 @@ export default function TryonWorkspace({ onExit }) {
                     );
                   })}
                 </div>
+                
+                {/* Try Sample Materials Button */}
+                <div className="mt-3 flex justify-center">
+                  <button 
+                    onClick={() => setShowSampleModal(true)}
+                    className="text-[10px] border border-[#dcd6cc] bg-[#fdfcf9] hover:bg-[#ede8df] hover:border-[#7f5700] text-[#5c544d] px-6 py-2 rounded-full transition-colors flex items-center gap-2 uppercase tracking-[1.5px] font-bold shadow-sm"
+                  >
+                    <Image className="w-3.5 h-3.5" /> Sample Materials
+                  </button>
+                </div>
               </div>
 
               {/* Step 3: SELECT MODEL */}
@@ -817,6 +845,191 @@ export default function TryonWorkspace({ onExit }) {
                 View Demo Gallery
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sample Materials Modal */}
+      {showSampleModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in"
+          onClick={() => setShowSampleModal(false)}
+        >
+          <div 
+            className="bg-[#FAF7F2] border border-[#1a1410] max-w-3xl w-full p-6 md:p-8 relative shadow-2xl rounded-2xl max-h-[90vh] overflow-y-auto custom-scrollbar"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setShowSampleModal(false)} 
+              className="absolute top-4 right-4 text-[#1A1410] hover:text-[#7f5700] transition-colors bg-white rounded-full p-1 shadow-sm z-10"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <h2 className="font-['Playfair_Display',serif] text-2xl text-[#1A1410] mb-1">
+              Sample Materials
+            </h2>
+            <p className="text-[11px] text-[#8c8278] font-sans leading-relaxed mb-6">
+              Select a saree and blouse to automatically load them into your workspace. You can close this window at any time.
+            </p>
+
+            <div className="space-y-6">
+              
+              {category !== 'SAREE' && category !== 'ANARKALI' && (
+                <div className="text-center py-12 text-[#8c8278] text-[11px] font-bold tracking-[1.5px] uppercase border-2 border-dashed border-[#dcd6cc] rounded-xl bg-white">
+                  No sample materials available for {category} yet.
+                </div>
+              )}
+
+              {/* Saree Section */}
+              {category === 'SAREE' && (
+              <div className="bg-white p-5 border border-[rgba(26,20,16,0.08)] rounded-xl">
+                <h3 className="font-['Playfair_Display',serif] text-lg text-[#1A1410] mb-5">Saree & Blouse Samples</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Saree Grid */}
+                  <div className="space-y-4">
+                    <h4 className="text-[10px] tracking-[1.5px] uppercase font-bold text-[#1A1410] border-b border-[rgba(26,20,16,0.1)] pb-2 flex items-center justify-between">
+                      <span>Pick Saree</span>
+                      {garmentUploads.saree && <Check className="w-3.5 h-3.5 text-green-600" />}
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button 
+                        onClick={() => {
+                          setGarmentUploads(prev => ({ ...prev, saree: { url: realSampleSaree1, file: null } }));
+                        }}
+                        className={`border-2 rounded-xl overflow-hidden transition-all group aspect-[3/4] relative ${garmentUploads.saree?.url === realSampleSaree1 ? 'border-[#7f5700] shadow-md scale-[1.02]' : 'border-[rgba(0,0,0,0.05)] hover:border-[#dcd6cc]'}`}
+                      >
+                        <img src={realSampleSaree1} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        {garmentUploads.saree?.url === realSampleSaree1 && (
+                          <div className="absolute top-2 right-2 bg-[#7f5700] text-white rounded-full p-1 shadow-sm"><Check className="w-3 h-3" /></div>
+                        )}
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                          <span className="text-white text-[9px] font-bold tracking-[1px] uppercase border border-white px-3 py-1.5 rounded-full backdrop-blur-sm">Select</span>
+                        </div>
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setGarmentUploads(prev => ({ ...prev, saree: { url: realSampleSaree2, file: null } }));
+                        }}
+                        className={`border-2 rounded-xl overflow-hidden transition-all group aspect-[3/4] relative ${garmentUploads.saree?.url === realSampleSaree2 ? 'border-[#7f5700] shadow-md scale-[1.02]' : 'border-[rgba(0,0,0,0.05)] hover:border-[#dcd6cc]'}`}
+                      >
+                        <img src={realSampleSaree2} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        {garmentUploads.saree?.url === realSampleSaree2 && (
+                          <div className="absolute top-2 right-2 bg-[#7f5700] text-white rounded-full p-1 shadow-sm"><Check className="w-3 h-3" /></div>
+                        )}
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                          <span className="text-white text-[9px] font-bold tracking-[1px] uppercase border border-white px-3 py-1.5 rounded-full backdrop-blur-sm">Select</span>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Blouse Grid */}
+                  <div className="space-y-4">
+                    <h4 className="text-[10px] tracking-[1.5px] uppercase font-bold text-[#1A1410] border-b border-[rgba(26,20,16,0.1)] pb-2 flex items-center justify-between">
+                      <span>Pick Blouse</span>
+                      {garmentUploads.blouse && <Check className="w-3.5 h-3.5 text-green-600" />}
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button 
+                        onClick={() => {
+                          setGarmentUploads(prev => ({ ...prev, blouse: { url: realSampleBlouse1, file: null } }));
+                        }}
+                        className={`border-2 rounded-xl overflow-hidden transition-all group aspect-[3/4] relative ${garmentUploads.blouse?.url === realSampleBlouse1 ? 'border-[#7f5700] shadow-md scale-[1.02]' : 'border-[rgba(0,0,0,0.05)] hover:border-[#dcd6cc]'}`}
+                      >
+                        <img src={realSampleBlouse1} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        {garmentUploads.blouse?.url === realSampleBlouse1 && (
+                          <div className="absolute top-2 right-2 bg-[#7f5700] text-white rounded-full p-1 shadow-sm"><Check className="w-3 h-3" /></div>
+                        )}
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                          <span className="text-white text-[9px] font-bold tracking-[1px] uppercase border border-white px-3 py-1.5 rounded-full backdrop-blur-sm">Select</span>
+                        </div>
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setGarmentUploads(prev => ({ ...prev, blouse: { url: realSampleBlouse2, file: null } }));
+                        }}
+                        className={`border-2 rounded-xl overflow-hidden transition-all group aspect-[3/4] relative ${garmentUploads.blouse?.url === realSampleBlouse2 ? 'border-[#7f5700] shadow-md scale-[1.02]' : 'border-[rgba(0,0,0,0.05)] hover:border-[#dcd6cc]'}`}
+                      >
+                        <img src={realSampleBlouse2} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        {garmentUploads.blouse?.url === realSampleBlouse2 && (
+                          <div className="absolute top-2 right-2 bg-[#7f5700] text-white rounded-full p-1 shadow-sm"><Check className="w-3 h-3" /></div>
+                        )}
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                          <span className="text-white text-[9px] font-bold tracking-[1px] uppercase border border-white px-3 py-1.5 rounded-full backdrop-blur-sm">Select</span>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              )}
+
+              {/* Anarkali Section */}
+              {category === 'ANARKALI' && (
+              <div className="bg-white p-5 border border-[rgba(26,20,16,0.08)] rounded-xl">
+                <h3 className="font-['Playfair_Display',serif] text-lg text-[#1A1410] mb-5">Anarkali Samples</h3>
+                <div className="space-y-8">
+                  
+                  {/* Dress 1 */}
+                  <div>
+                    <h4 className="text-[10px] tracking-[1.5px] uppercase font-bold text-[#1A1410] border-b border-[rgba(26,20,16,0.1)] pb-2 mb-3">
+                      Pink Anarkali Suit
+                    </h4>
+                    <div className="grid grid-cols-4 gap-3">
+                      {[
+                        { id: 'full', url: anarkaliFull1, label: 'Full' },
+                        { id: 'top', url: anarkaliTop1, label: 'Top' },
+                        { id: 'bottom', url: anarkaliBottom1, label: 'Bottom' },
+                        { id: 'back', url: anarkaliBack1, label: 'Back' }
+                      ].map((slot) => (
+                        <button key={slot.id} onClick={() => setGarmentUploads({
+                          full: { url: anarkaliFull1, file: null },
+                          top: { url: anarkaliTop1, file: null },
+                          bottom: { url: anarkaliBottom1, file: null },
+                          back: { url: anarkaliBack1, file: null }
+                        })}
+                        className={`border-2 rounded-xl overflow-hidden transition-all group aspect-[3/4] relative ${garmentUploads.full?.url === anarkaliFull1 ? 'border-[#7f5700] shadow-md scale-[1.02]' : 'border-[rgba(0,0,0,0.05)] hover:border-[#dcd6cc]'}`}>
+                          <img src={slot.url} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          <div className="absolute top-1 right-1 bg-black/60 text-white px-1.5 py-0.5 text-[7px] uppercase tracking-wider rounded-sm font-bold backdrop-blur-sm">{slot.label}</div>
+                          {garmentUploads.full?.url === anarkaliFull1 && <div className="absolute top-1 left-1 bg-[#7f5700] text-white rounded-full p-1 shadow-sm"><Check className="w-3 h-3" /></div>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Dress 2 */}
+                  <div>
+                    <h4 className="text-[10px] tracking-[1.5px] uppercase font-bold text-[#1A1410] border-b border-[rgba(26,20,16,0.1)] pb-2 mb-3">
+                      Green Anarkali Suit
+                    </h4>
+                    <div className="grid grid-cols-4 gap-3">
+                      {[
+                        { id: 'full', url: anarkaliFull2, label: 'Full' },
+                        { id: 'top', url: anarkaliTop2, label: 'Top' },
+                        { id: 'bottom', url: anarkaliBottom2, label: 'Bottom' },
+                        { id: 'back', url: anarkaliBack2, label: 'Back' }
+                      ].map((slot) => (
+                        <button key={slot.id} onClick={() => setGarmentUploads({
+                          full: { url: anarkaliFull2, file: null },
+                          top: { url: anarkaliTop2, file: null },
+                          bottom: { url: anarkaliBottom2, file: null },
+                          back: { url: anarkaliBack2, file: null }
+                        })}
+                        className={`border-2 rounded-xl overflow-hidden transition-all group aspect-[3/4] relative ${garmentUploads.full?.url === anarkaliFull2 ? 'border-[#7f5700] shadow-md scale-[1.02]' : 'border-[rgba(0,0,0,0.05)] hover:border-[#dcd6cc]'}`}>
+                          <img src={slot.url} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          <div className="absolute top-1 right-1 bg-black/60 text-white px-1.5 py-0.5 text-[7px] uppercase tracking-wider rounded-sm font-bold backdrop-blur-sm">{slot.label}</div>
+                          {garmentUploads.full?.url === anarkaliFull2 && <div className="absolute top-1 left-1 bg-[#7f5700] text-white rounded-full p-1 shadow-sm"><Check className="w-3 h-3" /></div>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+              )}
+
+            </div>
+
           </div>
         </div>
       )}
