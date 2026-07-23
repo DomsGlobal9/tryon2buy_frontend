@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Search, Plus, Package, Box, Filter, LogOut, Image as ImageIcon, Trash2, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../../config';
 
 const VendorCatalog = () => {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ const VendorCatalog = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch('/api/tryon/catalog/products', {
+      const res = await fetch(`${API_URL}/api/tryon/catalog/products`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('vendor_token')}`
         }
@@ -60,7 +61,7 @@ const VendorCatalog = () => {
     if (!productToDelete) return;
     setIsDeleting(true);
     try {
-      const res = await fetch(`/api/tryon/catalog/products/${productToDelete.id}`, {
+      const res = await fetch(`${API_URL}/api/tryon/catalog/products/${productToDelete.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('vendor_token')}`
