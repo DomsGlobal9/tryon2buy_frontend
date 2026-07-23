@@ -19,10 +19,16 @@ export default function VendorAuth() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Redirect to workspace if already logged in
+    // Redirect to appropriate workspace if already logged in
     const token = localStorage.getItem('vendor_token');
+    const portalType = localStorage.getItem('portal_type');
+    
     if (token) {
-      navigate('/workspace');
+      if (portalType === 'b2b') {
+        navigate('/vendor/upload');
+      } else {
+        navigate('/workspace');
+      }
     }
 
     // Inject fonts
@@ -36,9 +42,15 @@ export default function VendorAuth() {
     linkCourier.rel = 'stylesheet';
     document.head.appendChild(linkCourier);
 
+    const linkSpace = document.createElement('link');
+    linkSpace.href = 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap';
+    linkSpace.rel = 'stylesheet';
+    document.head.appendChild(linkSpace);
+
     return () => {
       document.head.removeChild(linkGaramond);
       document.head.removeChild(linkCourier);
+      document.head.removeChild(linkSpace);
     };
   }, [navigate]);
 
@@ -67,6 +79,7 @@ export default function VendorAuth() {
       // Save token & info
       localStorage.setItem('vendor_token', data.token);
       localStorage.setItem('vendor_data', JSON.stringify(data.vendor));
+      localStorage.setItem('portal_type', 'merchant');
 
       // Redirect to merchant dashboard
       navigate('/workspace');
@@ -228,6 +241,18 @@ export default function VendorAuth() {
               </>
             )}
           </button>
+
+          {/* Link to B2B Client Portal */}
+          <div className="mt-4 text-center border-t border-[rgba(26,20,16,0.1)] pt-5 font-['Space_Grotesk',sans-serif]">
+            <span className="text-xs uppercase tracking-wider font-bold text-[#8c8278] mr-2">Are you a B2B Client?</span>
+            <button
+              type="button"
+              onClick={() => navigate('/client-login')}
+              className="text-xs font-bold uppercase tracking-wider text-[#7f5700] hover:text-[#1a1410] transition-colors"
+            >
+              Access Client Portal →
+            </button>
+          </div>
         </form>
       </div>
     </div>
