@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Home, ArrowLeft, Upload, ChevronRight, Check, Image as ImageIcon, Sparkles, Box, FileText, Package, LogOut, ChevronDown, Camera, X, LayoutGrid, CloudUpload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../../config';
 
 const CATEGORY_SLOTS = {
   SAREE: [
@@ -69,7 +70,7 @@ const VendorUpload = () => {
 
   const fetchAllowedCategories = async () => {
     try {
-      const res = await fetch('/api/tryon/vendor/profile', {
+      const res = await fetch(`${API_URL}/api/tryon/vendor/profile`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('vendor_token')}`
         }
@@ -94,7 +95,7 @@ const VendorUpload = () => {
     try {
       const formData = new FormData();
       formData.append('image', file);
-      const res = await fetch('/api/tryon/upload?folder=garments', {
+      const res = await fetch(`${API_URL}/api/tryon/upload?folder=garments`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('vendor_token')}`
@@ -177,7 +178,7 @@ const VendorUpload = () => {
     }
 
     try {
-      const res = await fetch('/api/tryon/catalog/generate', {
+      const res = await fetch(`${API_URL}/api/tryon/catalog/generate`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -203,7 +204,7 @@ const VendorUpload = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/tryon/catalog/save', {
+      const res = await fetch(`${API_URL}/api/tryon/catalog/save`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -233,7 +234,7 @@ const VendorUpload = () => {
     setLoading(true);
     if (generationId) {
       try {
-        await fetch('/api/tryon/catalog/discard', {
+        await fetch(`${API_URL}/api/tryon/catalog/discard`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
