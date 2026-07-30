@@ -52,7 +52,7 @@ export default function ClientAuth() {
     setLoading(true);
 
     const endpoint = '/api/auth/vendor/login';
-    const payload = { email, password };
+    const payload = { email, password, expectedRole: 'b2b_client' };
 
     try {
       const res = await fetch(`${API_URL}${endpoint}`, {
@@ -99,17 +99,19 @@ export default function ClientAuth() {
 
         {/* Brand Header */}
         <div className="text-center mb-8">
-          <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="mx-auto h-12 object-contain invert brightness-0 pb-1" />
-          <span className="text-xs uppercase tracking-[3px] text-[#8c8278] font-bold block mt-3">
+          <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="mx-auto h-10 md:h-12 object-contain invert brightness-0 pb-1" />
+          <span className="text-[10px] uppercase tracking-[3px] text-[#8c8278] font-bold block mt-4">
             B2B Client Portal
           </span>
         </div>
 
         {/* Single Header (No Tabs) */}
-        <div className="flex border-b border-white/10 mb-8 pb-4 justify-center">
-          <span className="text-sm uppercase font-bold tracking-widest text-white">
+        <div className="flex items-center gap-4 mb-8 mt-2">
+          <div className="h-px bg-white/10 flex-1"></div>
+          <span className="text-xs uppercase font-bold tracking-widest text-white">
             Client Login
           </span>
+          <div className="h-px bg-white/10 flex-1"></div>
         </div>
 
         {/* Error Alert */}
@@ -165,7 +167,7 @@ export default function ClientAuth() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#c4933f] hover:bg-[#a67c33] text-[#1A1410] text-xs font-bold uppercase tracking-widest py-4 rounded-xl mt-4 transition-all flex items-center justify-center gap-3 relative shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-75 disabled:cursor-not-allowed"
+            className="w-full bg-[#c4933f] hover:bg-[#a67c33] text-[#1A1410] text-[11px] font-bold uppercase tracking-widest py-4 rounded-xl mt-2 transition-all flex items-center justify-center gap-3 relative shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-75 disabled:cursor-not-allowed"
           >
             {loading ? (
               <span className="w-5 h-5 border-2 border-[#1A1410]/20 border-t-[#1A1410] rounded-full animate-spin" />
@@ -178,14 +180,14 @@ export default function ClientAuth() {
           </button>
 
           {/* Link back to Merchant Portal */}
-          <div className="mt-2 text-center border-t border-white/10 pt-5">
-            <span className="text-xs uppercase tracking-widest font-bold text-gray-500 mr-2">Are you a Merchant?</span>
+          <div className="mt-4 text-center border-t border-white/10 pt-6 flex flex-col gap-2">
+            <span className="text-[10px] uppercase tracking-widest font-bold text-[#8c8278]">Are you a Merchant?</span>
             <button
               type="button"
               onClick={() => navigate('/login')}
-              className="text-xs font-bold uppercase tracking-widest text-[#c4933f] hover:text-white transition-colors"
+              className="text-[10px] font-bold uppercase tracking-widest text-[#c4933f] hover:text-white transition-colors flex items-center justify-center gap-1.5"
             >
-              Go to Studio Portal →
+              Go to Studio Portal <ArrowRight className="w-3 h-3" />
             </button>
           </div>
         </form>

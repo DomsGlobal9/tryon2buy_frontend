@@ -61,7 +61,7 @@ export default function VendorAuth() {
 
     const endpoint = isLogin ? '/api/auth/vendor/login' : '/api/auth/vendor/register';
     const payload = isLogin 
-      ? { email, password }
+      ? { email, password, expectedRole: 'merchant' }
       : { email, password, name, storeName };
 
     try {
