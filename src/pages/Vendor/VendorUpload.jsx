@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Home, ArrowLeft, Upload, ChevronRight, Check, Image as ImageIcon, Sparkles, Box, FileText, Package, LogOut, ChevronDown, Camera, X, LayoutGrid, CloudUpload } from 'lucide-react';
+import { Home, ArrowLeft, Upload, ChevronRight, Check, Image as ImageIcon, Sparkles, Box, FileText, Package, LogOut, ChevronDown, Camera, X, LayoutGrid, CloudUpload, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../../config';
+import VendorProfileModal from '../../components/VendorProfileModal';
 
 const CATEGORY_SLOTS = {
   SAREE: [
@@ -11,26 +12,22 @@ const CATEGORY_SLOTS = {
   LEHANGA: [
     { id: 'full', label: 'Full View', required: true },
     { id: 'top', label: 'Top View', required: true },
-    { id: 'bottom', label: 'Bottom View', required: true },
-    { id: 'back', label: 'Back View', required: true }
+    { id: 'bottom', label: 'Bottom View', required: true }
   ],
   ANARKALI: [
     { id: 'full', label: 'Full View', required: true },
     { id: 'top', label: 'Top View', required: true },
-    { id: 'bottom', label: 'Bottom View', required: true },
-    { id: 'back', label: 'Back View', required: true }
+    { id: 'bottom', label: 'Bottom View', required: true }
   ],
   SHARARA: [
     { id: 'full', label: 'Full View', required: true },
     { id: 'top', label: 'Top View', required: true },
-    { id: 'bottom', label: 'Bottom View', required: true },
-    { id: 'back', label: 'Back View', required: true }
+    { id: 'bottom', label: 'Bottom View', required: true }
   ],
   KURTHI: [
     { id: 'full', label: 'Full View', required: true },
     { id: 'top', label: 'Top View', required: true },
-    { id: 'bottom', label: 'Bottom View', required: true },
-    { id: 'back', label: 'Back View', required: true }
+    { id: 'bottom', label: 'Bottom View', required: true }
   ]
 };
 
@@ -47,6 +44,7 @@ const VendorUpload = () => {
   const [category, setCategory] = useState('');
   const [allowedCategories, setAllowedCategories] = useState([]);
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   // Uploads
   const [garmentUploads, setGarmentUploads] = useState({});
@@ -90,6 +88,8 @@ const VendorUpload = () => {
   const handleGarmentSlotChange = async (slotId, e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
+    e.target.value = ''; // Reset input so same file can trigger onChange again
 
     setIsUploadingSlot(slotId);
     try {
@@ -254,6 +254,77 @@ const VendorUpload = () => {
 
   const activeSlots = CATEGORY_SLOTS[category] || [];
 
+  const renderSlot = (slot) => {
+    if (!slot) return null;
+    const slotData = garmentUploads[slot.id];
+    const isUploading = isUploadingSlot === slot.id;
+    const isDragging = draggingSlot === slot.id;
+
+    return (
+      <div
+        key={slot.id}
+        onDragOver={(e) => handleDragOver(e, slot.id)}
+        onDragLeave={handleDragLeave}
+        onDrop={(e) => handleDrop(e, slot.id)}
+        className={`relative border border-dashed rounded-2xl overflow-hidden flex flex-col items-center justify-center min-h-[220px] transition-all duration-300 ${isDragging ? 'border-[#7F5700] bg-[#faf7f2] scale-[1.02] shadow-md' : 'border-[#dcd6cc] bg-[#fdfcf9] hover:border-[#7F5700]'}`}
+      >
+        {isUploading ? (
+          <div className="flex flex-col items-center gap-3 w-full h-full justify-center">
+            <div className="w-6 h-6 border-2 border-[#7F5700] border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-xs text-gray-500 font-medium">Uploading...</span>
+          </div>
+        ) : slotData ? (
+          <div className="relative w-full h-full flex flex-col items-center justify-center p-4 group/image">
+            <img src={slotData.url} alt={slot.label} className="max-h-[180px] max-w-full object-contain drop-shadow-md group-hover/image:scale-95 transition-transform duration-500" />
+            
+            {/* Elegant Hover Overlay */}
+            <div className="absolute inset-0 bg-[#1a1410]/40 opacity-0 group-hover/image:opacity-100 transition-all duration-300 backdrop-blur-[2px] flex items-center justify-center rounded-2xl z-20">
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); handleRemoveGarmentSlot(slot.id); }}
+                className="bg-white text-red-500 hover:bg-red-500 hover:text-white px-5 py-2.5 rounded-full text-[10px] font-bold tracking-[1.5px] uppercase transition-all duration-300 shadow-[0_8px_16px_rgba(0,0,0,0.15)] flex items-center gap-1.5 transform translate-y-3 group-hover/image:translate-y-0"
+              >
+                <X className="w-3.5 h-3.5" />
+                Remove
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-2 mt-6 opacity-70 group-hover/image:opacity-100 transition-opacity w-full h-full justify-center pb-2">
+            {slot.id !== 'full' && slot.id !== 'saree' && (
+              <div className="text-[10px] font-bold text-[#1A1410] uppercase tracking-widest mb-2 pointer-events-none md:hidden">
+                {slot.label.replace(' View', '')} {slot.required && <span className="text-red-500">*</span>}
+              </div>
+            )}
+            
+            <div className="flex items-center gap-6">
+              {/* Upload from Gallery / Main Upload */}
+              <label htmlFor={`file-${slot.id}`} className="flex flex-col items-center gap-1.5 md:gap-2 cursor-pointer group/upload">
+                <div className="bg-[#f2efe9] p-3 md:p-3.5 rounded-full group-hover/upload:bg-[#ede8df] group-hover/upload:scale-110 group-hover/upload:shadow-sm transition-all duration-300">
+                  <input id={`file-${slot.id}`} type="file" accept="image/*" onChange={(e) => handleGarmentSlotChange(slot.id, e)} className="hidden" />
+                  <Upload className="h-5 w-5 text-[#7f5700]" />
+                </div>
+                <span className="text-[9px] font-bold text-[#1A1410] uppercase tracking-widest md:hidden">Gallery</span>
+                <span className="hidden md:block text-[11px] font-bold text-[#1A1410]">Upload {slot.label.replace(' View', '')}</span>
+              </label>
+
+              {/* Take Photo (Mobile Only) */}
+              <label htmlFor={`camera-${slot.id}`} className="flex flex-col items-center gap-1.5 cursor-pointer group/camera md:hidden">
+                <div className="bg-[#f2efe9] p-3 rounded-full group-hover/camera:bg-[#ede8df] group-hover/camera:scale-110 group-hover/camera:shadow-sm transition-all duration-300">
+                  <input id={`camera-${slot.id}`} type="file" accept="image/*" capture="environment" onChange={(e) => handleGarmentSlotChange(slot.id, e)} className="hidden" />
+                  <Camera className="h-5 w-5 text-[#7f5700]" />
+                </div>
+                <span className="text-[9px] font-bold text-[#1A1410] uppercase tracking-widest">Camera</span>
+              </label>
+            </div>
+            
+            <div className="text-[9px] text-[#8c8278] font-sans mt-1">JPG, PNG • Max 10MB</div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-[#faf7f2] font-['Space_Grotesk',sans-serif]">
       {/* Header */}
@@ -290,6 +361,14 @@ const VendorUpload = () => {
           </button>
 
           <div className="w-px h-6 bg-[#e5e0d8] mx-1 md:mx-2 hidden sm:block flex-shrink-0"></div>
+
+          <button 
+            onClick={() => setIsProfileModalOpen(true)}
+            className="flex items-center justify-center bg-[#faf7f2] hover:bg-white border border-[#e5e0d8] hover:border-[#7F5700] text-[#5c544d] hover:text-[#7F5700] w-8 h-8 md:w-9 md:h-9 rounded-xl transition-all shadow-sm flex-shrink-0"
+            title="Business Profile"
+          >
+            <User className="w-4 h-4" />
+          </button>
           
           <button 
             onClick={handleLogout}
@@ -403,85 +482,42 @@ const VendorUpload = () => {
                   <span className="text-xs text-gray-400 font-medium bg-gray-100 px-3 py-1 rounded-full uppercase tracking-wider">{category}</span>
                 </div>
 
-                <div className={`grid gap-4 ${activeSlots.length > 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-2'}`}>
-                  {activeSlots.map((slot) => {
-                    const slotData = garmentUploads[slot.id];
-                    const isUploading = isUploadingSlot === slot.id;
-                    const isDragging = draggingSlot === slot.id;
-
-                    return (
-                      <div 
-                        key={slot.id}
-                        onDragOver={(e) => handleDragOver(e, slot.id)}
-                        onDragLeave={handleDragLeave}
-                        onDrop={(e) => handleDrop(e, slot.id)}
-                        className={`relative border-2 border-dashed bg-[#fdfcf9] rounded-2xl overflow-hidden flex flex-col items-center justify-center min-h-[150px] sm:min-h-[160px] transition-all duration-300 ${isDragging ? 'border-[#7F5700] bg-[#faf7f2] scale-[1.02] shadow-md' : 'border-[#dcd6cc] hover:border-[#7F5700]'}`}
-                      >
-                        <div className="absolute top-0 left-0 bg-[#ede8df] text-[#5c544d] px-3 py-1.5 text-[10px] uppercase font-bold tracking-widest z-10 rounded-br-lg border-b border-r border-[#dcd6cc]">
-                          {slot.label} {slot.required && <span className="text-red-500">*</span>}
-                        </div>
-
-                        {isUploading ? (
-                          <div className="flex flex-col items-center gap-3">
-                            <div className="w-6 h-6 border-2 border-[#7F5700] border-t-transparent rounded-full animate-spin"></div>
-                            <span className="text-xs text-gray-500 font-medium">Uploading...</span>
-                          </div>
-                        ) : slotData ? (
-                          <div className="relative w-full h-full flex flex-col items-center justify-center p-4 mt-6">
-                            <img src={slotData.url} alt={slot.label} className="max-h-[140px] max-w-full object-contain drop-shadow-md" />
-                            
-                            {/* Remove Button */}
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveGarmentSlot(slot.id)}
-                              className="absolute top-2 right-2 bg-white/90 hover:bg-red-50 text-gray-500 hover:text-red-600 p-2 rounded-full transition-colors z-20 shadow-sm border border-gray-200 hover:border-red-200"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center w-full p-3 sm:p-4 mt-2">
-                            {/* Cloud Icon */}
-                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#faf7f2] rounded-full flex items-center justify-center text-[#7F5700] shadow-sm border border-[#e5e0d8] pointer-events-none mb-1">
-                              <CloudUpload className="w-4 h-4 sm:w-5 sm:h-5" />
-                            </div>
-                            
-                            {/* Headings */}
-                            <h3 className="text-[11px] sm:text-[13px] font-bold text-[#1A1410] pointer-events-none">
-                              <span className="hidden lg:inline">Upload a photo</span>
-                              <span className="lg:hidden">Upload or take a photo</span>
-                            </h3>
-                            <p className="text-[9px] sm:text-[10px] text-gray-500 mb-2 sm:mb-3 pointer-events-none text-center">Drag & drop an image here or</p>
-                            
-                            {/* Buttons */}
-                            <div className="flex flex-row items-center justify-center gap-1.5 sm:gap-2 w-full relative z-20 flex-nowrap">
-                              <label className="flex items-center justify-center gap-1 sm:gap-1.5 border border-[#7F5700] text-[#7F5700] hover:bg-[#7F5700] hover:text-white px-2 sm:px-3 py-1.5 rounded-lg cursor-pointer transition-colors text-[9px] sm:text-[10px] font-bold uppercase tracking-wider whitespace-nowrap flex-1 lg:flex-none">
-                                <input type="file" accept="image/*" onChange={(e) => handleGarmentSlotChange(slot.id, e)} className="hidden" />
-                                <Upload className="h-3 w-3" />
-                                <span>Upload Files</span>
-                              </label>
-
-                              <label className="lg:hidden flex items-center justify-center gap-1 sm:gap-1.5 border border-[#7F5700] text-[#7F5700] hover:bg-[#7F5700] hover:text-white px-2 sm:px-3 py-1.5 rounded-lg cursor-pointer transition-colors text-[9px] sm:text-[10px] font-bold uppercase tracking-wider whitespace-nowrap flex-1">
-                                <input type="file" accept="image/*" capture="environment" onChange={(e) => handleGarmentSlotChange(slot.id, e)} className="hidden" />
-                                <Camera className="h-3 w-3" />
-                                <span>Take Photo</span>
-                              </label>
-                            </div>
-
-                            {/* Info */}
-                            <p className="text-[8px] sm:text-[9px] font-medium text-gray-400 mt-2 sm:mt-3 pointer-events-none uppercase tracking-widest text-center">PNG, JPG up to 10MB</p>
-                          </div>
-                        )}
+                {category !== 'SAREE' ? (
+                  <div className="flex flex-col gap-6">
+                    {/* Full Garment Section */}
+                    <div>
+                      <div className="flex items-center gap-4 mb-4 mt-2">
+                        <div className="h-px bg-[#e5e0d8] flex-1"></div>
+                        <span className="text-[10px] uppercase font-bold tracking-[2px] text-[#1A1410]">Full Garment</span>
+                        <div className="h-px bg-[#e5e0d8] flex-1"></div>
                       </div>
-                    );
-                  })}
-                </div>
+                      {renderSlot(activeSlots.find(s => s.id === 'full'))}
+                    </div>
+
+                    {/* Garment Parts Section */}
+                    <div>
+                      <div className="flex items-center gap-4 mb-4 mt-2">
+                        <div className="h-px bg-[#e5e0d8] flex-1"></div>
+                        <span className="text-[10px] uppercase font-bold tracking-[2px] text-[#1A1410]">Garment Parts</span>
+                        <div className="h-px bg-[#e5e0d8] flex-1"></div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {renderSlot(activeSlots.find(s => s.id === 'top'))}
+                        {renderSlot(activeSlots.find(s => s.id === 'bottom'))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                    {activeSlots.map((slot) => renderSlot(slot))}
+                  </div>
+                )}
 
                 <div className="mt-auto pt-10 flex justify-end">
                   <button 
                     onClick={handleGenerate}
                     disabled={loading}
-                    className="bg-[#1A1410] hover:bg-black text-white px-10 py-4 rounded-xl font-bold tracking-widest uppercase text-sm flex items-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                    className="w-full sm:w-auto bg-[#1A1410] hover:bg-black text-white px-10 py-4 rounded-xl font-bold tracking-widest uppercase text-sm flex justify-center items-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:-translate-y-0.5"
                   >
                     {loading ? (
                       <>
@@ -526,7 +562,7 @@ const VendorUpload = () => {
                     </div>
                     <div>
                       <h2 className="text-xl md:text-2xl font-bold text-[#1A1410] tracking-tight">Generation Complete!</h2>
-                      <p className="text-xs md:text-sm text-gray-500 font-medium">Review the high-fidelity AI drape.</p>
+                      <p className="text-xs md:text-sm text-gray-500 font-medium">Review the high-fidelity drape.</p>
                     </div>
                   </div>
                   
@@ -579,6 +615,11 @@ const VendorUpload = () => {
           </div>
         )}
       </main>
+      
+      <VendorProfileModal 
+        isOpen={isProfileModalOpen} 
+        onClose={() => setIsProfileModalOpen(false)} 
+      />
     </div>
   );
 };

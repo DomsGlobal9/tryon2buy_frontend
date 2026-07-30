@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Search, Plus, Package, Box, Filter, LogOut, Image as ImageIcon, Trash2, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Search, Plus, Package, Box, Filter, LogOut, Image as ImageIcon, Trash2, AlertTriangle, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../../config';
+import VendorProfileModal from '../../components/VendorProfileModal';
 
 const VendorCatalog = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const VendorCatalog = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [productToDelete, setProductToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -113,6 +115,14 @@ const VendorCatalog = () => {
             
             <div className="w-px h-6 bg-[#e5e0d8] mx-1 md:mx-2 hidden sm:block"></div>
             
+            <button 
+              onClick={() => setIsProfileModalOpen(true)}
+              className="flex items-center justify-center bg-[#faf7f2] hover:bg-white border border-[#e5e0d8] hover:border-[#7F5700] text-[#5c544d] hover:text-[#7F5700] w-8 h-8 md:w-10 md:h-10 rounded-xl transition-all shadow-sm flex-shrink-0"
+              title="Business Profile"
+            >
+              <User className="w-4 h-4 md:w-5 md:h-5" />
+            </button>
+
             <button 
               onClick={handleLogout}
               className="flex items-center gap-1.5 md:gap-2 bg-[#faf7f2] hover:bg-red-50 border border-[#e5e0d8] hover:border-red-200 text-[#5c544d] hover:text-red-600 px-3 py-2 md:px-4 md:py-2.5 rounded-xl font-bold uppercase tracking-widest text-[9px] md:text-[10px] transition-all shadow-sm flex-shrink-0"
@@ -274,6 +284,11 @@ const VendorCatalog = () => {
           </div>
         </div>
       )}
+
+      <VendorProfileModal 
+        isOpen={isProfileModalOpen} 
+        onClose={() => setIsProfileModalOpen(false)} 
+      />
     </div>
   );
 };
