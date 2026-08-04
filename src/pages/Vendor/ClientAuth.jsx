@@ -98,8 +98,10 @@ export default function ClientAuth() {
       <div className="w-full max-w-[450px] bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-3xl relative overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-8 duration-700">
 
         {/* Brand Header */}
-        <div className="text-center mb-8">
-          <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="mx-auto h-10 md:h-12 object-contain invert brightness-0 pb-1" />
+        <div className="text-center mb-8 flex flex-col items-center">
+          <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity focus:outline-none">
+            <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-10 md:h-12 object-contain invert brightness-0 pb-1" />
+          </button>
           <span className="text-[10px] uppercase tracking-[3px] text-[#8c8278] font-bold block mt-4">
             B2B Client Portal
           </span>

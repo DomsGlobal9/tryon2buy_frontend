@@ -45,6 +45,7 @@ const VendorUpload = () => {
   const [allowedCategories, setAllowedCategories] = useState([]);
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [selectedDupattaStyle, setSelectedDupattaStyle] = useState(null);
 
   // Uploads
   const [garmentUploads, setGarmentUploads] = useState({});
@@ -184,7 +185,7 @@ const VendorUpload = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('vendor_token')}`
         },
-        body: JSON.stringify({ garment_image_url: garmentPayload, category })
+        body: JSON.stringify({ garment_image_url: garmentPayload, category, dupatta_style_url: selectedDupattaStyle })
       });
       
       const data = await res.json();
@@ -456,6 +457,7 @@ const VendorUpload = () => {
                               onClick={() => {
                                 setCategory(cat);
                                 setGarmentUploads({}); // Reset uploads on category change
+                                setSelectedDupattaStyle(null); // Reset dupatta style
                                 setCategoryDropdownOpen(false);
                               }}
                             >
@@ -494,16 +496,45 @@ const VendorUpload = () => {
                       {renderSlot(activeSlots.find(s => s.id === 'full'))}
                     </div>
 
-                    {/* Garment Parts Section */}
+                    {/* Garment Parts & Dupatta Section */}
                     <div>
                       <div className="flex items-center gap-4 mb-4 mt-2">
                         <div className="h-px bg-[#e5e0d8] flex-1"></div>
-                        <span className="text-[10px] uppercase font-bold tracking-[2px] text-[#1A1410]">Garment Parts</span>
+                        <span className="text-[10px] uppercase font-bold tracking-[2px] text-[#1A1410]">
+                          Garment Parts {category === 'LEHANGA' ? '& Dupatta Style (Optional)' : ''}
+                        </span>
                         <div className="h-px bg-[#e5e0d8] flex-1"></div>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      
+                      <div className={`grid grid-cols-1 md:grid-cols-2 ${category === 'LEHANGA' ? 'lg:grid-cols-4' : ''} gap-4`}>
                         {renderSlot(activeSlots.find(s => s.id === 'top'))}
                         {renderSlot(activeSlots.find(s => s.id === 'bottom'))}
+
+                        {/* Dupatta Drape Style Selection (Lehenga Only) */}
+                        {category === 'LEHANGA' && (
+                          [
+                            { id: 'style_1', name: 'Classic Single-Shoulder', url: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/lehanga_duppatta1.jpg' },
+                            { id: 'style_2', name: 'Traditional Front Pleat', url: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/lehangaduppatta2.jpg' }
+                          ].map(style => (
+                            <button
+                              key={style.id}
+                              onClick={() => setSelectedDupattaStyle(selectedDupattaStyle === style.url ? null : style.url)}
+                              className={`relative group rounded-xl overflow-hidden border-2 transition-all min-h-[160px] ${selectedDupattaStyle === style.url ? 'border-[#7F5700] ring-4 ring-[#7F5700]/20' : 'border-[#e5e0d8] hover:border-[#7F5700]/50'}`}
+                            >
+                              <div className="w-full h-full bg-[#faf7f2]">
+                                <img src={style.url} alt={style.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                              </div>
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 md:p-4">
+                                <span className="text-white text-[10px] md:text-xs font-bold uppercase tracking-wider text-left drop-shadow-md">{style.name}</span>
+                              </div>
+                              {selectedDupattaStyle === style.url && (
+                                <div className="absolute top-2 right-2 md:top-3 md:right-3 bg-[#7F5700] text-white p-1 md:p-1.5 rounded-full shadow-lg">
+                                  <Check className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                                </div>
+                              )}
+                            </button>
+                          ))
+                        )}
                       </div>
                     </div>
                   </div>
