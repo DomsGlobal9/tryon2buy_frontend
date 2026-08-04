@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { API_URL } from '../../config';
-import { Sparkles, Upload, Check, ChevronLeft, ArrowRight, RefreshCw, LogOut, Shirt, UserCheck, Wind, Star, Layers, Image, X, Camera } from 'lucide-react';
+import { Sparkles, Upload, Check, ChevronLeft, ArrowRight, RefreshCw, LogOut, Shirt, UserCheck, Wind, Star, Layers, Image, X, Camera, ShieldCheck, Timer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import VendorLimitModal from '../../components/VendorLimitModal';
 import VendorUpgradeModal from '../../components/VendorUpgradeModal';
 import SampleWorkspaceModal from '../../components/SampleWorkspaceModal';
+import { motion } from 'framer-motion';
 
 // Step 1 assets
 const imgSaree = "http://localhost:3845/assets/acdc2b8b07c17fbe38507a6bf5f4d4bfd0719563.png";
@@ -121,10 +122,42 @@ const DEFAULT_MODELS_BY_CATEGORY = {
     { name: "Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/44.jpeg" }
   ],
   "LEHANGA": [
-    { name: "Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga1.jpg" },
-    { name: "Model 2", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga2.jpg" },
-    { name: "Model 3", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga3.jpg" },
-    { name: "Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga4.jpg" }
+    { 
+      name: "Model 1", 
+      img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga1_default.png",
+      images: {
+        default: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga1_default.png",
+        style_1: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga1_duppata.png",
+        style_2: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga1_default.png"
+      }
+    },
+    { 
+      name: "Model 2", 
+      img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga2_default.png",
+      images: {
+        default: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga2_default.png",
+        style_1: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga2_duppata.png",
+        style_2: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga2_default.png"
+      }
+    },
+    { 
+      name: "Model 3", 
+      img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga3_default.png",
+      images: {
+        default: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga3_default.png",
+        style_1: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga3_duppata.png",
+        style_2: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga3_default.png"
+      }
+    },
+    { 
+      name: "Model 4", 
+      img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga4_default.png",
+      images: {
+        default: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga4_default.png",
+        style_1: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga4_duppatta.png",
+        style_2: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga4_default.png"
+      }
+    }
   ],
   "ANARKALI": [
     { name: "Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/anarkali1.jpg" },
@@ -184,6 +217,7 @@ export default function TryonWorkspace({ onExit }) {
   const [selectedImage, setSelectedImage] = useState(null); // portrait image for without_garment
   const [selectedFile, setSelectedFile] = useState(null); // portrait file for without_garment
   const [garmentUploads, setGarmentUploads] = useState({}); // multi-slot state for with_garment
+  const [selectedDupattaStyle, setSelectedDupattaStyle] = useState(null);
   const [currentGenerationId, setCurrentGenerationId] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -276,6 +310,7 @@ export default function TryonWorkspace({ onExit }) {
         });
         return {};
       });
+      setSelectedDupattaStyle(null);
       setResultImageUrl(null); // Clear previous results to show the new category preview
       setTryonState('initial');
     }
@@ -384,10 +419,22 @@ export default function TryonWorkspace({ onExit }) {
       }
       const garment_image_url = JSON.stringify(garment_urls);
       const sm = defaultModels.find(m => m.name === selectedModel);
-      const human_image_url = sm ? sm.img : imgModelClassicStudio;
+      let human_image_url = sm ? sm.img : imgModelClassicStudio;
+
+      // Smart Model Switch Logic for Lehenga Dupatta Styles
+      if (category === 'LEHANGA' && sm && sm.images) {
+        if (selectedDupattaStyle === 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/lehanga_duppatta1.jpg') {
+          human_image_url = sm.images.style_1 || human_image_url;
+        } else if (selectedDupattaStyle === 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/lehangaduppatta2.jpg') {
+          human_image_url = sm.images.style_2 || human_image_url;
+        } else {
+          human_image_url = sm.images.default || human_image_url;
+        }
+      }
+
       const genRes = await fetch(`${API_URL}/api/tryon/generate`, {
         method: 'POST', headers: getHeaders(),
-        body: JSON.stringify({ mode: 'with_garment', garment_image_url, human_image_url, category, target_folder: 'vendor-drapes' })
+        body: JSON.stringify({ mode: 'with_garment', garment_image_url, human_image_url, category, target_folder: 'vendor-drapes', dupatta_style_url: selectedDupattaStyle })
       });
       if (!genRes.ok) {
         const errorData = await genRes.json(); clearInterval(interval); setTryonState('initial');
@@ -450,30 +497,31 @@ export default function TryonWorkspace({ onExit }) {
           </nav>
         </div>
         
-        <div className="flex items-center gap-[24px]">
-          <button className="opacity-80 hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-3 md:gap-[24px]">
+          <button className="opacity-80 hover:opacity-100 transition-opacity hidden sm:block">
             <img src={imgSearchIcon} alt="Search" className="h-[18px] w-[14px] object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
           </button>
-          <button className="opacity-80 hover:opacity-100 transition-opacity">
+          <button className="opacity-80 hover:opacity-100 transition-opacity hidden sm:block">
             <img src={imgCartIcon} alt="Bag" className="h-[14px] w-[14px] object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
           </button>
           
           <button 
             onClick={() => navigate(isGuestMode ? '/shop/demo' : '/gallery')}
-            className="text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 opacity-70 hover:opacity-100 transition-opacity text-[#8c8278] hover:text-[#1A1410]"
+            className="text-[9px] md:text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 transition-all text-[#1A1410] bg-white border border-[#1A1410]/20 px-3 py-1.5 md:px-4 md:py-2 rounded-full hover:border-[#1A1410] hover:bg-[#1A1410] hover:text-white shadow-sm whitespace-nowrap"
           >
-            <Image className="w-3.5 h-3.5" />
-            <span>MY TRYON GALLERY</span>
+            <Image className="w-3 h-3 md:w-3.5 md:h-3.5" />
+            <span className="hidden sm:inline">MY TRYON GALLERY</span>
+            <span className="sm:hidden">GALLERY</span>
           </button>
 
-          <div className="h-4 w-px bg-[rgba(26,20,16,0.15)]" />
+          <div className="h-4 w-px bg-[rgba(26,20,16,0.15)] hidden md:block" />
 
           <button 
             onClick={handleLogout}
-            className="text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 opacity-70 hover:opacity-100 transition-opacity text-[#8c8278] hover:text-[#1A1410]"
+            className="text-[9px] md:text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 transition-colors text-[#1A1410] hover:text-red-600 whitespace-nowrap"
           >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>{isGuestMode ? 'EXIT GUEST MODE' : 'LOGOUT'}</span>
+            <LogOut className="w-3 h-3 md:w-3.5 md:h-3.5" />
+            <span className="hidden sm:inline">{isGuestMode ? 'Exit Guest Mode' : 'Logout'}</span>
           </button>
         </div>
       </header>
@@ -590,7 +638,7 @@ export default function TryonWorkspace({ onExit }) {
                                   <Upload className="h-4 w-4 text-[#7f5700]" />
                                 </div>
                                 <span className="text-[8px] font-bold text-[#1A1410] uppercase tracking-widest md:hidden">Gallery</span>
-                                <span className="hidden md:block text-[10px] font-bold text-[#1A1410]">Upload {slot.label}</span>
+                                <span className="hidden md:block text-[10px] font-bold text-[#1A1410] uppercase tracking-widest whitespace-nowrap">Upload</span>
                               </label>
 
                               {/* Take Photo (Mobile Only) */}
@@ -625,12 +673,40 @@ export default function TryonWorkspace({ onExit }) {
                       <div>
                         <div className="flex items-center gap-3 mb-3">
                           <div className="h-px bg-[#e5e0d8] flex-1"></div>
-                          <span className="text-[9px] uppercase font-bold tracking-[2px] text-[#1A1410]">Garment Parts</span>
+                          <span className="text-[9px] uppercase font-bold tracking-[2px] text-[#1A1410]">
+                            Garment Parts {category === 'LEHANGA' ? '& Dupatta Style (Optional)' : ''}
+                          </span>
                           <div className="h-px bg-[#e5e0d8] flex-1"></div>
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className={`grid grid-cols-2 ${category === 'LEHANGA' ? 'lg:grid-cols-4' : ''} gap-3`}>
                           {renderSlot(activeSlots.find(s => s.id === 'top'))}
                           {renderSlot(activeSlots.find(s => s.id === 'bottom'))}
+
+                          {/* Dupatta Drape Style Selection (Lehenga Only) */}
+                          {category === 'LEHANGA' && (
+                            [
+                              { id: 'style_1', name: 'Classic Single-Shoulder', url: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/lehanga_duppatta1.jpg' },
+                              { id: 'style_2', name: 'Traditional Front Pleat', url: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/lehangaduppatta2.jpg' }
+                            ].map(style => (
+                              <button
+                                key={style.id}
+                                onClick={() => setSelectedDupattaStyle(selectedDupattaStyle === style.url ? null : style.url)}
+                                className={`relative group rounded-xl overflow-hidden border-2 transition-all min-h-[140px] ${selectedDupattaStyle === style.url ? 'border-[#7F5700] ring-4 ring-[#7F5700]/20' : 'border-[#e5e0d8] hover:border-[#7F5700]/50'}`}
+                              >
+                                <div className="w-full h-full bg-[#faf7f2]">
+                                  <img src={style.url} alt={style.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                </div>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-2.5">
+                                  <span className="text-white text-[8px] md:text-[9px] font-bold uppercase tracking-wider text-left drop-shadow-md">{style.name}</span>
+                                </div>
+                                {selectedDupattaStyle === style.url && (
+                                  <div className="absolute top-2 right-2 bg-[#7F5700] text-white p-1 rounded-full shadow-lg">
+                                    <Check className="w-3 h-3" />
+                                  </div>
+                                )}
+                              </button>
+                            ))
+                          )}
                         </div>
                       </div>
                     </div>
@@ -782,14 +858,49 @@ export default function TryonWorkspace({ onExit }) {
                 <div className="w-full max-w-[280px] border-t border-[rgba(26,20,16,0.08)] pt-4 mt-6 text-[8px] tracking-[1px] text-[#8c8278] uppercase font-bold text-left">
                   ESTIMATING: {Math.max(1, Math.floor((100 - progress) / 8))} SEC REMAINING ({progress}%)
                 </div>
+
+                {/* Features Banner */}
+                <div className="hidden md:flex mt-12 border border-[#e5e0d8] rounded-2xl items-stretch divide-x divide-[#e5e0d8] bg-white w-full max-w-[560px] shadow-sm overflow-hidden">
+                  <div className="flex-1 flex flex-col items-center justify-start text-center p-4 py-5">
+                    <div className="w-8 h-8 rounded-full bg-[#faf7f2] flex items-center justify-center mb-3">
+                       <Sparkles className="w-4 h-4 text-[#7F5700]" />
+                    </div>
+                    <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none">Realistic Try-On</h6>
+                    <p className="text-[8px] text-[#8c8278] leading-[1.4] max-w-[90px]">Advanced AI for realistic results</p>
+                  </div>
+                  <div className="flex-1 flex flex-col items-center justify-start text-center p-4 py-5">
+                    <div className="w-8 h-8 rounded-full bg-[#faf7f2] flex items-center justify-center mb-3">
+                       <ShieldCheck className="w-4 h-4 text-[#7F5700]" />
+                    </div>
+                    <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none">Secure & Private</h6>
+                    <p className="text-[8px] text-[#8c8278] leading-[1.4] max-w-[90px]">Your images are safe and never shared</p>
+                  </div>
+                  <div className="flex-1 flex flex-col items-center justify-start text-center p-4 py-5">
+                    <div className="w-8 h-8 rounded-full bg-[#faf7f2] flex items-center justify-center mb-3">
+                       <Image className="w-4 h-4 text-[#7F5700]" />
+                    </div>
+                    <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none">High Quality</h6>
+                    <p className="text-[8px] text-[#8c8278] leading-[1.4] max-w-[90px]">HD results with perfect fit</p>
+                  </div>
+                  <div className="flex-1 flex flex-col items-center justify-start text-center p-4 py-5">
+                    <div className="w-8 h-8 rounded-full bg-[#faf7f2] flex items-center justify-center mb-3">
+                       <Timer className="w-4 h-4 text-[#7F5700]" />
+                    </div>
+                    <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none">Easy & Fast</h6>
+                    <p className="text-[8px] text-[#8c8278] leading-[1.4] max-w-[90px]">Get results in just seconds</p>
+                  </div>
+                </div>
               </div>
             )}
 
             {/* STATE C: Generated Result */}
             {tryonState === 'generated' && (
-              <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-white animate-fade-in">
+              <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-white overflow-hidden">
                 
-                <img 
+                <motion.img 
+                  initial={{ scale: 1.05, filter: 'blur(10px)', opacity: 0 }}
+                  animate={{ scale: 1, filter: 'blur(0px)', opacity: 1 }}
+                  transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                   src={
                     resultImageUrl || 
                     (workspaceMode === 'with_garment' 
@@ -797,7 +908,7 @@ export default function TryonWorkspace({ onExit }) {
                       : (selectedCatalogDress?.draped || DRAPED_RESULT_MAP["SAREE"]["Classic Studio"]))
                   } 
                   alt="Try-on output preview" 
-                  className="w-full h-full object-cover transition-all duration-300"
+                  className="w-full h-full object-cover"
                 />
 
                 {/* Metadata label bottom-left */}
@@ -810,13 +921,6 @@ export default function TryonWorkspace({ onExit }) {
                   </span>
                 </div>
 
-                {/* AI tag top-right */}
-                <div className="absolute top-4 right-4 bg-white border border-[rgba(26,20,16,0.08)] px-2.5 py-1 flex items-center gap-1.5 shadow-sm">
-                  <img src={imgSparkleIcon} alt="" className="h-2.5 w-2.5" onError={(e) => { e.target.style.display = 'none'; }} />
-                  <span className="text-[8px] font-bold uppercase tracking-wide text-[#1A1410]">
-                    AI GENERATED
-                  </span>
-                </div>
               </div>
             )}
           </div>

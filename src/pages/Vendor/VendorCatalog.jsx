@@ -1,20 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Search, Plus, Package, Box, Filter, LogOut, Image as ImageIcon, Trash2, AlertTriangle, User } from 'lucide-react';
+import { ArrowLeft, Search, Plus, Package, Box, Filter, LogOut, Image as ImageIcon, Trash2, AlertTriangle, User, Eye, X, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { API_URL } from '../../config';
 import VendorProfileModal from '../../components/VendorProfileModal';
 
 const VendorCatalog = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const [allowedCategories, setAllowedCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [productToDelete, setProductToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [previewProduct, setPreviewProduct] = useState(null);
 
   useEffect(() => {
-    fetchProducts();
+    fetchData();
   }, []);
 
   const handleLogout = () => {
@@ -24,19 +30,26 @@ const VendorCatalog = () => {
     navigate('/');
   };
 
-  const fetchProducts = async () => {
+  const fetchData = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/tryon/catalog/products`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('vendor_token')}`
-        }
-      });
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        setProducts(data);
+      const [productsRes, profileRes] = await Promise.all([
+        fetch(`${API_URL}/api/tryon/catalog/products`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('vendor_token')}` }
+        }),
+        fetch(`${API_URL}/api/tryon/vendor/profile`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('vendor_token')}` }
+        })
+      ]);
+      const productsData = await productsRes.json();
+      if (Array.isArray(productsData)) {
+        setProducts(productsData);
+      }
+      const profileData = await profileRes.json();
+      if (profileData.allowedCategories) {
+        setAllowedCategories(profileData.allowedCategories);
       }
     } catch (err) {
-      console.error('Failed to fetch catalog', err);
+      console.error('Failed to fetch catalog or profile', err);
     } finally {
       setLoading(false);
     }
@@ -50,7 +63,9 @@ const VendorCatalog = () => {
   const filteredProducts = products.filter(product => {
     const q = searchQuery.toLowerCase();
     const pId = getProductId(product).toLowerCase();
-    return product.title.toLowerCase().includes(q) || pId.includes(q);
+    const matchesSearch = product.title.toLowerCase().includes(q) || pId.includes(q);
+    const matchesCategory = selectedCategory === 'ALL' || product.category === selectedCategory;
+    return matchesSearch && matchesCategory;
   });
 
   const handleTryOn = (product) => {
@@ -152,8 +167,60 @@ const VendorCatalog = () => {
           </div>
           
           <div className="flex items-center gap-3 text-sm font-bold text-[#5c544d]">
-            <Filter className="w-4 h-4" />
-            <span>{filteredProducts.length} Products</span>
+            <div className="relative">
+              <button 
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                className={`h-11 md:h-12 bg-white border ${isFilterOpen ? 'border-[#7F5700] text-[#7F5700]' : 'border-[#e5e0d8] text-[#5c544d] hover:border-[#7F5700] hover:text-[#7F5700]'} rounded-xl px-4 flex items-center justify-center shadow-sm gap-2 transition-all`}
+              >
+                <Filter className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase hidden sm:inline">
+                  {selectedCategory === 'ALL' ? 'Filter' : selectedCategory}
+                </span>
+                {selectedCategory !== 'ALL' && (
+                  <div className="w-2 h-2 rounded-full bg-[#7F5700] sm:hidden" />
+                )}
+              </button>
+
+              <AnimatePresence>
+                {isFilterOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsFilterOpen(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.15, ease: "easeOut" }}
+                      className="absolute right-0 top-full mt-2 w-48 bg-white border border-[#e5e0d8] rounded-2xl shadow-xl z-50 overflow-hidden"
+                    >
+                      <div className="p-3 border-b border-[#e5e0d8] bg-[#faf7f2]">
+                        <h4 className="text-[9px] font-bold text-gray-500 uppercase tracking-widest px-1">Filter by Category</h4>
+                      </div>
+                      <div className="p-1.5 max-h-60 overflow-y-auto">
+                        <button
+                          onClick={() => { setSelectedCategory('ALL'); setIsFilterOpen(false); }}
+                          className={`w-full text-left px-3 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl transition-colors ${selectedCategory === 'ALL' ? 'bg-[#7F5700]/10 text-[#7F5700]' : 'text-[#1A1410] hover:bg-[#faf7f2]'}`}
+                        >
+                          All Categories
+                        </button>
+                        {allowedCategories.map(cat => (
+                          <button
+                            key={cat}
+                            onClick={() => { setSelectedCategory(cat); setIsFilterOpen(false); }}
+                            className={`w-full text-left px-3 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl transition-colors mt-0.5 ${selectedCategory === cat ? 'bg-[#7F5700]/10 text-[#7F5700]' : 'text-[#1A1410] hover:bg-[#faf7f2]'}`}
+                          >
+                            {cat}
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+            
+            <div className="h-11 md:h-12 bg-white border border-[#e5e0d8] rounded-xl px-4 flex items-center justify-center shadow-sm">
+              <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase">{filteredProducts.length} Products</span>
+            </div>
           </div>
         </div>
 
@@ -177,6 +244,27 @@ const VendorCatalog = () => {
               className="bg-[#1A1410] hover:bg-black text-white px-8 py-3.5 rounded-xl font-bold tracking-widest uppercase text-xs transition-all shadow-md"
             >
               Digitize First Product
+            </button>
+          </div>
+        )}
+
+        {/* Filter/Search Empty State */}
+        {!loading && products.length > 0 && filteredProducts.length === 0 && (
+          <div className="py-20 flex flex-col items-center justify-center text-center">
+            <div className="w-64 h-64 mb-4 -mt-12">
+              <DotLottieReact
+                src="https://lottie.host/b4ed5a46-067b-4dd4-b59b-581573941a6b/yxLLumxzjB.lottie"
+                loop
+                autoplay
+              />
+            </div>
+            <h3 className="text-xl font-bold text-[#1A1410] mb-2">No Matching Products</h3>
+            <p className="text-gray-500 max-w-md">We couldn't find any products matching your current category or search filters.</p>
+            <button 
+              onClick={() => { setSearchQuery(''); setSelectedCategory('ALL'); }}
+              className="mt-6 text-[#7F5700] hover:text-[#1A1410] font-bold text-xs uppercase tracking-widest transition-colors"
+            >
+              Clear All Filters
             </button>
           </div>
         )}
@@ -209,6 +297,18 @@ const VendorCatalog = () => {
                     <div className="absolute top-3 right-3 bg-[#1A1410]/90 backdrop-blur-sm px-2.5 py-1 rounded-md border border-white/10 shadow-sm text-[9px] font-bold uppercase tracking-wider text-white">
                       {product.category}
                     </div>
+
+                    {/* Preview Button (Hover Reveal) */}
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPreviewProduct(product);
+                      }}
+                      className="absolute bottom-3 right-12 bg-white/90 hover:bg-[#faf7f2] hover:text-[#7F5700] text-gray-500 backdrop-blur-sm p-1.5 rounded-full shadow-sm transition-all opacity-0 group-hover:opacity-100 border border-white/20"
+                      title="Preview Product"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </button>
 
                     {/* Delete Button (Hover Reveal) */}
                     <button 
@@ -284,6 +384,63 @@ const VendorCatalog = () => {
           </div>
         </div>
       )}
+
+      {/* Preview Modal */}
+      <AnimatePresence>
+        {previewProduct && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.2 } }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" 
+            onClick={() => setPreviewProduct(null)}
+          >
+            <motion.div 
+              initial={{ scale: 0.85, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: -10, transition: { type: 'spring', duration: 0.4 } }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="relative max-w-4xl max-h-[90vh] flex flex-col items-center justify-center" 
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="relative inline-block">
+                <motion.button 
+                  onClick={() => setPreviewProduct(null)}
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9, rotate: -90 }}
+                  className="absolute top-3 right-3 text-white/80 hover:text-white transition-colors bg-black/50 hover:bg-black/80 rounded-full p-1.5 z-[110] shadow-md border border-white/10"
+                >
+                  <X className="w-5 h-5" />
+                </motion.button>
+                
+                {previewProduct.primaryAsset?.imageUrl ? (
+                  <motion.img 
+                    src={previewProduct.primaryAsset.imageUrl} 
+                    alt={previewProduct.title} 
+                    initial={{ scale: 0.8, filter: "blur(10px)" }}
+                    animate={{ scale: 1, filter: "blur(0px)" }}
+                    exit={{ scale: 0.4, opacity: 0, rotate: -10, filter: "blur(20px)", transition: { duration: 0.3, ease: "easeIn" } }}
+                    className="max-w-full max-h-[80vh] object-contain rounded-xl shadow-2xl" 
+                  />
+                ) : (
+                  <div className="w-full aspect-[3/4] max-w-md bg-white rounded-xl flex items-center justify-center text-gray-400">
+                    <ImageIcon className="w-16 h-16 opacity-50" />
+                  </div>
+                )}
+              </div>
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="mt-4 text-center"
+              >
+                <h3 className="text-white text-xl font-bold tracking-wide">{previewProduct.title}</h3>
+                <p className="text-white/70 text-sm mt-1 uppercase tracking-widest">{getProductId(previewProduct)} • {previewProduct.category}</p>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <VendorProfileModal 
         isOpen={isProfileModalOpen} 

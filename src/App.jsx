@@ -11,6 +11,13 @@ import VendorUpload from './pages/Vendor/VendorUpload';
 import VendorTryon from './pages/Vendor/VendorTryon';
 import Landing from './pages/Landing/Landing';
 import AboutUs from './pages/Landing/AboutUs';
+import SareeTryOn from './pages/Landing/Categories/SareeTryOn';
+import LehengaTryOn from './pages/Landing/Categories/LehengaTryOn';
+import AnarkaliTryOn from './pages/Landing/Categories/AnarkaliTryOn';
+import ShararaTryOn from './pages/Landing/Categories/ShararaTryOn';
+import KurtiTryOn from './pages/Landing/Categories/KurtiTryOn';
+import BlogIndex from './pages/Landing/BlogIndex';
+import BlogPost from './pages/Landing/BlogPost';
 
 // Authentication Guard for Vendor Interface
 const VendorRoute = ({ children }) => {
@@ -27,6 +34,17 @@ export default function App() {
           {/* Public Landing */}
           <Route path="/" element={<Landing />} />
           <Route path="/about" element={<AboutUs />} />
+          
+          {/* Solutions / Categories */}
+          <Route path="/saree" element={<SareeTryOn />} />
+          <Route path="/lehenga" element={<LehengaTryOn />} />
+          <Route path="/anarkali" element={<AnarkaliTryOn />} />
+          <Route path="/sharara" element={<ShararaTryOn />} />
+          <Route path="/kurti" element={<KurtiTryOn />} />
+
+          {/* Blog / Resources */}
+          <Route path="/blog" element={<BlogIndex />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
 
           {/* Auth Routes */}
           <Route path="/login" element={<VendorAuth />} />

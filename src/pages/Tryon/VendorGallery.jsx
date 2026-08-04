@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { API_URL } from '../../config';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Share2, Copy, Check, Trash2, ExternalLink } from 'lucide-react';
+import { ChevronLeft, Share2, Copy, Check, Trash2, ExternalLink, Eye, X } from 'lucide-react';
 
 // Must match the hardcoded vendor ID in backend/index.js
 const DEFAULT_VENDOR_ID = 'feb21067-a3ee-4020-b388-16d3a37a29ce';
@@ -12,9 +12,11 @@ export default function VendorGallery() {
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState(null);
   const [galleryCopied, setGalleryCopied] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
 
   const vendor = JSON.parse(localStorage.getItem('vendor_data') || '{}');
   const vendorId = vendor.id || DEFAULT_VENDOR_ID;
+  const isMasterVendor = vendor.email === 'vendor@store.com';
 
   const copyGalleryLink = () => {
     const link = `${window.location.origin}/shop/${vendorId}`;
@@ -130,13 +132,25 @@ export default function VendorGallery() {
                   alt="Draped Garment" 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <button 
-                  onClick={() => handleDelete(gen.id)}
-                  className="absolute top-2 right-2 bg-white/90 hover:bg-red-50 text-red-500 p-2 rounded-sm opacity-0 group-hover/img:opacity-100 transition-opacity shadow-sm border border-transparent hover:border-red-200"
-                  title="Delete from Gallery"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                {/* Action Buttons Group */}
+                <div className="absolute top-2 right-2 opacity-0 group-hover/img:opacity-100 transition-opacity flex bg-white/95 rounded-md shadow-sm overflow-hidden border border-[rgba(26,20,16,0.1)]">
+                  <button 
+                    onClick={() => setPreviewImage(gen.resultImageUrl || gen.garmentImageUrl)}
+                    className={`hover:bg-gray-100 text-[#1a1410] p-2 transition-colors ${isMasterVendor ? 'border-r border-[rgba(26,20,16,0.05)]' : ''}`}
+                    title="Preview Full Image"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                  </button>
+                  {isMasterVendor && (
+                    <button 
+                      onClick={() => handleDelete(gen.id)}
+                      className="hover:bg-red-50 text-red-500 p-2 transition-colors"
+                      title="Delete from Gallery"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="flex flex-col gap-2">
                 <span className="text-[9px] font-bold uppercase tracking-widest text-[#1a1410] truncate">
@@ -175,6 +189,27 @@ export default function VendorGallery() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Full Screen Image Preview Modal */}
+      {previewImage && (
+        <div 
+          className="fixed inset-0 z-[200] bg-[#1a1410]/95 backdrop-blur-md flex items-center justify-center p-6 sm:p-12 cursor-zoom-out animate-in fade-in duration-300"
+          onClick={() => setPreviewImage(null)}
+        >
+          <button 
+            className="absolute top-6 right-6 sm:top-10 sm:right-10 text-white/50 hover:text-white transition-colors"
+            onClick={(e) => { e.stopPropagation(); setPreviewImage(null); }}
+          >
+            <X className="w-8 h-8" />
+          </button>
+          <img 
+            src={previewImage} 
+            alt="Full Preview" 
+            className="max-w-full max-h-full object-contain cursor-default drop-shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       )}
 

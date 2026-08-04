@@ -122,7 +122,7 @@ export default function Landing() {
       `}} />
       
       {/* Navigation */}
-      <nav className="flex items-center justify-between px-6 md:px-16 xl:px-24 py-4 md:py-6 max-w-[1800px] mx-auto w-full sticky top-0 z-[110] bg-[#faf7f2]/90 backdrop-blur-md border-b border-[#8c8278]/10">
+      <nav className="flex items-center justify-between px-6 md:px-16 xl:px-24 py-4 md:py-6 max-w-[1800px] mx-auto w-full sticky top-0 z-[110] bg-[#faf7f2]/90 backdrop-blur-md">
         <div className="flex items-center gap-2">
           <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-8 md:h-12 object-contain" />
         </div>
@@ -131,6 +131,43 @@ export default function Landing() {
         <div className="hidden md:flex items-center gap-8">
           <Link to="/about" className="text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors font-['Merriweather',serif]">
             ABOUT US
+          </Link>
+          <div className="group relative">
+            <span className="text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors font-['Merriweather',serif] cursor-pointer flex items-center gap-1 py-4">
+              SOLUTIONS
+              <svg className="w-3 h-3 transition-transform duration-200 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+            </span>
+            <div className="absolute top-[80%] left-1/2 -translate-x-1/2 mt-2 w-[280px] bg-white/95 backdrop-blur-xl border border-[#8c8278]/10 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col p-2 rounded-2xl z-[120] transform group-hover:translate-y-1">
+              
+              <Link to="/saree" className="flex flex-col px-4 py-3 hover:bg-[#faf7f2] rounded-xl transition-colors group/item">
+                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-[#ed7b22] font-['Merriweather',serif] mb-1">Saree Try-On</span>
+                <span className="text-[10px] text-[#8c8278] font-['Inter',sans-serif] capitalize">Nivi, Bengali & Regional drapes</span>
+              </Link>
+              
+              <Link to="/lehenga" className="flex flex-col px-4 py-3 hover:bg-[#faf7f2] rounded-xl transition-colors group/item">
+                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-[#ed7b22] font-['Merriweather',serif] mb-1">Lehenga Try-On</span>
+                <span className="text-[10px] text-[#8c8278] font-['Inter',sans-serif] capitalize">Accurate flare & volume physics</span>
+              </Link>
+              
+              <Link to="/anarkali" className="flex flex-col px-4 py-3 hover:bg-[#faf7f2] rounded-xl transition-colors group/item">
+                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-[#ed7b22] font-['Merriweather',serif] mb-1">Anarkali Try-On</span>
+                <span className="text-[10px] text-[#8c8278] font-['Inter',sans-serif] capitalize">Floor-length flow & fit</span>
+              </Link>
+              
+              <Link to="/sharara" className="flex flex-col px-4 py-3 hover:bg-[#faf7f2] rounded-xl transition-colors group/item">
+                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-[#ed7b22] font-['Merriweather',serif] mb-1">Sharara Try-On</span>
+                <span className="text-[10px] text-[#8c8278] font-['Inter',sans-serif] capitalize">Trouser volume & layering</span>
+              </Link>
+
+              <Link to="/kurti" className="flex flex-col px-4 py-3 hover:bg-[#faf7f2] rounded-xl transition-colors group/item">
+                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-[#ed7b22] font-['Merriweather',serif] mb-1">Kurti Try-On</span>
+                <span className="text-[10px] text-[#8c8278] font-['Inter',sans-serif] capitalize">Regional tailoring conventions</span>
+              </Link>
+
+            </div>
+          </div>
+          <Link to="/blog" className="text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors font-['Merriweather',serif]">
+            JOURNAL
           </Link>
           <Link to="/login" state={{ isLogin: false }} className="text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors font-['Merriweather',serif]">
             SIGNUP
@@ -165,20 +202,38 @@ export default function Landing() {
             <Link 
               to="/about" 
               onClick={() => setIsMobileMenuOpen(false)}
-              className="group flex items-end gap-6 py-8 border-b border-white/10 animate-fade-up delay-100"
+              className="group flex items-end gap-6 py-6 border-b border-white/10 animate-fade-up delay-100"
             >
               <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">01</span>
-              <span className="font-['EB_Garamond',serif] text-5xl tracking-wide text-white group-hover:text-[#ed7b22] group-hover:italic transition-all duration-300">About Us</span>
+              <span className="font-['EB_Garamond',serif] text-4xl tracking-wide text-white group-hover:text-[#ed7b22] group-hover:italic transition-all duration-300">About Us</span>
+            </Link>
+
+            <Link 
+              to="/saree" 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="group flex items-end gap-6 py-6 border-b border-white/10 animate-fade-up delay-150"
+            >
+              <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">02</span>
+              <span className="font-['EB_Garamond',serif] text-4xl tracking-wide text-white group-hover:text-[#ed7b22] group-hover:italic transition-all duration-300">Solutions</span>
+            </Link>
+
+            <Link 
+              to="/blog" 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="group flex items-end gap-6 py-6 border-b border-white/10 animate-fade-up delay-200"
+            >
+              <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">03</span>
+              <span className="font-['EB_Garamond',serif] text-4xl tracking-wide text-white group-hover:text-[#ed7b22] group-hover:italic transition-all duration-300">Journal</span>
             </Link>
             
             <Link 
               to="/login" 
               state={{ isLogin: false }} 
               onClick={() => setIsMobileMenuOpen(false)}
-              className="group flex items-end gap-6 py-8 border-b border-white/10 animate-fade-up delay-200"
+              className="group flex items-end gap-6 py-6 border-b border-white/10 animate-fade-up delay-300"
             >
-              <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">02</span>
-              <span className="font-['EB_Garamond',serif] text-5xl tracking-wide text-white group-hover:text-[#ed7b22] group-hover:italic transition-all duration-300">Sign Up</span>
+              <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">04</span>
+              <span className="font-['EB_Garamond',serif] text-4xl tracking-wide text-white group-hover:text-[#ed7b22] group-hover:italic transition-all duration-300">Sign Up</span>
             </Link>
 
             <Link 
@@ -187,8 +242,8 @@ export default function Landing() {
               onClick={() => setIsMobileMenuOpen(false)}
               className="group flex items-end gap-6 py-8 border-b border-white/10 animate-fade-up delay-300"
             >
-              <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">03</span>
-              <span className="font-['EB_Garamond',serif] text-5xl tracking-wide text-[#ed7b22] group-hover:text-white transition-all duration-300">Login</span>
+              <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">05</span>
+              <span className="font-['EB_Garamond',serif] text-4xl tracking-wide text-[#ed7b22] group-hover:text-white transition-all duration-300">Login</span>
             </Link>
           </div>
 
