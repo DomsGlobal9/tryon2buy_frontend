@@ -23,8 +23,8 @@ const imgCheckIcon = "http://localhost:3845/assets/5562447e235a6d5290bd80edeccaa
 const imgCloudUploadIcon = "http://localhost:3845/assets/5ed675a87992382480595b863c88f043867b5f35.svg";
 const imgSparkleIcon = "http://localhost:3845/assets/57bc61ae51616a14133de6d0ecef9147d2895169.svg";
 const imgSilhouetteIcon = "http://localhost:3845/assets/a249434f512726ee89a8ee251ee587fd341399a0.svg";
-const imgSearchIcon = "http://localhost:3845/assets/6e210d18e84e7be6898081e805c5c52a0b885275.svg"; 
-const imgCartIcon = "http://localhost:3845/assets/fe48a95e0d65c7fcf86d546a537bcf683b7cb725.svg"; 
+const imgSearchIcon = "http://localhost:3845/assets/6e210d18e84e7be6898081e805c5c52a0b885275.svg";
+const imgCartIcon = "http://localhost:3845/assets/fe48a95e0d65c7fcf86d546a537bcf683b7cb725.svg";
 const imgChevronDown = "http://localhost:3845/assets/09a9e63298cac1d80b6e69971e95da0f6ebb5138.svg";
 
 // Backdrops
@@ -122,39 +122,39 @@ const DEFAULT_MODELS_BY_CATEGORY = {
     { name: "Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/44.jpeg" }
   ],
   "LEHANGA": [
-    { 
-      name: "Model 1", 
+    {
+      name: "Model 1",
       img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga1_default.png",
       images: {
         default: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga1_default.png",
-        style_1: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga1_duppata.png",
+        style_1: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga1_duppat.png",
         style_2: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga1_default.png"
       }
     },
-    { 
-      name: "Model 2", 
+    {
+      name: "Model 2",
       img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga2_default.png",
       images: {
         default: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga2_default.png",
-        style_1: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga2_duppata.png",
+        style_1: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga2_duppat.png",
         style_2: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga2_default.png"
       }
     },
-    { 
-      name: "Model 3", 
+    {
+      name: "Model 3",
       img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga3_default.png",
       images: {
         default: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga3_default.png",
-        style_1: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga3_duppata.png",
+        style_1: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga3_duppa.png",
         style_2: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga3_default.png"
       }
     },
-    { 
-      name: "Model 4", 
+    {
+      name: "Model 4",
       img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga4_default.png",
       images: {
         default: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga4_default.png",
-        style_1: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga4_duppatta.png",
+        style_1: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga4_duppata.png",
         style_2: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/lehanga/lehanga4_default.png"
       }
     }
@@ -212,7 +212,7 @@ export default function TryonWorkspace({ onExit }) {
 
   // Workspace configuration states
   const [category, setCategory] = useState("SAREE");
-  
+
   // Selection references for BOTH flows
   const [selectedImage, setSelectedImage] = useState(null); // portrait image for without_garment
   const [selectedFile, setSelectedFile] = useState(null); // portrait file for without_garment
@@ -221,7 +221,7 @@ export default function TryonWorkspace({ onExit }) {
   const [currentGenerationId, setCurrentGenerationId] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-  
+
   const [selectedModel, setSelectedModel] = useState(null); // model selection
   const [selectedCatalogDress, setSelectedCatalogDress] = useState(null); // catalog dress selection
 
@@ -276,7 +276,7 @@ export default function TryonWorkspace({ onExit }) {
     }
   }, [category]);
 
-  
+
 
   const getUploadSlots = (cat) => {
     if (cat === "SAREE") {
@@ -320,7 +320,7 @@ export default function TryonWorkspace({ onExit }) {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       const url = URL.createObjectURL(file);
-      
+
       setGarmentUploads(prev => {
         // Revoke the old object URL if one exists to prevent memory leaks
         if (prev[slotId]?.url?.startsWith('blob:')) {
@@ -328,7 +328,7 @@ export default function TryonWorkspace({ onExit }) {
         }
         return { ...prev, [slotId]: { file, url } };
       });
-      
+
       // Clear the input value so the same file can be uploaded again if removed
       e.target.value = '';
     }
@@ -339,7 +339,7 @@ export default function TryonWorkspace({ onExit }) {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
       const url = URL.createObjectURL(file);
-      
+
       setGarmentUploads(prev => {
         // Revoke the old object URL if one exists to prevent memory leaks
         if (prev[slotId]?.url?.startsWith('blob:')) {
@@ -444,7 +444,7 @@ export default function TryonWorkspace({ onExit }) {
         return;
       }
       const genData = await genRes.json();
-      
+
       clearInterval(interval);
       setProgress(100);
       setResultImageUrl(genData.result_image_url || FALLBACK_SAREE_ICON);
@@ -464,8 +464,9 @@ export default function TryonWorkspace({ onExit }) {
   // 3. MAIN ATELIER / WORKSPACE FLOW
   return (
     <div className="bg-[#FAF7F2] min-h-screen flex flex-col font-['Courier_Prime',monospace] text-[#1A1410] antialiased select-none select-text relative">
-      
-      <style dangerouslySetInnerHTML={{__html: `
+
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes scan {
           0% { top: 0%; }
           50% { top: 100%; }
@@ -486,17 +487,17 @@ export default function TryonWorkspace({ onExit }) {
       {/* Header */}
       <header className="bg-[#FAF7F2] border-b border-[rgba(26,20,16,0.08)] h-[60px] flex items-center justify-between px-4 md:px-[64px] relative shrink-0 z-20">
         <div className="flex items-center gap-[48px]">
-          <img 
+          <img
             onClick={onExit}
-            src="/TRYON2BUY%20LOGO%20(black%20).png" 
-            alt="TryOn2Buy Logo" 
+            src="/TRYON2BUY%20LOGO%20(black%20).png"
+            alt="TryOn2Buy Logo"
             className="h-10 md:h-12 object-contain cursor-pointer hover:opacity-80 transition-opacity"
           />
           <nav className="hidden md:flex gap-[32px] text-[12px] tracking-[1.6px] uppercase font-bold">
             <span className="text-[#7f5700] border-[#7f5700] border-b border-solid pb-[2px] leading-[24px] cursor-pointer">VIRTUAL TRY-ON</span>
           </nav>
         </div>
-        
+
         <div className="flex items-center gap-3 md:gap-[24px]">
           <button className="opacity-80 hover:opacity-100 transition-opacity hidden sm:block">
             <img src={imgSearchIcon} alt="Search" className="h-[18px] w-[14px] object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
@@ -504,8 +505,8 @@ export default function TryonWorkspace({ onExit }) {
           <button className="opacity-80 hover:opacity-100 transition-opacity hidden sm:block">
             <img src={imgCartIcon} alt="Bag" className="h-[14px] w-[14px] object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
           </button>
-          
-          <button 
+
+          <button
             onClick={() => navigate(isGuestMode ? '/shop/demo' : '/gallery')}
             className="text-[9px] md:text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 transition-all text-[#1A1410] bg-white border border-[#1A1410]/20 px-3 py-1.5 md:px-4 md:py-2 rounded-full hover:border-[#1A1410] hover:bg-[#1A1410] hover:text-white shadow-sm whitespace-nowrap"
           >
@@ -516,7 +517,7 @@ export default function TryonWorkspace({ onExit }) {
 
           <div className="h-4 w-px bg-[rgba(26,20,16,0.15)] hidden md:block" />
 
-          <button 
+          <button
             onClick={handleLogout}
             className="text-[9px] md:text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 transition-colors text-[#1A1410] hover:text-red-600 whitespace-nowrap"
           >
@@ -528,12 +529,12 @@ export default function TryonWorkspace({ onExit }) {
 
       {/* Main Content Pane */}
       <div className="flex-1 flex flex-col-reverse md:flex-row relative z-10 overflow-y-auto md:overflow-clip">
-        
+
         {/* Left Side Console Column */}
         <aside className="w-full md:w-[420px] bg-[#FAF7F2] border-r border-[rgba(26,20,16,0.08)] overflow-y-auto px-6 py-5 shrink-0 flex flex-col gap-4 custom-scrollbar">
-          
+
           {/* Back button to Choice Screen (only shown during personalization now) */}
-          
+
 
           {/* Workspace Header */}
           <div className="space-y-0.5">
@@ -543,225 +544,223 @@ export default function TryonWorkspace({ onExit }) {
           </div>
 
           {/* Step 1: SELECT CATEGORY */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <div className="bg-[#1a1410] text-[#faf7f2] size-5 flex items-center justify-center text-[10px] font-bold">1</div>
-                  <h3 className="text-[11px] tracking-[1.5px] uppercase font-bold text-[#1A1410]">SELECT CATEGORY</h3>
-                </div>
-                
-                <div className="grid grid-cols-5 gap-3">
-                  {[
-                    { key: "SAREE", icon: Wind },
-                    { key: "LEHANGA", icon: Sparkles },
-                    { key: "ANARKALI", icon: Star },
-                    { key: "KURTHI", icon: Shirt },
-                    { key: "SHARARA", icon: Layers }
-                  ].map((cat) => {
-                    const isActive = category === cat.key;
-                    return (
-                      <button
-                        key={cat.key}
-                        onClick={() => handleCategorySelect(cat.key)}
-                        className={`group h-[48px] flex items-center justify-center px-2 border transition-all duration-300 ${
-                          isActive 
-                            ? 'bg-[#FFFFFF] border-[#7f5700] ring-[1px] ring-[#7f5700]' 
-                            : 'bg-white border-[rgba(26,20,16,0.08)] hover:border-[#7F5700] hover:shadow-[0_4px_15px_rgb(127,87,0,0.1)] hover:scale-[1.01]'
-                        }`}
-                      >
-                        <span className={`text-[10px] font-bold tracking-[1px] uppercase whitespace-nowrap transition-colors ${isActive ? 'text-[#7f5700]' : 'text-[#8c8278] group-hover:text-[#1A1410]'}`}>
-                          {cat.key}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="bg-[#1a1410] text-[#faf7f2] size-5 flex items-center justify-center text-[10px] font-bold">1</div>
+              <h3 className="text-[11px] tracking-[1.5px] uppercase font-bold text-[#1A1410]">SELECT CATEGORY</h3>
+            </div>
 
-              {/* Step 2: UPLOAD GARMENT */}
-              <div className="space-y-5">
-                <div className="flex items-center gap-2">
-                  <div className="bg-[#1a1410] text-[#faf7f2] size-4 flex items-center justify-center text-[9px] font-bold">2</div>
-                  <h3 className="text-[10px] tracking-[1px] uppercase font-bold text-[#1A1410]">UPLOAD GARMENT</h3>
-                </div>
-                
-                {category === 'SAREE' ? (
-                  <div className="bg-yellow-50/80 px-4 py-3 border border-yellow-200 rounded-md shadow-sm text-[11px] text-yellow-800 font-['Inter',sans-serif] leading-relaxed -mt-2">
-                    <span className="font-bold text-yellow-900">Note:</span> Upload the saree as a flat lay or draped on a mannequin. Blouse is optional — if not uploaded, the blouse from the saree image will be used.
-                  </div>
-                ) : (
-                  <div className="bg-yellow-50/80 px-4 py-3 border border-yellow-200 rounded-md shadow-sm text-[11px] text-yellow-800 font-['Inter',sans-serif] leading-relaxed -mt-2">
-                    <span className="font-bold text-yellow-900">Note:</span> Please upload flat lay or mannequin photos of the actual stitched {category.toLowerCase()}. Do not upload unstitched fabric pieces. Ensure each specific garment part is uploaded into its corresponding slot below for optimal draping.
-                  </div>
-                )}
-                {(() => {
-                  const renderSlot = (slot) => {
-                    if (!slot) return null;
-                    const slotData = garmentUploads[slot.id];
-                    return (
-                      <div 
-                        key={slot.id} 
-                        onDrop={(e) => handleGarmentDrop(slot.id, e)}
-                        onDragOver={handleDragOver}
-                        className="relative border border-dashed border-[#dcd6cc] bg-[#fdfcf9] rounded-xl overflow-hidden flex flex-col items-center justify-center min-h-[140px] group hover:border-[#7F5700] hover:bg-white hover:shadow-sm transition-all duration-300"
-                      >
-                        <input id={`file-${slot.id}`} type="file" accept="image/*" onChange={(e) => handleGarmentSlotChange(slot.id, e)} className="hidden" />
-                        <input id={`camera-${slot.id}`} type="file" accept="image/*" capture="environment" onChange={(e) => handleGarmentSlotChange(slot.id, e)} className="hidden" />
-                        
-                        <div className="absolute top-3 left-0 right-0 text-center pointer-events-none z-10">
-                          <span className="text-[9px] uppercase font-bold tracking-widest text-[#1A1410] bg-[#fdfcf9] group-hover:bg-white px-2 transition-colors">
-                            {slot.label} {slot.required && <span className="text-red-500">*</span>}
-                          </span>
-                        </div>
-
-                        {slotData ? (
-                          <>
-                            <div className="relative w-full h-[100px] flex items-center justify-center p-4 mt-6">
-                              <img src={slotData.url} alt={slot.label} className="max-h-full max-w-full object-contain drop-shadow-md group-hover:scale-95 transition-transform duration-500" />
-                            </div>
-                            <div className="absolute inset-0 bg-[#1a1410]/40 opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px] flex items-center justify-center rounded-xl z-20">
-                              <button
-                                type="button"
-                                onClick={(e) => handleRemoveGarmentSlot(slot.id, e)}
-                                className="bg-white text-red-500 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-full text-[9px] font-bold tracking-[1px] uppercase transition-all duration-300 shadow-[0_4px_10px_rgba(0,0,0,0.1)] flex items-center gap-1.5 transform translate-y-2 group-hover:translate-y-0"
-                              >
-                                <X className="w-3 h-3" />
-                                Remove
-                              </button>
-                            </div>
-                          </>
-                        ) : (
-                          <div className="flex flex-col items-center gap-2 mt-6 opacity-70 group-hover:opacity-100 transition-opacity w-full h-full justify-center pb-2">
-                            <div className="flex items-center gap-6">
-                              {/* Upload from Gallery / Main Upload */}
-                              <label htmlFor={`file-${slot.id}`} className="flex flex-col items-center gap-1.5 md:gap-2 cursor-pointer group/upload">
-                                <div className="bg-[#f2efe9] p-2.5 md:p-3 rounded-full group-hover/upload:bg-[#ede8df] group-hover/upload:scale-110 group-hover/upload:shadow-sm transition-all duration-300">
-                                  <Upload className="h-4 w-4 text-[#7f5700]" />
-                                </div>
-                                <span className="text-[8px] font-bold text-[#1A1410] uppercase tracking-widest md:hidden">Gallery</span>
-                                <span className="hidden md:block text-[10px] font-bold text-[#1A1410] uppercase tracking-widest whitespace-nowrap">Upload</span>
-                              </label>
-
-                              {/* Take Photo (Mobile Only) */}
-                              <label htmlFor={`camera-${slot.id}`} className="flex flex-col items-center gap-1.5 cursor-pointer group/camera md:hidden">
-                                <div className="bg-[#f2efe9] p-2.5 rounded-full group-hover/camera:bg-[#ede8df] group-hover/camera:scale-110 group-hover/camera:shadow-sm transition-all duration-300">
-                                  <Camera className="h-4 w-4 text-[#7f5700]" />
-                                </div>
-                                <span className="text-[8px] font-bold text-[#1A1410] uppercase tracking-widest">Camera</span>
-                              </label>
-                            </div>
-                            <div className="text-[8px] text-[#8c8278] font-sans mt-0.5">JPG, PNG • Max 10MB</div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  };
-
-                  return category === 'SAREE' ? (
-                    <div className="grid grid-cols-2 gap-3">
-                      {activeSlots.map(renderSlot)}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-5">
-                      <div>
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="h-px bg-[#e5e0d8] flex-1"></div>
-                          <span className="text-[9px] uppercase font-bold tracking-[2px] text-[#1A1410]">Full Garment</span>
-                          <div className="h-px bg-[#e5e0d8] flex-1"></div>
-                        </div>
-                        {renderSlot(activeSlots.find(s => s.id === 'full'))}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="h-px bg-[#e5e0d8] flex-1"></div>
-                          <span className="text-[9px] uppercase font-bold tracking-[2px] text-[#1A1410]">
-                            Garment Parts {category === 'LEHANGA' ? '& Dupatta Style (Optional)' : ''}
-                          </span>
-                          <div className="h-px bg-[#e5e0d8] flex-1"></div>
-                        </div>
-                        <div className={`grid grid-cols-2 ${category === 'LEHANGA' ? 'lg:grid-cols-4' : ''} gap-3`}>
-                          {renderSlot(activeSlots.find(s => s.id === 'top'))}
-                          {renderSlot(activeSlots.find(s => s.id === 'bottom'))}
-
-                          {/* Dupatta Drape Style Selection (Lehenga Only) */}
-                          {category === 'LEHANGA' && (
-                            [
-                              { id: 'style_1', name: 'Classic Single-Shoulder', url: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/lehanga_duppatta1.jpg' },
-                              { id: 'style_2', name: 'Traditional Front Pleat', url: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/lehangaduppatta2.jpg' }
-                            ].map(style => (
-                              <button
-                                key={style.id}
-                                onClick={() => setSelectedDupattaStyle(selectedDupattaStyle === style.url ? null : style.url)}
-                                className={`relative group rounded-xl overflow-hidden border-2 transition-all min-h-[140px] ${selectedDupattaStyle === style.url ? 'border-[#7F5700] ring-4 ring-[#7F5700]/20' : 'border-[#e5e0d8] hover:border-[#7F5700]/50'}`}
-                              >
-                                <div className="w-full h-full bg-[#faf7f2]">
-                                  <img src={style.url} alt={style.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                                </div>
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-2.5">
-                                  <span className="text-white text-[8px] md:text-[9px] font-bold uppercase tracking-wider text-left drop-shadow-md">{style.name}</span>
-                                </div>
-                                {selectedDupattaStyle === style.url && (
-                                  <div className="absolute top-2 right-2 bg-[#7F5700] text-white p-1 rounded-full shadow-lg">
-                                    <Check className="w-3 h-3" />
-                                  </div>
-                                )}
-                              </button>
-                            ))
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
-                
-                {/* Try Sample Materials Button */}
-                <div className="mt-3 flex justify-center">
-                  <button 
-                    onClick={() => setShowSampleModal(true)}
-                    className="text-[10px] border border-[#dcd6cc] bg-[#fdfcf9] hover:bg-[#ede8df] hover:border-[#7f5700] text-[#5c544d] px-6 py-2 rounded-full transition-colors flex items-center gap-2 uppercase tracking-[1.5px] font-bold shadow-sm"
+            <div className="grid grid-cols-5 gap-3">
+              {[
+                { key: "SAREE", icon: Wind },
+                { key: "LEHANGA", icon: Sparkles },
+                { key: "ANARKALI", icon: Star },
+                { key: "KURTHI", icon: Shirt },
+                { key: "SHARARA", icon: Layers }
+              ].map((cat) => {
+                const isActive = category === cat.key;
+                return (
+                  <button
+                    key={cat.key}
+                    onClick={() => handleCategorySelect(cat.key)}
+                    className={`group h-[48px] flex items-center justify-center px-2 border transition-all duration-300 ${isActive
+                      ? 'bg-[#FFFFFF] border-[#7f5700] ring-[1px] ring-[#7f5700]'
+                      : 'bg-white border-[rgba(26,20,16,0.08)] hover:border-[#7F5700] hover:shadow-[0_4px_15px_rgb(127,87,0,0.1)] hover:scale-[1.01]'
+                      }`}
                   >
-                    <Image className="w-3.5 h-3.5" /> Sample Materials
+                    <span className={`text-[10px] font-bold tracking-[1px] uppercase whitespace-nowrap transition-colors ${isActive ? 'text-[#7f5700]' : 'text-[#8c8278] group-hover:text-[#1A1410]'}`}>
+                      {cat.key}
+                    </span>
                   </button>
-                </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Step 2: UPLOAD GARMENT */}
+          <div className="space-y-5">
+            <div className="flex items-center gap-2">
+              <div className="bg-[#1a1410] text-[#faf7f2] size-4 flex items-center justify-center text-[9px] font-bold">2</div>
+              <h3 className="text-[10px] tracking-[1px] uppercase font-bold text-[#1A1410]">UPLOAD GARMENT</h3>
+            </div>
+
+            {category === 'SAREE' ? (
+              <div className="bg-yellow-50/80 px-4 py-3 border border-yellow-200 rounded-md shadow-sm text-[11px] text-yellow-800 font-['Inter',sans-serif] leading-relaxed -mt-2">
+                <span className="font-bold text-yellow-900">Note:</span> Upload the saree as a flat lay or draped on a mannequin. Blouse is optional — if not uploaded, the blouse from the saree image will be used.
               </div>
+            ) : (
+              <div className="bg-yellow-50/80 px-4 py-3 border border-yellow-200 rounded-md shadow-sm text-[11px] text-yellow-800 font-['Inter',sans-serif] leading-relaxed -mt-2">
+                <span className="font-bold text-yellow-900">Note:</span> Please upload flat lay or mannequin photos of the actual stitched {category.toLowerCase()}. Do not upload unstitched fabric pieces. Ensure each specific garment part is uploaded into its corresponding slot below for optimal draping.
+              </div>
+            )}
+            {(() => {
+              const renderSlot = (slot) => {
+                if (!slot) return null;
+                const slotData = garmentUploads[slot.id];
+                return (
+                  <div
+                    key={slot.id}
+                    onDrop={(e) => handleGarmentDrop(slot.id, e)}
+                    onDragOver={handleDragOver}
+                    className="relative border border-dashed border-[#dcd6cc] bg-[#fdfcf9] rounded-xl overflow-hidden flex flex-col items-center justify-center min-h-[140px] group hover:border-[#7F5700] hover:bg-white hover:shadow-sm transition-all duration-300"
+                  >
+                    <input id={`file-${slot.id}`} type="file" accept="image/*" onChange={(e) => handleGarmentSlotChange(slot.id, e)} className="hidden" />
+                    <input id={`camera-${slot.id}`} type="file" accept="image/*" capture="environment" onChange={(e) => handleGarmentSlotChange(slot.id, e)} className="hidden" />
 
-              {/* Step 3: SELECT MODEL */}
-              <div className="space-y-5">
-                <div className="flex items-center gap-2">
-                  <div className="bg-[#1a1410] text-[#faf7f2] size-4 flex items-center justify-center text-[9px] font-bold">3</div>
-                  <h3 className="text-[10px] tracking-[1px] uppercase font-bold text-[#1A1410]">SELECT MODEL</h3>
-                </div>
+                    <div className="absolute top-3 left-0 right-0 text-center pointer-events-none z-10">
+                      <span className="text-[9px] uppercase font-bold tracking-widest text-[#1A1410] bg-[#fdfcf9] group-hover:bg-white px-2 transition-colors">
+                        {slot.label} {slot.required && <span className="text-red-500">*</span>}
+                      </span>
+                    </div>
 
-                <div className="grid grid-cols-4 gap-3 w-full">
-                  {(defaultModels.length > 0 ? defaultModels : [
-                    { name: "Classic Studio", img: imgModelClassicStudio },
-                    { name: "Heritage Court", img: imgModelHeritageCourt }
-                  ]).map((model) => {
-                    const isSelected = selectedModel === model.name;
-                    return (
-                      <button
-                        key={model.name}
-                        onClick={() => {
-                          setSelectedModel(model.name);
-                          setResultImageUrl(null);
-                          setTryonState('initial');
-                        }}
-                        className={`w-full border p-0.5 relative flex flex-col transition-all duration-300 ${
-                          isSelected ? 'border-[#7f5700]' : 'border-[rgba(0,0,0,0)] opacity-75 hover:opacity-100'
-                        }`}
-                      >
-                        <div className="aspect-[3/4] w-full overflow-hidden relative">
-                          <img src={model.img} alt={model.name} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
-                          <div className="absolute bottom-0 left-0 right-0 bg-[rgba(26,20,16,0.8)] p-1.5 flex items-center justify-between">
-                            <span className="text-[7px] font-bold tracking-[0.5px] text-[#faf7f2] uppercase truncate max-w-[80%]">{model.name}</span>
-                            {isSelected && <img src={imgCheckIcon} alt="selected" className="size-[6px] object-contain invert shrink-0" onError={(e) => { e.target.style.display = 'none'; }} />}
-                          </div>
+                    {slotData ? (
+                      <>
+                        <div className="relative w-full h-[100px] flex items-center justify-center p-4 mt-6">
+                          <img src={slotData.url} alt={slot.label} className="max-h-full max-w-full object-contain drop-shadow-md group-hover:scale-95 transition-transform duration-500" />
                         </div>
-                      </button>
-                    );
-                  })}
+                        <div className="absolute inset-0 bg-[#1a1410]/40 opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px] flex items-center justify-center rounded-xl z-20">
+                          <button
+                            type="button"
+                            onClick={(e) => handleRemoveGarmentSlot(slot.id, e)}
+                            className="bg-white text-red-500 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-full text-[9px] font-bold tracking-[1px] uppercase transition-all duration-300 shadow-[0_4px_10px_rgba(0,0,0,0.1)] flex items-center gap-1.5 transform translate-y-2 group-hover:translate-y-0"
+                          >
+                            <X className="w-3 h-3" />
+                            Remove
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 mt-6 opacity-70 group-hover:opacity-100 transition-opacity w-full h-full justify-center pb-2">
+                        <div className="flex items-center gap-6">
+                          {/* Upload from Gallery / Main Upload */}
+                          <label htmlFor={`file-${slot.id}`} className="flex flex-col items-center gap-1.5 md:gap-2 cursor-pointer group/upload">
+                            <div className="bg-[#f2efe9] p-2.5 md:p-3 rounded-full group-hover/upload:bg-[#ede8df] group-hover/upload:scale-110 group-hover/upload:shadow-sm transition-all duration-300">
+                              <Upload className="h-4 w-4 text-[#7f5700]" />
+                            </div>
+                            <span className="text-[8px] font-bold text-[#1A1410] uppercase tracking-widest md:hidden">Gallery</span>
+                            <span className="hidden md:block text-[10px] font-bold text-[#1A1410] uppercase tracking-widest whitespace-nowrap">Upload</span>
+                          </label>
+
+                          {/* Take Photo (Mobile Only) */}
+                          <label htmlFor={`camera-${slot.id}`} className="flex flex-col items-center gap-1.5 cursor-pointer group/camera md:hidden">
+                            <div className="bg-[#f2efe9] p-2.5 rounded-full group-hover/camera:bg-[#ede8df] group-hover/camera:scale-110 group-hover/camera:shadow-sm transition-all duration-300">
+                              <Camera className="h-4 w-4 text-[#7f5700]" />
+                            </div>
+                            <span className="text-[8px] font-bold text-[#1A1410] uppercase tracking-widest">Camera</span>
+                          </label>
+                        </div>
+                        <div className="text-[8px] text-[#8c8278] font-sans mt-0.5">JPG, PNG • Max 10MB</div>
+                      </div>
+                    )}
+                  </div>
+                );
+              };
+
+              return category === 'SAREE' ? (
+                <div className="grid grid-cols-2 gap-3">
+                  {activeSlots.map(renderSlot)}
                 </div>
-              </div>
-                
+              ) : (
+                <div className="flex flex-col gap-5">
+                  <div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="h-px bg-[#e5e0d8] flex-1"></div>
+                      <span className="text-[9px] uppercase font-bold tracking-[2px] text-[#1A1410]">Full Garment</span>
+                      <div className="h-px bg-[#e5e0d8] flex-1"></div>
+                    </div>
+                    {renderSlot(activeSlots.find(s => s.id === 'full'))}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="h-px bg-[#e5e0d8] flex-1"></div>
+                      <span className="text-[9px] uppercase font-bold tracking-[2px] text-[#1A1410]">
+                        Garment Parts {category === 'LEHANGA' ? '& Dupatta Style (Optional)' : ''}
+                      </span>
+                      <div className="h-px bg-[#e5e0d8] flex-1"></div>
+                    </div>
+                    <div className={`grid grid-cols-2 ${category === 'LEHANGA' ? 'lg:grid-cols-4' : ''} gap-3`}>
+                      {renderSlot(activeSlots.find(s => s.id === 'top'))}
+                      {renderSlot(activeSlots.find(s => s.id === 'bottom'))}
+
+                      {/* Dupatta Drape Style Selection (Lehenga Only) */}
+                      {category === 'LEHANGA' && (
+                        [
+                          { id: 'style_1', name: 'Classic Single-Shoulder', url: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/lehanga_duppatta1.jpg' },
+                          { id: 'style_2', name: 'Traditional Front Pleat', url: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/lehangaduppatta2.jpg' }
+                        ].map(style => (
+                          <button
+                            key={style.id}
+                            onClick={() => setSelectedDupattaStyle(selectedDupattaStyle === style.url ? null : style.url)}
+                            className={`relative group rounded-xl overflow-hidden border-2 transition-all min-h-[140px] ${selectedDupattaStyle === style.url ? 'border-[#7F5700] ring-4 ring-[#7F5700]/20' : 'border-[#e5e0d8] hover:border-[#7F5700]/50'}`}
+                          >
+                            <div className="w-full h-full bg-[#faf7f2]">
+                              <img src={style.url} alt={style.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                            </div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-2.5">
+                              <span className="text-white text-[8px] md:text-[9px] font-bold uppercase tracking-wider text-left drop-shadow-md">{style.name}</span>
+                            </div>
+                            {selectedDupattaStyle === style.url && (
+                              <div className="absolute top-2 right-2 bg-[#7F5700] text-white p-1 rounded-full shadow-lg">
+                                <Check className="w-3 h-3" />
+                              </div>
+                            )}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Try Sample Materials Button */}
+            <div className="mt-3 flex justify-center">
+              <button
+                onClick={() => setShowSampleModal(true)}
+                className="text-[10px] border border-[#dcd6cc] bg-[#fdfcf9] hover:bg-[#ede8df] hover:border-[#7f5700] text-[#5c544d] px-6 py-2 rounded-full transition-colors flex items-center gap-2 uppercase tracking-[1.5px] font-bold shadow-sm"
+              >
+                <Image className="w-3.5 h-3.5" /> Sample Materials
+              </button>
+            </div>
+          </div>
+
+          {/* Step 3: SELECT MODEL */}
+          <div className="space-y-5">
+            <div className="flex items-center gap-2">
+              <div className="bg-[#1a1410] text-[#faf7f2] size-4 flex items-center justify-center text-[9px] font-bold">3</div>
+              <h3 className="text-[10px] tracking-[1px] uppercase font-bold text-[#1A1410]">SELECT MODEL</h3>
+            </div>
+
+            <div className="grid grid-cols-4 gap-3 w-full">
+              {(defaultModels.length > 0 ? defaultModels : [
+                { name: "Classic Studio", img: imgModelClassicStudio },
+                { name: "Heritage Court", img: imgModelHeritageCourt }
+              ]).map((model) => {
+                const isSelected = selectedModel === model.name;
+                return (
+                  <button
+                    key={model.name}
+                    onClick={() => {
+                      setSelectedModel(model.name);
+                      setResultImageUrl(null);
+                      setTryonState('initial');
+                    }}
+                    className={`w-full border p-0.5 relative flex flex-col transition-all duration-300 ${isSelected ? 'border-[#7f5700]' : 'border-[rgba(0,0,0,0)] opacity-75 hover:opacity-100'
+                      }`}
+                  >
+                    <div className="aspect-[3/4] w-full overflow-hidden relative">
+                      <img src={model.img} alt={model.name} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                      <div className="absolute bottom-0 left-0 right-0 bg-[rgba(26,20,16,0.8)] p-1.5 flex items-center justify-between">
+                        <span className="text-[7px] font-bold tracking-[0.5px] text-[#faf7f2] uppercase truncate max-w-[80%]">{model.name}</span>
+                        {isSelected && <img src={imgCheckIcon} alt="selected" className="size-[6px] object-contain invert shrink-0" onError={(e) => { e.target.style.display = 'none'; }} />}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Primary Action Button: GENERATE TRY-ON */}
           <button
             onClick={startGeneration}
@@ -776,24 +775,24 @@ export default function TryonWorkspace({ onExit }) {
 
         {/* Right Side Result Canvas Column */}
         <main className="flex-1 bg-[#FFFFFF] relative overflow-hidden flex flex-col items-center justify-center p-4 md:p-8 min-h-[600px] md:min-h-0 shrink-0 md:shrink">
-          
+
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="absolute border-[rgba(26,20,16,0.2)] border-r border-t right-[-192px] size-[384px] top-[-192px]" />
             <div className="absolute border-[rgba(26,20,16,0.2)] border-b border-l bottom-[-128px] left-[-128px] size-[256px]" />
           </div>
 
           <div className="aspect-[3/4] bg-[#FAF7F2] w-full max-w-[500px] shadow-2xl border border-[rgba(26,20,16,0.05)] relative overflow-hidden flex items-center justify-center animate-fade-in z-10">
-            
+
             {/* STATE A: Initial Model Preview */}
             {tryonState === 'initial' && (
               <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-[#faf7f2] animate-fade-in">
-                <img 
+                <img
                   src={
-                    workspaceMode === 'with_garment' 
+                    workspaceMode === 'with_garment'
                       ? (defaultModels.find(m => m.name === selectedModel)?.img || imgSilhouetteIcon)
                       : (selectedCatalogDress?.img || imgSilhouetteIcon)
-                  } 
-                  alt="Base model preview" 
+                  }
+                  alt="Base model preview"
                   className="w-full h-full object-cover transition-all duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col items-center justify-end pb-12 pointer-events-none">
@@ -863,28 +862,28 @@ export default function TryonWorkspace({ onExit }) {
                 <div className="hidden md:flex mt-12 border border-[#e5e0d8] rounded-2xl items-stretch divide-x divide-[#e5e0d8] bg-white w-full max-w-[560px] shadow-sm overflow-hidden">
                   <div className="flex-1 flex flex-col items-center justify-start text-center p-4 py-5">
                     <div className="w-8 h-8 rounded-full bg-[#faf7f2] flex items-center justify-center mb-3">
-                       <Sparkles className="w-4 h-4 text-[#7F5700]" />
+                      <Sparkles className="w-4 h-4 text-[#7F5700]" />
                     </div>
                     <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none">Realistic Try-On</h6>
                     <p className="text-[8px] text-[#8c8278] leading-[1.4] max-w-[90px]">Advanced AI for realistic results</p>
                   </div>
                   <div className="flex-1 flex flex-col items-center justify-start text-center p-4 py-5">
                     <div className="w-8 h-8 rounded-full bg-[#faf7f2] flex items-center justify-center mb-3">
-                       <ShieldCheck className="w-4 h-4 text-[#7F5700]" />
+                      <ShieldCheck className="w-4 h-4 text-[#7F5700]" />
                     </div>
                     <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none">Secure & Private</h6>
                     <p className="text-[8px] text-[#8c8278] leading-[1.4] max-w-[90px]">Your images are safe and never shared</p>
                   </div>
                   <div className="flex-1 flex flex-col items-center justify-start text-center p-4 py-5">
                     <div className="w-8 h-8 rounded-full bg-[#faf7f2] flex items-center justify-center mb-3">
-                       <Image className="w-4 h-4 text-[#7F5700]" />
+                      <Image className="w-4 h-4 text-[#7F5700]" />
                     </div>
                     <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none">High Quality</h6>
                     <p className="text-[8px] text-[#8c8278] leading-[1.4] max-w-[90px]">HD results with perfect fit</p>
                   </div>
                   <div className="flex-1 flex flex-col items-center justify-start text-center p-4 py-5">
                     <div className="w-8 h-8 rounded-full bg-[#faf7f2] flex items-center justify-center mb-3">
-                       <Timer className="w-4 h-4 text-[#7F5700]" />
+                      <Timer className="w-4 h-4 text-[#7F5700]" />
                     </div>
                     <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none">Easy & Fast</h6>
                     <p className="text-[8px] text-[#8c8278] leading-[1.4] max-w-[90px]">Get results in just seconds</p>
@@ -896,25 +895,25 @@ export default function TryonWorkspace({ onExit }) {
             {/* STATE C: Generated Result */}
             {tryonState === 'generated' && (
               <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-white overflow-hidden">
-                
-                <motion.img 
+
+                <motion.img
                   initial={{ scale: 1.05, filter: 'blur(10px)', opacity: 0 }}
                   animate={{ scale: 1, filter: 'blur(0px)', opacity: 1 }}
                   transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                   src={
-                    resultImageUrl || 
-                    (workspaceMode === 'with_garment' 
+                    resultImageUrl ||
+                    (workspaceMode === 'with_garment'
                       ? (defaultModels.find(m => m.name === selectedModel)?.img || DRAPED_RESULT_MAP["SAREE"]["Classic Studio"])
                       : (selectedCatalogDress?.draped || DRAPED_RESULT_MAP["SAREE"]["Classic Studio"]))
-                  } 
-                  alt="Try-on output preview" 
+                  }
+                  alt="Try-on output preview"
                   className="w-full h-full object-cover"
                 />
 
                 {/* Metadata label bottom-left */}
                 <div className="absolute bottom-4 left-4 backdrop-blur-[6px] bg-white/85 border border-[rgba(26,20,16,0.08)] px-3 py-1.5 shadow-sm">
                   <span className="text-[10px] font-bold text-[#1A1410]">
-                    {workspaceMode === 'with_garment' 
+                    {workspaceMode === 'with_garment'
                       ? `${selectedModel} — ${selectedBackdrop.name}`
                       : `${selectedCatalogDress?.name} — Personal Portrait — ${selectedBackdrop.name}`
                     }
@@ -929,12 +928,11 @@ export default function TryonWorkspace({ onExit }) {
 
 
           {/* Action buttons */}
-          <div 
-            className={`mt-4 grid gap-4 w-full max-w-[500px] transition-all duration-500 grid-cols-2 ${
-              tryonState === 'generated' ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden mt-0'
-            }`}
+          <div
+            className={`mt-4 grid gap-4 w-full max-w-[500px] transition-all duration-500 grid-cols-2 ${tryonState === 'generated' ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden mt-0'
+              }`}
           >
-            <button 
+            <button
               onClick={() => {
                 startGeneration();
               }}
@@ -944,7 +942,7 @@ export default function TryonWorkspace({ onExit }) {
               <span>REGENERATE</span>
             </button>
 
-            <button 
+            <button
               onClick={async () => {
                 if (isGuestMode) {
                   setShowGuestSaveModal(true);
@@ -981,23 +979,23 @@ export default function TryonWorkspace({ onExit }) {
         </main>
       </div>
 
-      <VendorLimitModal 
-        isOpen={showLimitModal} 
+      <VendorLimitModal
+        isOpen={showLimitModal}
         onClose={() => setShowLimitModal(false)}
         userType={isGuestMode ? 'guest' : 'vendor'}
       />
 
-      <VendorUpgradeModal 
-        isOpen={showUpgradeModal} 
-        onClose={() => setShowUpgradeModal(false)} 
+      <VendorUpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
       />
 
       {/* Guest Save Modal */}
       {showGuestSaveModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
           <div className="bg-[#FAF7F2] border border-[#1a1410] max-w-md w-full p-8 relative shadow-2xl text-center rounded-2xl">
-            <button 
-              onClick={() => setShowGuestSaveModal(false)} 
+            <button
+              onClick={() => setShowGuestSaveModal(false)}
               className="absolute top-4 right-4 text-[#1A1410] hover:text-[#7f5700] transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -1006,12 +1004,12 @@ export default function TryonWorkspace({ onExit }) {
               Save to Library
             </h2>
             <p className="text-[12px] text-[#5c544d] font-sans leading-relaxed mb-6">
-              To save your custom drapes to a personal library, please create a free Merchant Account. 
-              <br/><br/>
+              To save your custom drapes to a personal library, please create a free Merchant Account.
+              <br /><br />
               Alternatively, you can visit the Demo Gallery to try on existing collection pieces!
             </p>
             <div className="flex flex-col gap-3">
-              <button 
+              <button
                 onClick={() => {
                   sessionStorage.removeItem('guest_mode');
                   navigate('/login');
@@ -1020,7 +1018,7 @@ export default function TryonWorkspace({ onExit }) {
               >
                 Create Account
               </button>
-              <button 
+              <button
                 onClick={() => navigate('/shop/demo')}
                 className="w-full bg-transparent border border-[#1a1410] hover:bg-[rgba(26,20,16,0.05)] text-[#1A1410] py-3.5 text-[11px] font-bold tracking-[2px] uppercase transition-colors rounded-xl"
               >
@@ -1032,12 +1030,12 @@ export default function TryonWorkspace({ onExit }) {
       )}
 
       {/* Sample Materials Modal */}
-      <SampleWorkspaceModal 
-        isOpen={showSampleModal} 
-        onClose={() => setShowSampleModal(false)} 
-        category={category} 
-        garmentUploads={garmentUploads} 
-        setGarmentUploads={setGarmentUploads} 
+      <SampleWorkspaceModal
+        isOpen={showSampleModal}
+        onClose={() => setShowSampleModal(false)}
+        category={category}
+        garmentUploads={garmentUploads}
+        setGarmentUploads={setGarmentUploads}
       />
 
     </div>
