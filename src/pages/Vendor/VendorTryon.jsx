@@ -431,10 +431,10 @@ export default function VendorTryon() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col md:flex-row relative">
+      <div className="flex-1 flex flex-col xl:flex-row relative">
         
         {/* Left Side: Instructions & Upload */}
-        <aside className="w-full md:w-[400px] bg-[#faf7f2] border-r border-[rgba(26,20,16,0.1)] p-3 md:p-4 shrink-0 flex flex-col justify-start overflow-y-auto style={{scrollbarWidth: 'thin'}}">
+        <aside className="w-full xl:w-[400px] bg-[#faf7f2] border-r border-[rgba(26,20,16,0.1)] p-3 md:p-4 shrink-0 flex flex-col justify-start overflow-y-auto style={{scrollbarWidth: 'thin'}}">
           
           {/* Global Hidden Inputs for Camera and File Browser */}
           <input ref={cameraInputRef} type="file" accept="image/*" capture="camera" onChange={handleFileChange} className="hidden" />
@@ -786,7 +786,7 @@ export default function VendorTryon() {
 
         {/* Right Side: Background Panel */}
         {tryonState === 'generated' && (
-          <aside className="w-full md:w-[360px] bg-[#faf7f2] border-l border-[rgba(26,20,16,0.1)] p-8 shrink-0 flex flex-col justify-center animate-fade-in">
+          <aside className="w-full xl:w-[360px] bg-[#faf7f2] border-l border-[rgba(26,20,16,0.1)] p-8 shrink-0 flex flex-col justify-center animate-fade-in">
             <h3 className="font-['EB_Garamond',serif] text-[20px] text-[#1a1410] mb-2">Change Background</h3>
             <p className="text-[10px] tracking-[0.5px] text-[#8c8278] mb-8">Select a background and apply it to your try-on.</p>
             

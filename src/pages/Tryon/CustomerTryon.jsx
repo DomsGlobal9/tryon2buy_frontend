@@ -10,26 +10,26 @@ import VendorUpgradeModal from '../../components/VendorUpgradeModal';
 // Display-only — no prompts or raw image logic here.
 // The backend resolves everything from prompts.js using these IDs.
 const BACKGROUND_OPTIONS = [
-  { id: 'bg1', name: 'Ancient Temple',   image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg1.png' },
-  { id: 'bg2', name: 'Festive Palace',   image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg2.png' },
-  { id: 'bg3', name: 'Luxury Boutique',  image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg3.png' },
-  { id: 'bg4', name: 'Hotel Lobby',      image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg4.png' },
-  { id: 'bg5', name: 'Floral Archway',   image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg5.jpg' },
-  { id: 'bg6', name: 'Golden Palace',    image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg6.jpg' },
-  { id: 'bg7', name: 'Tropical Garden',  image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg7.jpg' },
-  { id: 'bg8', name: 'Beach Resort',     image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg8.png' }
+  { id: 'bg1', name: 'Ancient Temple', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg1.png' },
+  { id: 'bg2', name: 'Festive Palace', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg2.png' },
+  { id: 'bg3', name: 'Luxury Boutique', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg3.png' },
+  { id: 'bg4', name: 'Hotel Lobby', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg4.png' },
+  { id: 'bg5', name: 'Floral Archway', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg5.jpg' },
+  { id: 'bg6', name: 'Golden Palace', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg6.jpg' },
+  { id: 'bg7', name: 'Tropical Garden', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg7.jpg' },
+  { id: 'bg8', name: 'Beach Resort', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg8.png' }
 ];
 
 const SHOWCASE_BLOUSES = [
   { id: 'elbow-sleeve', name: 'Elbow Sleeve', image: '/assets/blouse/elbow_sleeve.png' },
-  { id: 'full-sleeve',  name: 'Full Sleeve',  image: '/assets/blouse/full_sleeve.png' },
-  { id: 'sleeveless',   name: 'Sleeveless',   image: '/assets/blouse/sleeve_less.png' }
+  { id: 'full-sleeve', name: 'Full Sleeve', image: '/assets/blouse/full_sleeve.png' },
+  { id: 'sleeveless', name: 'Sleeveless', image: '/assets/blouse/sleeve_less.png' }
 ];
 
 const SHOWCASE_NECKS = [
-  { id: 'boat-neck',    name: 'Boat Neck',    image: '/assets/neck/boat_neck.png' },
-  { id: 'round-neck',   name: 'Round Neck',   image: '/assets/neck/round_neck.png' },
-  { id: 'collar-neck',  name: 'Collar Neck',  image: '/assets/neck/collar_neck.png' }
+  { id: 'boat-neck', name: 'Boat Neck', image: '/assets/neck/boat_neck.png' },
+  { id: 'round-neck', name: 'Round Neck', image: '/assets/neck/round_neck.png' },
+  { id: 'collar-neck', name: 'Collar Neck', image: '/assets/neck/collar_neck.png' }
 ];
 
 export default function CustomerTryon() {
@@ -46,11 +46,11 @@ export default function CustomerTryon() {
 
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
-  
+
   const [tryonState, setTryonState] = useState('initial'); // 'initial', 'generating', 'generated'
   const [progress, setProgress] = useState(0);
   const [resultImageUrl, setResultImageUrl] = useState(null);
-  
+
   const [isChangingBackground, setIsChangingBackground] = useState(false);
   const [selectedBg, setSelectedBg] = useState(null);
 
@@ -194,12 +194,12 @@ export default function CustomerTryon() {
 
   const applyBackground = async () => {
     if (!resultImageUrl || isChangingBackground || !selectedBg) return;
-    
+
     const bgOption = BACKGROUND_OPTIONS.find(bg => bg.id === selectedBg);
     if (!bgOption) return;
 
     setIsChangingBackground(true);
-    
+
     try {
       const res = await fetch(`${API_URL}/api/tryon/change-background`, {
         method: 'POST',
@@ -224,7 +224,7 @@ export default function CustomerTryon() {
         return;
       }
       if (!res.ok) throw new Error(data.error || "Failed to change background");
-      
+
       setResultImageUrl(data.url);
       setSelectedBg(null);
     } catch (err) {
@@ -273,7 +273,7 @@ export default function CustomerTryon() {
 
   const startGeneration = async () => {
     if (!selectedImage || !sourceGeneration) return;
-    
+
     setTryonState('generating');
     setProgress(0);
 
@@ -289,10 +289,10 @@ export default function CustomerTryon() {
       if (selectedFile) {
         const formData = new FormData();
         formData.append('image', selectedFile);
-        const uploadRes = await fetch(`${API_URL}/api/tryon/upload?folder=user-uploads`, { 
-          method: 'POST', 
+        const uploadRes = await fetch(`${API_URL}/api/tryon/upload?folder=user-uploads`, {
+          method: 'POST',
           headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {},
-          body: formData 
+          body: formData
         });
 
         if (uploadRes.status === 401 || uploadRes.status === 403) {
@@ -344,7 +344,7 @@ export default function CustomerTryon() {
       }
 
       const genData = await genRes.json();
-      
+
       if (intervalRef.current) clearInterval(intervalRef.current);
       setProgress(100);
       setResultImageUrl(genData.result_image_url || garment_image_url);
@@ -380,8 +380,9 @@ export default function CustomerTryon() {
 
   return (
     <div className="bg-[#faf7f2] min-h-screen flex flex-col font-['Courier_Prime',monospace] text-[#1a1410] antialiased select-none">
-      
-      <style dangerouslySetInnerHTML={{__html: `
+
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes scan {
           0% { top: 0%; }
           50% { top: 100%; }
@@ -398,7 +399,7 @@ export default function CustomerTryon() {
           animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
       `}} />
-      
+
       {/* Header */}
       <header className="bg-[#faf7f2] border-b border-[rgba(26,20,16,0.1)] h-[60px] flex items-center justify-between px-4 md:px-[32px] shrink-0 relative">
         {/* Back Button */}
@@ -414,7 +415,7 @@ export default function CustomerTryon() {
 
         {/* Centered Branding */}
         <div className="flex justify-center items-center gap-2 md:gap-3">
-          <div 
+          <div
             onClick={() => {
               if (authToken) {
                 navigate('/workspace');
@@ -445,11 +446,11 @@ export default function CustomerTryon() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col md:flex-row relative">
-        
+      <div className="flex-1 flex flex-col xl:flex-row relative">
+
         {/* Left Side: Instructions & Upload */}
-        <aside className="w-full md:w-[400px] bg-[#faf7f2] border-r border-[rgba(26,20,16,0.1)] p-3 md:p-4 shrink-0 flex flex-col justify-start overflow-y-auto style={{scrollbarWidth: 'thin'}}">
-          
+        <aside className="w-full xl:w-[400px] bg-[#faf7f2] border-r border-[rgba(26,20,16,0.1)] p-3 md:p-4 shrink-0 flex flex-col justify-start overflow-y-auto style={{scrollbarWidth: 'thin'}}">
+
           {/* Global Hidden Inputs for Camera and File Browser */}
           <input ref={cameraInputRef} type="file" accept="image/*" capture="camera" onChange={handleFileChange} className="hidden" />
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
@@ -497,7 +498,7 @@ export default function CustomerTryon() {
               </div>
 
               {/* Upload Area */}
-              <div 
+              <div
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onDragEnter={handleDragEnter}
@@ -509,7 +510,7 @@ export default function CustomerTryon() {
                   <div className="w-full h-full flex flex-col items-center justify-center group">
                     <div className="relative mb-3">
                       <img src={selectedImage} alt="Your Portrait" className="h-[120px] w-auto object-contain rounded-md shadow-sm" />
-                      <button 
+                      <button
                         onClick={clearImage}
                         className="absolute top-1 right-1 bg-black/40 hover:bg-red-500 text-white rounded-full p-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all z-20"
                         title="Remove image"
@@ -519,14 +520,14 @@ export default function CustomerTryon() {
                     </div>
 
                     <div className="flex items-center gap-2 z-10 justify-center">
-                      <button 
-                        onClick={triggerCamera} 
+                      <button
+                        onClick={triggerCamera}
                         className="lg:hidden border border-[#dd6b20] text-[#dd6b20] bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[10px] font-sans hover:bg-[#dd6b20] hover:text-white transition-colors"
                       >
                         <Camera className="w-3.5 h-3.5" /> Take Photo
                       </button>
-                      <button 
-                        onClick={triggerFileBrowser} 
+                      <button
+                        onClick={triggerFileBrowser}
                         className="border border-[#dd6b20] text-[#dd6b20] bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[10px] font-sans hover:bg-[#dd6b20] hover:text-white transition-colors"
                       >
                         <FolderOpen className="w-3.5 h-3.5" /> Browse Files
@@ -539,7 +540,7 @@ export default function CustomerTryon() {
                       <CloudUpload className="w-6 h-6 text-[#dd6b20]" />
                     </div>
                     <h3 className="text-[#1a202c] text-[13px] font-bold mb-2 font-sans">Drag & drop your image here</h3>
-                    
+
                     <div className="flex items-center justify-center w-full max-w-[160px] mb-2">
                       <div className="flex-1 h-[1px] bg-[#e2e8f0]"></div>
                       <span className="px-2 text-[#a0aec0] text-[10px] font-sans">or</span>
@@ -547,14 +548,14 @@ export default function CustomerTryon() {
                     </div>
 
                     <div className="flex items-center gap-2 mb-2 z-10">
-                      <button 
-                        onClick={triggerCamera} 
+                      <button
+                        onClick={triggerCamera}
                         className="lg:hidden border border-[#dd6b20] text-[#dd6b20] bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[10px] font-sans hover:bg-[#dd6b20] hover:text-white transition-colors"
                       >
                         <Camera className="w-3.5 h-3.5" /> Take Photo
                       </button>
-                      <button 
-                        onClick={triggerFileBrowser} 
+                      <button
+                        onClick={triggerFileBrowser}
                         className="border border-[#dd6b20] text-[#dd6b20] bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[10px] font-sans hover:bg-[#dd6b20] hover:text-white transition-colors"
                       >
                         <FolderOpen className="w-3.5 h-3.5" /> Browse Files
@@ -583,7 +584,7 @@ export default function CustomerTryon() {
 
           {tryonState === 'generated' && selectedImage && (
             <div className="mb-4 animate-fade-in mt-4">
-              <div 
+              <div
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onDragEnter={handleDragEnter}
@@ -591,8 +592,8 @@ export default function CustomerTryon() {
                 className={`bg-white border-2 flex flex-col items-center justify-center text-center relative overflow-hidden group p-2 min-h-[140px] rounded-xl mb-3 transition-all ${isDragging ? 'border-[#dd6b20] border-dashed bg-[#fffaf0] scale-[1.02] shadow-md' : 'border-[#f6ad55]'}`}
               >
                 <img src={selectedImage} alt="Your Portrait" className="h-[120px] w-auto object-contain shadow-sm rounded-lg pointer-events-none" />
-                
-                <button 
+
+                <button
                   onClick={clearImage}
                   className="absolute top-1 right-1 bg-black/40 hover:bg-red-500 text-white rounded-full p-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all z-20"
                   title="Remove image"
@@ -601,14 +602,14 @@ export default function CustomerTryon() {
                 </button>
               </div>
               <div className="flex items-center gap-2 z-10 justify-center">
-                <button 
-                  onClick={triggerCamera} 
+                <button
+                  onClick={triggerCamera}
                   className="lg:hidden border border-[#dd6b20] text-[#dd6b20] bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[10px] font-sans hover:bg-[#dd6b20] hover:text-white transition-colors"
                 >
                   <Camera className="w-3.5 h-3.5" /> Take Photo
                 </button>
-                <button 
-                  onClick={triggerFileBrowser} 
+                <button
+                  onClick={triggerFileBrowser}
                   className="border border-[#dd6b20] text-[#dd6b20] bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[10px] font-sans hover:bg-[#dd6b20] hover:text-white transition-colors"
                 >
                   <FolderOpen className="w-3.5 h-3.5" /> Browse Files
@@ -630,27 +631,25 @@ export default function CustomerTryon() {
 
           {tryonState === 'generated' && (!sourceGeneration?.category || sourceGeneration?.category.toUpperCase() === 'SAREE') && (
             <div className="mb-6 animate-fade-in border-t border-[rgba(26,20,16,0.1)] pt-6">
-              
+
               <div className="bg-[rgba(26,20,16,0.05)] rounded-full p-1 flex">
                 <button
                   onClick={() => setActiveTab('sleeve')}
                   disabled={isModifying || isChangingBackground}
-                  className={`flex-1 py-3 text-[10px] font-bold tracking-[1.5px] uppercase rounded-full transition-all duration-300 ${(isModifying || isChangingBackground) ? 'opacity-50 cursor-not-allowed' : ''} ${
-                    activeTab === 'sleeve'
+                  className={`flex-1 py-3 text-[10px] font-bold tracking-[1.5px] uppercase rounded-full transition-all duration-300 ${(isModifying || isChangingBackground) ? 'opacity-50 cursor-not-allowed' : ''} ${activeTab === 'sleeve'
                       ? 'bg-white shadow-sm text-[#1a1410]'
                       : 'text-[#8c8278] hover:text-[#1a1410]'
-                  }`}
+                    }`}
                 >
                   SLEEVE STYLE
                 </button>
                 <button
                   onClick={() => setActiveTab('neck')}
                   disabled={isModifying || isChangingBackground}
-                  className={`flex-1 py-3 text-[10px] font-bold tracking-[1.5px] uppercase rounded-full transition-all duration-300 ${(isModifying || isChangingBackground) ? 'opacity-50 cursor-not-allowed' : ''} ${
-                    activeTab === 'neck'
+                  className={`flex-1 py-3 text-[10px] font-bold tracking-[1.5px] uppercase rounded-full transition-all duration-300 ${(isModifying || isChangingBackground) ? 'opacity-50 cursor-not-allowed' : ''} ${activeTab === 'neck'
                       ? 'bg-white shadow-sm text-[#1a1410]'
                       : 'text-[#8c8278] hover:text-[#1a1410]'
-                  }`}
+                    }`}
                 >
                   NECK STYLE
                 </button>
@@ -719,11 +718,10 @@ export default function CustomerTryon() {
           <button
             onClick={startGeneration}
             disabled={!selectedImage || tryonState === 'generating'}
-            className={`w-full py-4 text-[11px] font-bold tracking-[2px] uppercase flex items-center justify-center gap-2 transition-all shadow-lg rounded-full ${
-              selectedImage && tryonState !== 'generating'
+            className={`w-full py-4 text-[11px] font-bold tracking-[2px] uppercase flex items-center justify-center gap-2 transition-all shadow-lg rounded-full ${selectedImage && tryonState !== 'generating'
                 ? 'bg-[#dd6b20] hover:bg-[#c05621] text-white cursor-pointer hover:shadow-xl active:scale-[0.99]'
                 : 'bg-[rgba(26,20,16,0.1)] text-[#8c8278] cursor-not-allowed shadow-none'
-            } ${tryonState === 'generated' ? 'hidden' : ''}`}
+              } ${tryonState === 'generated' ? 'hidden' : ''}`}
           >
             <span>{tryonState === 'generating' ? 'FITTING IN PROGRESS...' : 'SEE MYSELF IN THIS'}</span>
           </button>
@@ -737,7 +735,7 @@ export default function CustomerTryon() {
           </div>
 
           <div className="aspect-[3/4] bg-[#faf7f2] w-full max-w-[500px] shadow-2xl border border-[rgba(26,20,16,0.05)] relative overflow-hidden flex items-center justify-center animate-fade-in z-10">
-            
+
             {tryonState === 'initial' && (
               <img src={drapedDressUrl} alt="Garment" className="w-full h-full object-cover" />
             )}
@@ -757,7 +755,7 @@ export default function CustomerTryon() {
             {tryonState === 'generated' && (
               <div className="relative w-full h-full animate-fade-in group/canvas">
                 <img src={resultImageUrl} alt="Your Personal Try-On" className={`w-full h-full object-cover transition-opacity duration-700 ${(isChangingBackground || isModifying) ? 'opacity-40 blur-[2px]' : 'opacity-100'}`} />
-                
+
                 {/* Background Changing Animation */}
                 {isChangingBackground && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white/60 backdrop-blur-[2px]">
@@ -800,10 +798,10 @@ export default function CustomerTryon() {
 
         {/* Right Side: Background Panel */}
         {tryonState === 'generated' && (
-          <aside className="w-full md:w-[360px] bg-[#faf7f2] border-l border-[rgba(26,20,16,0.1)] p-8 shrink-0 flex flex-col justify-center animate-fade-in">
+          <aside className="w-full xl:w-[360px] bg-[#faf7f2] border-l border-[rgba(26,20,16,0.1)] p-8 shrink-0 flex flex-col justify-center animate-fade-in">
             <h3 className="font-['EB_Garamond',serif] text-[20px] text-[#1a1410] mb-2">Change Background</h3>
             <p className="text-[10px] tracking-[0.5px] text-[#8c8278] mb-8">Select a background and apply it to your try-on.</p>
-            
+
             <div className="grid grid-cols-2 gap-3 mb-8">
               {BACKGROUND_OPTIONS.map((bg) => (
                 <button
@@ -820,7 +818,7 @@ export default function CustomerTryon() {
               ))}
             </div>
 
-            <button 
+            <button
               onClick={applyBackground}
               disabled={!selectedBg || isChangingBackground || isModifying}
               className="w-full bg-[#1a1410] text-[#faf7f2] py-4 text-[11px] font-bold tracking-[1.5px] uppercase transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black flex items-center justify-center gap-2 shadow-md"
@@ -831,15 +829,15 @@ export default function CustomerTryon() {
           </aside>
         )}
       </div>
-      <VendorLimitModal 
-        isOpen={showVendorLimitModal} 
+      <VendorLimitModal
+        isOpen={showVendorLimitModal}
         onClose={() => setShowVendorLimitModal(false)}
         userType="guest"
       />
 
-      <VendorUpgradeModal 
-        isOpen={showUpgradeModal} 
-        onClose={() => setShowUpgradeModal(false)} 
+      <VendorUpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
         userType="vendor"
       />
     </div>
