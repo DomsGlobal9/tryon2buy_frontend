@@ -5,6 +5,9 @@ import { Sparkles, Check, ChevronLeft, RefreshCw, LogOut, Upload, Lightbulb, Clo
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import VendorLimitModal from '../../components/VendorLimitModal';
 import VendorUpgradeModal from '../../components/VendorUpgradeModal';
+import { saveToHistory, getActiveImage, deactivateActiveImage, clearAllHistory, subscribeToImageEvents, EVENTS } from '../../utils/imageStore';
+import ImageHistoryDock from '../../components/ImageHistoryDock';
+import FloatingImageAnimation from '../../components/FloatingImageAnimation';
 
 
 // Display-only — no prompts or raw image logic here.
@@ -35,10 +38,12 @@ const SHOWCASE_NECKS = [
 export default function VendorTryon() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
+  const activeImageRef = useRef(null);
   const intervalRef = useRef(null);
+  const isAnimatingRef = useRef(false);
+  const [floatingAnimation, setFloatingAnimation] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -78,13 +83,40 @@ export default function VendorTryon() {
     };
   };
 
-  const logout = () => {
-    setAuthToken(null);
-  };
 
   useEffect(() => {
     // Wait for explicit action
   }, [authToken]);
+
+  useEffect(() => {
+    async function loadStoredImage() {
+      const activeRecord = await getActiveImage();
+      if (activeRecord) {
+        setSelectedFile(activeRecord.file);
+        // Prevent creating multiple blob URLs for the same active image across renders
+        setSelectedImage(prev => {
+          if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev);
+          return URL.createObjectURL(activeRecord.file);
+        });
+      } else {
+        setSelectedFile(null);
+        setSelectedImage(prev => {
+          if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev);
+          return null;
+        });
+      }
+    }
+    loadStoredImage();
+
+    const unsubscribe = subscribeToImageEvents((data) => {
+      if ([EVENTS.PHOTO_PROMOTED, EVENTS.PHOTO_ADDED, EVENTS.PHOTO_DEACTIVATED, EVENTS.HISTORY_CLEARED].includes(data.type)) {
+        // Small delay to let IndexedDB transaction fully settle before reading
+        setTimeout(() => loadStoredImage(), 50);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     fetch(`${API_URL}/api/tryon/generations/${id}`)
@@ -103,9 +135,10 @@ export default function VendorTryon() {
   }, [id]);
 
   // Clean up blob URLs and intervals to prevent massive memory leaks on mobile
+  // IMPORTANT: Do NOT revoke if the floating animation is using this URL
   useEffect(() => {
     return () => {
-      if (selectedImage && selectedImage.startsWith('blob:')) {
+      if (selectedImage && selectedImage.startsWith('blob:') && !isAnimatingRef.current) {
         URL.revokeObjectURL(selectedImage);
       }
       if (intervalRef.current) {
@@ -129,19 +162,28 @@ export default function VendorTryon() {
       setSelectedFile(file);
       setSelectedImage(URL.createObjectURL(file));
       setTryonState('initial');
+      saveToHistory(file);
     }
   };
 
-  const clearImage = (e) => {
+  const clearImage = async (e) => {
     e.stopPropagation();
-    if (selectedImage && selectedImage.startsWith('blob:')) {
+    
+    if (activeImageRef.current && selectedImage) {
+      isAnimatingRef.current = true;
+      const rect = activeImageRef.current.getBoundingClientRect();
+      const urlToAnimate = selectedImage;
+      setFloatingAnimation({ url: urlToAnimate, sourceRect: rect });
+    } else if (selectedImage && selectedImage.startsWith('blob:')) {
       URL.revokeObjectURL(selectedImage);
     }
+    
     setSelectedImage(null);
     setSelectedFile(null);
     setTryonState('initial');
     if (fileInputRef.current) fileInputRef.current.value = '';
     if (cameraInputRef.current) cameraInputRef.current.value = '';
+    await deactivateActiveImage();
   };
 
   const triggerFileBrowser = (e) => {
@@ -171,6 +213,7 @@ export default function VendorTryon() {
         setSelectedFile(file);
         setSelectedImage(URL.createObjectURL(file));
         setTryonState('initial');
+        saveToHistory(file);
       }
     }
   };
@@ -325,12 +368,13 @@ export default function VendorTryon() {
         })
       });
 
-      const errorData = await genRes.clone().json().catch(() => ({}));
-      if (genRes.status === 401 && errorData.error === 'GUEST_LIMIT_REACHED') {
+      const genData = await genRes.json().catch(() => ({}));
+      
+      if (genRes.status === 401 && genData.error === 'GUEST_LIMIT_REACHED') {
         if (intervalRef.current) clearInterval(intervalRef.current);
         handleAuthError();
         return;
-      } else if (genRes.status === 403 && errorData.error === 'INSUFFICIENT_CREDITS') {
+      } else if (genRes.status === 403 && genData.error === 'INSUFFICIENT_CREDITS') {
         if (intervalRef.current) clearInterval(intervalRef.current);
         setShowUpgradeModal(true);
         setTryonState('initial');
@@ -340,10 +384,8 @@ export default function VendorTryon() {
         handleAuthError();
         return;
       } else if (!genRes.ok) {
-        throw new Error(errorData.error || 'Generation failed');
+        throw new Error(genData.error || 'Generation failed');
       }
-
-      const genData = await genRes.json();
       
       if (intervalRef.current) clearInterval(intervalRef.current);
       setProgress(100);
@@ -417,17 +459,8 @@ export default function VendorTryon() {
           </div>
         </div>
 
-        {/* Right spacer with Logout */}
+        {/* Right spacer */}
         <div className="flex-1 md:w-[200px] md:flex-none flex justify-end">
-          {authToken && (
-            <button
-              onClick={logout}
-              className="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:text-[#1a1410] transition-colors"
-            >
-              <LogOut className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span className="hidden md:inline">Sign Out</span>
-            </button>
-          )}
         </div>
       </header>
 
@@ -493,29 +526,27 @@ export default function VendorTryon() {
 
                 {selectedImage ? (
                   <div className="w-full h-full flex flex-col items-center justify-center group">
+                    <div className="bg-[#fffaf0] w-full rounded-md p-2 flex items-center justify-center gap-1.5 mb-2 border border-[#fefcbf]">
+                      <Check className="w-3.5 h-3.5 text-[#dd6b20]" />
+                      <span className="text-[#4a5568] text-[9px] font-sans font-bold">Photo saved for all try-ons (Expires 20m)</span>
+                    </div>
+                    
                     <div className="relative mb-3">
-                      <img src={selectedImage} alt="Your Portrait" className="h-[120px] w-auto object-contain rounded-md shadow-sm" />
-                      <button 
-                        onClick={clearImage}
-                        className="absolute top-1 right-1 bg-black/40 hover:bg-red-500 text-white rounded-full p-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all z-20"
-                        title="Remove image"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
+                      <img ref={activeImageRef} src={selectedImage} alt="Your Portrait" className="h-[120px] w-auto object-contain rounded-md shadow-sm pointer-events-none" />
                     </div>
 
-                    <div className="flex items-center gap-2 z-10 justify-center">
-                      <button 
-                        onClick={triggerCamera} 
-                        className="lg:hidden border border-[#dd6b20] text-[#dd6b20] bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[10px] font-sans hover:bg-[#dd6b20] hover:text-white transition-colors"
-                      >
-                        <Camera className="w-3.5 h-3.5" /> Take Photo
-                      </button>
+                    <div className="flex items-center gap-2 z-10 justify-center w-full max-w-[200px]">
                       <button 
                         onClick={triggerFileBrowser} 
-                        className="border border-[#dd6b20] text-[#dd6b20] bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[10px] font-sans hover:bg-[#dd6b20] hover:text-white transition-colors"
+                        className="flex-1 border border-[rgba(26,20,16,0.2)] text-[#4a5568] bg-white rounded-md px-3 py-1.5 flex items-center justify-center gap-1.5 font-bold text-[9px] uppercase tracking-wider font-sans hover:border-[#1a1410] hover:text-[#1a1410] transition-colors"
                       >
-                        <FolderOpen className="w-3.5 h-3.5" /> Browse Files
+                        <RefreshCw className="w-3 h-3" /> Replace
+                      </button>
+                      <button 
+                        onClick={clearImage}
+                        className="flex-1 border border-red-200 text-red-600 bg-red-50 rounded-md px-3 py-1.5 flex items-center justify-center gap-1.5 font-bold text-[9px] uppercase tracking-wider font-sans hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
+                      >
+                        <X className="w-3 h-3" /> Remove
                       </button>
                     </div>
                   </div>
@@ -576,28 +607,20 @@ export default function VendorTryon() {
                 onDragLeave={handleDragLeave}
                 className={`bg-white border-2 flex flex-col items-center justify-center text-center relative overflow-hidden group p-2 min-h-[140px] rounded-xl mb-3 transition-all ${isDragging ? 'border-[#dd6b20] border-dashed bg-[#fffaf0] scale-[1.02] shadow-md' : 'border-[#f6ad55]'}`}
               >
-                <img src={selectedImage} alt="Your Portrait" className="h-[120px] w-auto object-contain shadow-sm rounded-lg pointer-events-none" />
-                
-                <button 
-                  onClick={clearImage}
-                  className="absolute top-1 right-1 bg-black/40 hover:bg-red-500 text-white rounded-full p-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all z-20"
-                  title="Remove image"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
+                <img ref={activeImageRef} src={selectedImage} alt="Your Portrait" className="h-[120px] w-auto object-contain shadow-sm rounded-lg pointer-events-none" />
               </div>
-              <div className="flex items-center gap-2 z-10 justify-center">
-                <button 
-                  onClick={triggerCamera} 
-                  className="lg:hidden border border-[#dd6b20] text-[#dd6b20] bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[10px] font-sans hover:bg-[#dd6b20] hover:text-white transition-colors"
-                >
-                  <Camera className="w-3.5 h-3.5" /> Take Photo
-                </button>
+              <div className="flex items-center gap-2 z-10 justify-center w-full">
                 <button 
                   onClick={triggerFileBrowser} 
-                  className="border border-[#dd6b20] text-[#dd6b20] bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[10px] font-sans hover:bg-[#dd6b20] hover:text-white transition-colors"
+                  className="flex-1 border border-[rgba(26,20,16,0.2)] text-[#4a5568] bg-white rounded-md px-3 py-2 flex items-center justify-center gap-1.5 font-bold text-[9px] uppercase tracking-wider font-sans hover:border-[#1a1410] hover:text-[#1a1410] transition-colors"
                 >
-                  <FolderOpen className="w-3.5 h-3.5" /> Browse Files
+                  <RefreshCw className="w-3 h-3" /> Replace
+                </button>
+                <button 
+                  onClick={clearImage}
+                  className="flex-1 border border-red-200 text-red-600 bg-red-50 rounded-md px-3 py-2 flex items-center justify-center gap-1.5 font-bold text-[9px] uppercase tracking-wider font-sans hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
+                >
+                  <X className="w-3 h-3" /> Remove
                 </button>
               </div>
             </div>
@@ -828,6 +851,21 @@ export default function VendorTryon() {
         onClose={() => setShowUpgradeModal(false)} 
         userType="vendor"
       />
+      <ImageHistoryDock />
+      
+      {floatingAnimation && (
+        <FloatingImageAnimation 
+          imageUrl={floatingAnimation.url}
+          sourceRect={floatingAnimation.sourceRect}
+          onComplete={() => {
+            if (floatingAnimation.url.startsWith('blob:')) {
+              URL.revokeObjectURL(floatingAnimation.url);
+            }
+            isAnimatingRef.current = false;
+            setFloatingAnimation(null);
+          }}
+        />
+      )}
     </div>
   );
 }
