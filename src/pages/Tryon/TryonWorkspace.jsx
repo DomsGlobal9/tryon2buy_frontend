@@ -160,10 +160,10 @@ const DEFAULT_MODELS_BY_CATEGORY = {
     }
   ],
   "ANARKALI": [
-    { name: "Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/anarkali1.jpg" },
-    { name: "Model 2", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/anarkali2.jpg" },
-    { name: "Model 3", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/anarkali3.jpg" },
-    { name: "Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/anarkali4.jpg" }
+    { name: "Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/ChatGPT%20Image%20Aug%2020,%202026,%2005_55_11%20PM.png" },
+    { name: "Model 2", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/ChatGPT%20Image%20Aug%2020,%202026,%2005_55_23%20PM.png" },
+    { name: "Model 3", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/ChatGPT%20Image%20Aug%2020,%202026,%2005_55_52%20PM.png" },
+    { name: "Model 4", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/anarkali/ChatGPT%20Image%20Aug%2020,%202026,%2005_56_15%20PM.png" }
   ],
   "KURTHI": [
     { name: "Model 1", img: "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/kurti/kurti1.jpg" },
@@ -261,9 +261,15 @@ export default function TryonWorkspace({ onExit }) {
     linkCourier.rel = 'stylesheet';
     document.head.appendChild(linkCourier);
 
+    const linkInter = document.createElement('link');
+    linkInter.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
+    linkInter.rel = 'stylesheet';
+    document.head.appendChild(linkInter);
+
     return () => {
       document.head.removeChild(linkGaramond);
       document.head.removeChild(linkCourier);
+      document.head.removeChild(linkInter);
     };
   }, []);
 
@@ -811,82 +817,44 @@ export default function TryonWorkspace({ onExit }) {
             {/* STATE B: Generating Loading Animation */}
             {tryonState === 'generating' && (
               <div className="absolute inset-0 flex flex-col items-center justify-center p-8 bg-white/95 animate-fade-in text-center">
-                <div className="w-[180px] h-[240px] bg-white border border border-[rgba(26,20,16,0.08)] relative overflow-hidden mb-6 shadow-md">
-                  <img src={selectedImage || (Object.values(garmentUploads)[0]?.url) || imgSilhouetteIcon} alt="Scanning preview" className="w-full h-full object-cover blur-[5px] opacity-75" />
-                  <div className="absolute left-0 right-0 h-[2px] bg-[#c4933f] shadow-[0_0_8px_#c4933f] animate-scan" />
-                </div>
-
-                <div className="space-y-4 w-full max-w-[280px] text-left">
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 size-3.5 border border-[#1a1410] rounded-sm flex items-center justify-center">
-                      {progressStage >= 0 && <Check className="w-2.5 h-2.5 text-[#c4933f] stroke-[3]" />}
-                    </div>
-                    <div>
-                      <h5 className="text-[10px] font-bold uppercase tracking-wider text-[#1A1410]">Stage 1: silhouette extraction</h5>
-                      <p className="text-[8px] text-[#8c8278] font-sans">
-                        {progressStage === 0 ? 'Analyzing fabric structure and silhouette...' : 'Completed silhouette identification.'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 size-3.5 border border-[#1a1410] rounded-sm flex items-center justify-center">
-                      {progressStage >= 1 && <Check className="w-2.5 h-2.5 text-[#c4933f] stroke-[3]" />}
-                    </div>
-                    <div>
-                      <h5 className={`text-[10px] font-bold uppercase tracking-wider ${progressStage >= 1 ? 'text-[#1A1410]' : 'text-[#8c8278]'}`}>Stage 2: digital drapery mapping</h5>
-                      <p className="text-[8px] text-[#8c8278] font-sans">
-                        {progressStage < 1 ? 'Waiting...' : progressStage === 1 ? 'Aligning digital textile nodes on model...' : 'Completed grid nodes projection.'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 size-3.5 border border-[#1a1410] rounded-sm flex items-center justify-center">
-                      {progressStage >= 2 && <Check className="w-2.5 h-2.5 text-[#c4933f] stroke-[3]" />}
-                    </div>
-                    <div>
-                      <h5 className={`text-[10px] font-bold uppercase tracking-wider ${progressStage >= 2 ? 'text-[#1A1410]' : 'text-[#8c8278]'}`}>Stage 3: style compilation</h5>
-                      <p className="text-[8px] text-[#8c8278] font-sans">
-                        {progressStage < 2 ? 'Waiting...' : 'Simulating lighting, wrinkles, and shadows...'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="w-full max-w-[280px] border-t border-[rgba(26,20,16,0.08)] pt-4 mt-6 text-[8px] tracking-[1px] text-[#8c8278] uppercase font-bold text-left">
-                  ESTIMATING: {Math.max(1, Math.floor((100 - progress) / 8))} SEC REMAINING ({progress}%)
+                <div className="flex-1 flex items-center justify-center w-full min-h-[300px]">
+                  <dotlottie-wc 
+                    src="https://lottie.host/039ef93c-976a-4c61-a46d-63966c76e96e/9HZrOdg0ww.lottie" 
+                    style={{width: '380px', height: '380px', maxWidth: '100%'}} 
+                    autoplay="true" 
+                    loop="true"
+                  ></dotlottie-wc>
                 </div>
 
                 {/* Features Banner */}
-                <div className="hidden md:flex mt-12 border border-[#e5e0d8] rounded-2xl items-stretch divide-x divide-[#e5e0d8] bg-white w-full max-w-[560px] shadow-sm overflow-hidden">
+                <div className="hidden md:flex mt-auto mb-4 border border-[#e5e0d8] rounded-2xl items-stretch divide-x divide-[#e5e0d8] bg-white w-full max-w-[560px] shadow-sm overflow-hidden shrink-0 font-['Inter',sans-serif] tracking-normal">
                   <div className="flex-1 flex flex-col items-center justify-start text-center p-4 py-5">
                     <div className="w-8 h-8 rounded-full bg-[#faf7f2] flex items-center justify-center mb-3">
                       <Sparkles className="w-4 h-4 text-[#7F5700]" />
                     </div>
-                    <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none">Realistic Try-On</h6>
-                    <p className="text-[8px] text-[#8c8278] leading-[1.4] max-w-[90px]">Advanced AI for realistic results</p>
+                    <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none tracking-wide">Realistic Try-On</h6>
+                    <p className="text-[8px] text-[#5c544d] leading-[1.5] max-w-[90px] font-medium">Advanced AI for realistic results</p>
                   </div>
                   <div className="flex-1 flex flex-col items-center justify-start text-center p-4 py-5">
                     <div className="w-8 h-8 rounded-full bg-[#faf7f2] flex items-center justify-center mb-3">
                       <ShieldCheck className="w-4 h-4 text-[#7F5700]" />
                     </div>
-                    <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none">Secure & Private</h6>
-                    <p className="text-[8px] text-[#8c8278] leading-[1.4] max-w-[90px]">Your images are safe and never shared</p>
+                    <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none tracking-wide">Secure & Private</h6>
+                    <p className="text-[8px] text-[#5c544d] leading-[1.5] max-w-[90px] font-medium">Your images are safe and never shared</p>
                   </div>
                   <div className="flex-1 flex flex-col items-center justify-start text-center p-4 py-5">
                     <div className="w-8 h-8 rounded-full bg-[#faf7f2] flex items-center justify-center mb-3">
                       <Image className="w-4 h-4 text-[#7F5700]" />
                     </div>
-                    <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none">High Quality</h6>
-                    <p className="text-[8px] text-[#8c8278] leading-[1.4] max-w-[90px]">HD results with perfect fit</p>
+                    <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none tracking-wide">High Quality</h6>
+                    <p className="text-[8px] text-[#5c544d] leading-[1.5] max-w-[90px] font-medium">HD results with perfect fit</p>
                   </div>
                   <div className="flex-1 flex flex-col items-center justify-start text-center p-4 py-5">
                     <div className="w-8 h-8 rounded-full bg-[#faf7f2] flex items-center justify-center mb-3">
                       <Timer className="w-4 h-4 text-[#7F5700]" />
                     </div>
-                    <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none">Easy & Fast</h6>
-                    <p className="text-[8px] text-[#8c8278] leading-[1.4] max-w-[90px]">Get results in just seconds</p>
+                    <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none tracking-wide">Easy & Fast</h6>
+                    <p className="text-[8px] text-[#5c544d] leading-[1.5] max-w-[90px] font-medium">Get results in just seconds</p>
                   </div>
                 </div>
               </div>

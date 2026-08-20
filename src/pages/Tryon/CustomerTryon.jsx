@@ -4,7 +4,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Sparkles, Check, ChevronLeft, RefreshCw, LogOut, Upload, Lightbulb, CloudUpload, FolderOpen, Heart, Lock, ShieldCheck, Shield, Camera, X } from 'lucide-react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import VendorLimitModal from '../../components/VendorLimitModal';
-import { saveToHistory, getActiveImage, deactivateActiveImage, clearAllHistory, subscribeToImageEvents, EVENTS } from '../../utils/imageStore';
+import { saveToHistory, getActiveImage, deactivateActiveImage, clearAllHistory, subscribeToImageEvents, EVENTS, saveTryonResult, getTryonResultsBySelfie, deleteTryonResult, updateTryonResult, pingSelfieActivity } from '../../utils/imageStore';
 import ImageHistoryDock from '../../components/ImageHistoryDock';
 import FloatingImageAnimation from '../../components/FloatingImageAnimation';
 import VendorUpgradeModal from '../../components/VendorUpgradeModal';
@@ -55,6 +55,10 @@ export default function CustomerTryon() {
   const [tryonState, setTryonState] = useState('initial'); // 'initial', 'generating', 'generated'
   const [progress, setProgress] = useState(0);
   const [resultImageUrl, setResultImageUrl] = useState(null);
+  
+  const [activeSelfieId, setActiveSelfieId] = useState(null);
+  const [carouselResults, setCarouselResults] = useState([]);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
   const [isChangingBackground, setIsChangingBackground] = useState(false);
   const [selectedBg, setSelectedBg] = useState(null);
@@ -92,12 +96,14 @@ export default function CustomerTryon() {
     async function loadStoredImage() {
       const activeRecord = await getActiveImage();
       if (activeRecord) {
+        setActiveSelfieId(activeRecord.id);
         setSelectedFile(activeRecord.file);
         setSelectedImage(prev => {
           if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev);
           return URL.createObjectURL(activeRecord.file);
         });
       } else {
+        setActiveSelfieId(null);
         setSelectedFile(null);
         setSelectedImage(prev => {
           if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev);
@@ -107,15 +113,33 @@ export default function CustomerTryon() {
     }
     loadStoredImage();
 
+    async function loadCarousel() {
+      if (activeSelfieId) {
+        const results = await getTryonResultsBySelfie(activeSelfieId);
+        setCarouselResults(results);
+        setCurrentSlideIndex(0);
+      } else {
+        setCarouselResults([]);
+        setCurrentSlideIndex(0);
+      }
+    }
+    loadCarousel();
+
     const unsubscribe = subscribeToImageEvents((data) => {
       if ([EVENTS.PHOTO_PROMOTED, EVENTS.PHOTO_ADDED, EVENTS.PHOTO_DEACTIVATED, EVENTS.HISTORY_CLEARED].includes(data.type)) {
-        // Small delay to let IndexedDB transaction fully settle before reading
         setTimeout(() => loadStoredImage(), 50);
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [activeSelfieId]);
+
+  // Ping selfie activity to extend 20-minute expiry when user interacts with carousel
+  useEffect(() => {
+    if (activeSelfieId) {
+      pingSelfieActivity(activeSelfieId);
+    }
+  }, [currentSlideIndex, carouselResults, activeSelfieId]);
 
   useEffect(() => {
     fetch(`${API_URL}/api/tryon/generations/${id}`)
@@ -235,7 +259,10 @@ export default function CustomerTryon() {
   };
 
   const applyBackground = async () => {
-    if (!resultImageUrl || isChangingBackground || !selectedBg) return;
+    const targetUrl = carouselResults.length > 0 ? carouselResults[currentSlideIndex]?.resultImageUrl : resultImageUrl;
+    const targetId = carouselResults.length > 0 ? carouselResults[currentSlideIndex]?.id : null;
+    
+    if (!targetUrl || isChangingBackground || !selectedBg) return;
 
     const bgOption = BACKGROUND_OPTIONS.find(bg => bg.id === selectedBg);
     if (!bgOption) return;
@@ -247,7 +274,7 @@ export default function CustomerTryon() {
         method: 'POST',
         headers: getHeaders(),
         body: JSON.stringify({
-          imageUrl: resultImageUrl,
+          imageUrl: targetUrl,
           backgroundId: selectedBg,
           generationId: id
         })
@@ -267,8 +294,22 @@ export default function CustomerTryon() {
       }
       if (!res.ok) throw new Error(data.error || "Failed to change background");
 
-      setResultImageUrl(data.url);
+      if (targetId) {
+        const updatedRecord = await updateTryonResult(targetId, { resultImageUrl: data.url });
+        if (updatedRecord) {
+          setCarouselResults(prev => prev.map(r => r.id === targetId ? updatedRecord : r));
+        } else {
+          // Fallback update React state even if IndexedDB record expired
+          setCarouselResults(prev => prev.map(r => r.id === targetId ? { ...r, resultImageUrl: data.url } : r));
+        }
+      } else {
+        setResultImageUrl(data.url);
+      }
       setSelectedBg(null);
+
+      if (activeSelfieId) {
+        pingSelfieActivity(activeSelfieId);
+      }
     } catch (err) {
       console.error(err);
       alert(err.message);
@@ -278,7 +319,10 @@ export default function CustomerTryon() {
   };
 
   const applyModification = async () => {
-    if (!resultImageUrl) return;
+    const targetUrl = carouselResults.length > 0 ? carouselResults[currentSlideIndex]?.resultImageUrl : resultImageUrl;
+    const targetId = carouselResults.length > 0 ? carouselResults[currentSlideIndex]?.id : null;
+    
+    if (!targetUrl) return;
 
     setIsModifying(true);
     try {
@@ -286,7 +330,7 @@ export default function CustomerTryon() {
         method: 'POST',
         headers: getHeaders(),
         body: JSON.stringify({
-          imageUrl: resultImageUrl,
+          imageUrl: targetUrl,
           modificationType: activeTab === 'sleeve' ? showcaseBlouse : showcaseNeck,
           generationId: id
         })
@@ -305,7 +349,22 @@ export default function CustomerTryon() {
         return;
       }
       if (!response.ok) throw new Error(result.error || 'API Error');
-      setResultImageUrl(result.resultImageUrl);
+
+      if (targetId) {
+        const updatedRecord = await updateTryonResult(targetId, { resultImageUrl: result.resultImageUrl });
+        if (updatedRecord) {
+          setCarouselResults(prev => prev.map(r => r.id === targetId ? updatedRecord : r));
+        } else {
+          // Fallback update React state even if IndexedDB record expired
+          setCarouselResults(prev => prev.map(r => r.id === targetId ? { ...r, resultImageUrl: result.resultImageUrl } : r));
+        }
+      } else {
+        setResultImageUrl(result.resultImageUrl);
+      }
+      
+      if (activeSelfieId) {
+        pingSelfieActivity(activeSelfieId);
+      }
     } catch (err) {
       alert("Failed to apply modification: " + err.message);
     } finally {
@@ -355,6 +414,8 @@ export default function CustomerTryon() {
 
       const garment_image_url = sourceGeneration.resultImageUrl || sourceGeneration.garmentImageUrl;
 
+      const lockedSelfieId = activeSelfieId;
+
       const genRes = await fetch(`${API_URL}/api/tryon/generate`, {
         method: 'POST',
         headers: getHeaders(),
@@ -388,7 +449,21 @@ export default function CustomerTryon() {
 
       if (intervalRef.current) clearInterval(intervalRef.current);
       setProgress(100);
-      setResultImageUrl(genData.result_image_url || garment_image_url);
+      const finalUrl = genData.result_image_url || garment_image_url;
+      setResultImageUrl(finalUrl);
+      
+      if (lockedSelfieId) {
+        const savedRecord = await saveTryonResult({
+          activeSelfieId: lockedSelfieId,
+          garmentImageUrl: garment_image_url,
+          resultImageUrl: finalUrl
+        });
+        if (savedRecord) {
+          setCarouselResults(prev => [savedRecord, ...prev]);
+          setCurrentSlideIndex(0);
+        }
+      }
+
       setTimeout(() => setTryonState('generated'), 400);
 
     } catch (err) {
@@ -418,6 +493,19 @@ export default function CustomerTryon() {
   }
 
   const drapedDressUrl = sourceGeneration.resultImageUrl || sourceGeneration.garmentImageUrl;
+  const displayResultUrl = carouselResults.length > 0 ? carouselResults[currentSlideIndex]?.resultImageUrl : resultImageUrl;
+
+  const nextSlide = () => setCurrentSlideIndex(prev => Math.min(prev + 1, carouselResults.length - 1));
+  const prevSlide = () => setCurrentSlideIndex(prev => Math.max(prev - 1, 0));
+
+  const handleCarouselDelete = async (e, resultId) => {
+    e.stopPropagation();
+    const success = await deleteTryonResult(resultId);
+    if (success) {
+      setCarouselResults(prev => prev.filter(r => r.id !== resultId));
+      setCurrentSlideIndex(prev => Math.max(0, Math.min(prev, carouselResults.length - 2)));
+    }
+  };
 
   return (
     <div className="bg-[#faf7f2] min-h-screen flex flex-col font-['Courier_Prime',monospace] text-[#1a1410] antialiased select-none">
@@ -776,17 +864,32 @@ export default function CustomerTryon() {
 
             {tryonState === 'generated' && (
               <div className="relative w-full h-full animate-fade-in group/canvas">
-                <img src={resultImageUrl} alt="Your Personal Try-On" className={`w-full h-full object-cover transition-opacity duration-700 ${(isChangingBackground || isModifying) ? 'opacity-40 blur-[2px]' : 'opacity-100'}`} />
+                <img src={displayResultUrl} alt="Your Personal Try-On" className={`w-full h-full object-cover transition-opacity duration-700 ${(isChangingBackground || isModifying) ? 'opacity-40 blur-[2px]' : 'opacity-100'}`} />
+
+                {/* Carousel Navigation Overlays */}
+                {carouselResults.length > 1 && (
+                  <>
+                    {currentSlideIndex > 0 && (
+                      <button onClick={prevSlide} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 z-30 transition-all shadow-md backdrop-blur-md border border-white/20">
+                        <ChevronLeft className="w-5 h-5 stroke-[3]" />
+                      </button>
+                    )}
+                    {currentSlideIndex < carouselResults.length - 1 && (
+                      <button onClick={nextSlide} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 z-30 transition-all rotate-180 shadow-md backdrop-blur-md border border-white/20">
+                        <ChevronLeft className="w-5 h-5 stroke-[3]" />
+                      </button>
+                    )}
+                  </>
+                )}
 
                 {/* Background Changing Animation */}
                 {isChangingBackground && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white/60 backdrop-blur-[2px]">
                     <div className="w-[280px] h-[280px]">
                       <DotLottieReact
-                        src="https://lottie.host/daaf6e95-096e-4581-9f9b-57fd2fb31511/RNiTHsdDkt.lottie"
+                        src="https://lottie.host/1014dfd1-04b7-4311-bee6-0807da37a820/KcoFjrbtZT.lottie"
                         loop
                         autoplay
-                        speed={0.5}
                       />
                     </div>
                   </div>
@@ -812,6 +915,21 @@ export default function CustomerTryon() {
                 <div className="bg-black/80 backdrop-blur-sm text-white text-[9px] font-bold uppercase tracking-widest px-4 py-2 shadow-lg">
                   THE GARMENT YOU WILL TRY ON
                 </div>
+              </div>
+            )}
+            
+            {/* Filmstrip Overlay */}
+            {tryonState === 'generated' && carouselResults.length > 0 && (
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 max-w-[90%] z-30 flex justify-center gap-1.5 overflow-x-auto p-1.5 bg-black/50 backdrop-blur-md rounded-xl shadow-2xl border border-white/20 style={{scrollbarWidth: 'none'}}">
+                {carouselResults.map((res, idx) => (
+                  <div key={res.id} className="relative group/thumb shrink-0 cursor-pointer" onClick={() => setCurrentSlideIndex(idx)}>
+                    <img src={res.garmentImageUrl} alt="Garment" className={`w-10 h-14 object-cover rounded-md transition-all duration-300 ${currentSlideIndex === idx ? 'border-[1.5px] border-[#dd6b20] opacity-100 scale-105 shadow-sm' : 'border border-[rgba(255,255,255,0.2)] opacity-50 hover:opacity-100'}`} />
+                    {/* Delete button */}
+                    <button onClick={(e) => handleCarouselDelete(e, res.id)} className="absolute -top-1.5 -right-1.5 bg-red-500/90 hover:bg-red-500 text-white p-0.5 rounded-full opacity-0 group-hover/thumb:opacity-100 transition-opacity shadow-md">
+                      <X className="w-3 h-3 stroke-[3]" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>

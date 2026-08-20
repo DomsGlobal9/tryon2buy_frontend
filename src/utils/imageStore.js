@@ -1,5 +1,6 @@
 const DB_NAME = 'TryonHistoryDB';
 const STORE_NAME = 'history_images';
+const RESULTS_STORE_NAME = 'tryon_results';
 const MAX_IMAGES = 10;
 export const EXPIRY_MS = 20 * 60 * 1000; // 20 minutes
 
@@ -32,11 +33,22 @@ function broadcast(type, payload = {}) {
 
 function getDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 2); // bumped version to purge old schema
+    const request = indexedDB.open(DB_NAME, 4); // bumped version for activeSelfieId index
     request.onupgradeneeded = (e) => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      }
+      
+      let resultsStore;
+      if (!db.objectStoreNames.contains(RESULTS_STORE_NAME)) {
+        resultsStore = db.createObjectStore(RESULTS_STORE_NAME, { keyPath: 'id' });
+      } else {
+        resultsStore = e.target.transaction.objectStore(RESULTS_STORE_NAME);
+      }
+      
+      if (!resultsStore.indexNames.contains('activeSelfieId')) {
+        resultsStore.createIndex('activeSelfieId', 'activeSelfieId', { unique: false });
       }
     };
     request.onsuccess = (e) => resolve(e.target.result);
@@ -73,11 +85,20 @@ export async function getAllHistory() {
     
     if (needsTx) {
       const db = await getDB();
-      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const tx = db.transaction([STORE_NAME, RESULTS_STORE_NAME], 'readwrite');
       const store = tx.objectStore(STORE_NAME);
+      const resultsStore = tx.objectStore(RESULTS_STORE_NAME);
       for (const record of records) {
         if (now - record.lastUsedAt > EXPIRY_MS) {
           store.delete(record.id);
+          // Cascade delete associated results
+          const req = resultsStore.getAll();
+          req.onsuccess = () => {
+            const allResults = req.result || [];
+            allResults.forEach(res => {
+              if (res.activeSelfieId === record.id) resultsStore.delete(res.id);
+            });
+          };
         }
       }
       await new Promise((resolve) => {
@@ -217,9 +238,18 @@ export async function deactivateActiveImage() {
 export async function deleteHistoryImage(id) {
   try {
     const db = await getDB();
-    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const tx = db.transaction([STORE_NAME, RESULTS_STORE_NAME], 'readwrite');
     const store = tx.objectStore(STORE_NAME);
     store.delete(id);
+    
+    const resultsStore = tx.objectStore(RESULTS_STORE_NAME);
+    const req = resultsStore.getAll();
+    req.onsuccess = () => {
+      const allResults = req.result || [];
+      allResults.forEach(res => {
+        if (res.activeSelfieId === id) resultsStore.delete(res.id);
+      });
+    };
     
     return new Promise((resolve) => {
       tx.oncomplete = () => {
@@ -236,9 +266,11 @@ export async function deleteHistoryImage(id) {
 export async function clearAllHistory() {
   try {
     const db = await getDB();
-    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const tx = db.transaction([STORE_NAME, RESULTS_STORE_NAME], 'readwrite');
     const store = tx.objectStore(STORE_NAME);
+    const resultsStore = tx.objectStore(RESULTS_STORE_NAME);
     store.clear();
+    resultsStore.clear();
     
     return new Promise((resolve) => {
       tx.oncomplete = () => {
@@ -248,6 +280,119 @@ export async function clearAllHistory() {
       tx.onerror = () => resolve(false);
     });
   } catch (e) {
+    return false;
+  }
+}
+
+// ==========================================
+// TRY-ON RESULTS CAROUSEL STORAGE ENGINE
+// ==========================================
+
+export async function pingSelfieActivity(selfieId) {
+  if (!selfieId) return;
+  try {
+    const db = await getDB();
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.get(selfieId);
+    req.onsuccess = () => {
+      const record = req.result;
+      if (record) {
+        record.lastUsedAt = Date.now();
+        store.put(record);
+      }
+    };
+  } catch (e) {
+    console.warn('pingSelfieActivity error', e);
+  }
+}
+
+export async function saveTryonResult({ activeSelfieId, garmentImageUrl, resultImageUrl }) {
+  try {
+    const db = await getDB();
+    const tx = db.transaction(RESULTS_STORE_NAME, 'readwrite');
+    const store = tx.objectStore(RESULTS_STORE_NAME);
+    
+    const newRecord = {
+      id: Date.now().toString(),
+      activeSelfieId,
+      garmentImageUrl,
+      resultImageUrl,
+      createdAt: Date.now()
+    };
+    
+    store.put(newRecord);
+    
+    return new Promise((resolve) => {
+      tx.oncomplete = () => resolve(newRecord);
+      tx.onerror = () => resolve(null);
+    });
+  } catch (e) {
+    console.warn('saveTryonResult error', e);
+    return null;
+  }
+}
+
+export async function updateTryonResult(id, updates) {
+  try {
+    const db = await getDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(RESULTS_STORE_NAME, 'readwrite');
+      const store = tx.objectStore(RESULTS_STORE_NAME);
+      const req = store.get(id);
+      
+      req.onsuccess = () => {
+        const record = req.result;
+        if (!record) return resolve(null);
+        
+        const updatedRecord = { ...record, ...updates };
+        const putReq = store.put(updatedRecord);
+        
+        putReq.onsuccess = () => resolve(updatedRecord);
+        putReq.onerror = () => resolve(null);
+      };
+      req.onerror = () => resolve(null);
+    });
+  } catch (e) {
+    console.warn('updateTryonResult error', e);
+    return null;
+  }
+}
+
+export async function getTryonResultsBySelfie(selfieId) {
+  if (!selfieId) return [];
+  try {
+    const db = await getDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(RESULTS_STORE_NAME, 'readonly');
+      const store = tx.objectStore(RESULTS_STORE_NAME);
+      const index = store.index('activeSelfieId');
+      const req = index.getAll(selfieId);
+      req.onsuccess = () => {
+        const matching = req.result || [];
+        // Sort newest first
+        resolve(matching.sort((a, b) => b.createdAt - a.createdAt));
+      };
+      req.onerror = () => resolve([]);
+    });
+  } catch (e) {
+    console.warn('getTryonResultsBySelfie error', e);
+    return [];
+  }
+}
+
+export async function deleteTryonResult(resultId) {
+  try {
+    const db = await getDB();
+    const tx = db.transaction(RESULTS_STORE_NAME, 'readwrite');
+    const store = tx.objectStore(RESULTS_STORE_NAME);
+    store.delete(resultId);
+    
+    return new Promise((resolve) => {
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    });
+  } catch(e) {
     return false;
   }
 }
