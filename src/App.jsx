@@ -4,6 +4,8 @@ import TryonWorkspace from './pages/Tryon/TryonWorkspace';
 import VendorGallery from './pages/Tryon/VendorGallery';
 import CustomerTryon from './pages/Tryon/CustomerTryon';
 import CustomerGallery from './pages/Tryon/CustomerGallery';
+import ClientTryon from './pages/Tryon/ClientTryon';
+
 import VendorAuth from './pages/Tryon/VendorAuth';
 import ClientAuth from './pages/Vendor/ClientAuth';
 import VendorCatalog from './pages/Vendor/VendorCatalog';
@@ -60,6 +62,14 @@ export default function App() {
           {/* Customer Interface (Public) */}
           <Route path="/tryon/:id" element={<CustomerTryon />} />
           <Route path="/shop/:vendorId" element={<CustomerGallery />} />
+
+          {/* Scanned from the QR code on a garment tag in a shop.
+              Addressed by the SHOP and the PRODUCT CODE printed on the tag, not by an id in
+              this app's database -- the garment lives in Scaleezy Inventory, and this page
+              asks Inventory what was scanned. Without this route the catch-all below silently
+              redirected every scan to the landing page, which is what "the QR is not working"
+              was: a 200, then a redirect. */}
+          <Route path="/try/:clientId/:productCode" element={<ClientTryon />} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
