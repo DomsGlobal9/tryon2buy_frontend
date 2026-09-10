@@ -30,3 +30,6 @@ test-external-api.js
 *.spec.js
 tests/
 __tests__/
+
+# Local Claude Code settings — per-machine, not part of the app
+.claude/
