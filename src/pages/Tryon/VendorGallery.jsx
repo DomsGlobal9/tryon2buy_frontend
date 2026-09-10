@@ -176,10 +176,33 @@ export default function VendorGallery() {
                     )}
                   </button>
 
-                  {/* Tryon Preview (right) */}
+                  {/*
+                    Two different things that used to be one button.
+
+                    Tryon opens the SHOP's try-on page. That is the one with the shared dock:
+                    the photograph and the outfits tried go to the account, so they are there
+                    on the tablet at the counter and on the phone in the stockroom. This is
+                    what "click tryon from the gallery" is meant to do.
+
+                    Preview opens the CUSTOMER page -- what someone who follows the share
+                    link sees. It keeps a browser-local dock on purpose: a shopper scanning a
+                    code has no account, and their photograph is not the shop's to collect.
+
+                    Both take the same id: each page fetches /api/tryon/generations/:id.
+                    Before this, Tryon went to the customer page, which is why a photo taken
+                    on one device never showed up on another -- it never left that browser.
+                  */}
                   <button
                     onClick={() => navigate(`/tryon/${gen.id}`)}
-                    title="Preview customer try-on experience"
+                    title="Preview what a customer sees (stays on this device)"
+                    className="flex items-center justify-center px-2.5 py-2 text-[9px] font-bold uppercase tracking-widest bg-[#faf7f2] border border-[#1a1410] text-[#1a1410] hover:bg-[#1a1410] hover:text-[#faf7f2] transition-colors"
+                  >
+                    <Eye className="w-3 h-3" />
+                  </button>
+
+                  <button
+                    onClick={() => navigate(`/vendor/preview/${gen.id}`)}
+                    title="Try this on — your photos and outfits appear on every device you are signed in on"
                     className="flex items-center justify-center gap-1.5 px-3 py-2 text-[9px] font-bold uppercase tracking-widest bg-[#7f5700] text-[#faf7f2] hover:bg-[#1a1410] transition-colors"
                   >
                     <ExternalLink className="w-3 h-3" />
