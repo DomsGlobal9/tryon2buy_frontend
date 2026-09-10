@@ -193,12 +193,11 @@ export default function CustomerTryon() {
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (file.size > 10 * 1024 * 1024) {
-        alert("File is too large. Please upload an image under 10MB.");
-        if (fileInputRef.current) fileInputRef.current.value = '';
-        if (cameraInputRef.current) cameraInputRef.current.value = '';
-        return;
-      }
+      // No size limit. The photograph is re-encoded through a canvas before it is sent
+      // (toUploadableJpeg caps the long edge at 1600px), so a 40MB camera original leaves
+      // this browser as a few hundred KB. Rejecting it here only ever turned away a photo
+      // that was about to be shrunk anyway -- on a phone, usually the only photo they had.
+
       if (selectedImage && selectedImage.startsWith('blob:')) {
         URL.revokeObjectURL(selectedImage);
       }
@@ -248,10 +247,11 @@ export default function CustomerTryon() {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
       if (file.type.startsWith('image/')) {
-        if (file.size > 10 * 1024 * 1024) {
-          alert("File is too large. Please upload an image under 10MB.");
-          return;
-        }
+        // No size limit. The photograph is re-encoded through a canvas before it is sent
+        // (toUploadableJpeg caps the long edge at 1600px), so a 40MB camera original leaves
+        // this browser as a few hundred KB. Rejecting it here only ever turned away a photo
+        // that was about to be shrunk anyway -- on a phone, usually the only photo they had.
+
         if (selectedImage && selectedImage.startsWith('blob:')) {
           URL.revokeObjectURL(selectedImage);
         }
@@ -757,7 +757,7 @@ export default function CustomerTryon() {
                       </button>
                     </div>
 
-                    <p className="text-[#a0aec0] text-[9px] font-sans">PNG, JPG, HEIC · Max 10 MB</p>
+                    <p className="text-[#a0aec0] text-[9px] font-sans">PNG, JPG, HEIC · Any size</p>
                   </>
                 )}
               </div>
