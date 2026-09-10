@@ -262,6 +262,31 @@ export default function VendorTryon() {
   }, [id, dock]);
 
   /**
+   * The same beat for the PHOTOGRAPH in the slot, and it matters more than the garment's.
+   *
+   * Two things went wrong without it, both of them mid-customer and both silent.
+   *
+   * The photograph expires twenty minutes after it was last used, and "used" was only
+   * recorded when somebody picked it up or generated with it. A customer who is being fitted
+   * -- looking, deciding, talking -- is using it the whole time and touching nothing. Twenty
+   * minutes of that and the sweep deleted their photograph out from under the fitting.
+   *
+   * And deleting a photograph on another device gave no warning at all, because nothing was
+   * recording that this one was in use. A garment had that protection from the start; the
+   * customer standing in front of somebody did not.
+   *
+   * One beat fixes both: touchPhoto records lastUsedAt (keeps it alive) and inUseAt (makes a
+   * delete elsewhere ask first). Thirty seconds against the server's ninety-second window,
+   * so a lost beat costs a warning, never the session.
+   */
+  useEffect(() => {
+    if (!dockPhotoId) return;
+    dock.touch(dockPhotoId);
+    const beat = setInterval(() => dock.touch(dockPhotoId), 30000);
+    return () => clearInterval(beat);
+  }, [dockPhotoId, dock]);
+
+  /**
    * Notice -- never interrupt -- when this outfit is taken off the shop's list.
    *
    * The rule this enforces is worth stating plainly: **a delete on another device must never

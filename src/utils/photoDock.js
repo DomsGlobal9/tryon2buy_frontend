@@ -74,7 +74,10 @@ function localDock() {
       return promoted ? normaliseLocal(promoted) : null;
     },
     async deactivate() { return deactivateActiveImage(); },
-    async remove(id)   { return deleteHistoryImage(id); },
+    // Same return shape as the shared dock's remove, so the component does not have to know
+    // which one it is holding. A local dock is one browser: there is no other device that
+    // could be using this photograph, so inUse can never be true here.
+    async remove(id)   { await deleteHistoryImage(id); return { success: true }; },
     async clear()      { return clearAllHistory(); },
     async touch(id)    { return pingSelfieActivity(id); },
 
@@ -251,7 +254,29 @@ function remoteDock({ apiUrl, getToken, retentionMs }) {
       return normaliseRemote(photo);
     },
     async deactivate() { await call('/deactivate', { method: 'POST' }); announce(); return true; },
-    async remove(id)   { await call(`/photos/${encodeURIComponent(id)}`, { method: 'DELETE' }); announce(); return true; },
+    /**
+     * Remove a photograph from the shop's dock.
+     *
+     * Same shape as removeGarment, and for a stronger reason: a garment is an outfit on a
+     * list, a photograph is the customer standing in front of somebody. If another device is
+     * being fitted with it right now the server answers 409, and that is a question for the
+     * person at this screen, not an error to report as one.
+     */
+    async remove(id, { force = false } = {}) {
+      const res = await fetch(
+        `${apiUrl}/api/tryon/dock/photos/${encodeURIComponent(id)}${force ? '?force=1' : ''}`,
+        { method: 'DELETE', headers: headers() }
+      );
+
+      if (res.status === 409) return { inUse: true };
+      if (!res.ok) {
+        console.error('[photoDock] remove failed', res.status);
+        throw new Error(`dock request failed: ${res.status}`);
+      }
+
+      announce();
+      return { success: true };
+    },
     async clear()      { await call('', { method: 'DELETE' }); announce(); return true; },
     async touch(id)    { try { await call(`/photos/${encodeURIComponent(id)}/touch`, { method: 'POST' }); } catch { /* best effort */ } },
 

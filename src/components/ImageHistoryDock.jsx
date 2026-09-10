@@ -143,7 +143,29 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, busy = f
 
   const handleDelete = async (id) => {
     if (busy) return;
-    await activeDock.remove(id);
+
+    const first = await activeDock.remove(id);
+
+    /**
+     * Somebody is being fitted with this photograph on another device.
+     *
+     * Asked rather than refused, the same way removing an outfit is -- it is the shop's dock
+     * and the shop's decision. But a photograph is not an outfit: deleting it takes away the
+     * customer somebody is serving, along with their try-ons. That deserves a sentence
+     * saying so before it happens, which is what was missing.
+     *
+     * On a local dock this branch is unreachable: one browser, no other device.
+     */
+    if (first?.inUse) {
+      const goAhead = window.confirm(
+        'Someone is being fitted with this photo right now, on another device.\n\n' +
+        'Deleting it takes it off their screen and clears the try-ons made with it. They can ' +
+        'pick a photo again and carry on -- nothing stops mid-way.\n\nDelete it anyway?'
+      );
+      if (!goAhead) return;
+      await activeDock.remove(id, { force: true });
+    }
+
     // the local dock repaints via its event; the shared one has nothing to listen to
     if (activeDock.shared) fetchHistory();
   };
