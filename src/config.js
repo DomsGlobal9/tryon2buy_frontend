@@ -10,3 +10,17 @@ export const API_URL = import.meta.env.VITE_API_URL || '';
  */
 export const INVENTORY_API_URL =
   import.meta.env.VITE_INVENTORY_API_URL || 'https://inventory-backend-6vk5.onrender.com';
+
+/**
+ * Where a shopper who arrived from Inventory is allowed to be sent back to.
+ *
+ * A scanned garment belongs to a shop in Inventory, not to this app, so "back" for that
+ * person means their shop's page -- never this app's own gallery, storefront or merchant
+ * studio, which are somebody else's product entirely.
+ *
+ * This is an allowlist rather than "trust whatever ?returnUrl says", because a page that
+ * redirects anywhere on request is an open redirect: a /try/ link could be mailed out with a
+ * returnUrl pointing at a lookalike site, and the Back button would carry the shopper there.
+ * Set VITE_INVENTORY_APP_URL to the Inventory front end to allow it.
+ */
+export const INVENTORY_APP_URL = import.meta.env.VITE_INVENTORY_APP_URL || '';

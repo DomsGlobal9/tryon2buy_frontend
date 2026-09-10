@@ -8,6 +8,13 @@ import { saveToHistory, getActiveImage, deactivateActiveImage, clearAllHistory, 
 import ImageHistoryDock from '../../components/ImageHistoryDock';
 import FloatingImageAnimation from '../../components/FloatingImageAnimation';
 import VendorUpgradeModal from '../../components/VendorUpgradeModal';
+import { newClientRequestId, recoverGeneration, userFacingMessage } from '../../utils/generationRecovery';
+import { uploadSelfie } from '../../utils/imageUpload';
+
+// How long to hold the synchronous request open before falling back to polling. Generous
+// enough for a normal generation to answer directly, short enough that we stop waiting on a
+// socket a proxy has already abandoned. Exceeding it is not an error -- see recoverGeneration.
+const GENERATION_REQUEST_TIMEOUT_MS = 120000;
 
 
 // Display-only — no prompts or raw image logic here.
@@ -43,6 +50,14 @@ export default function CustomerTryon() {
   const activeImageRef = useRef(null);
   const intervalRef = useRef(null);
   const isAnimatingRef = useRef(false);
+  // The photo exactly as the file input gave it to us. selectedFile does not stay that
+  // object -- saveToHistory broadcasts PHOTO_ADDED and loadStoredImage replaces it 50ms
+  // later with the copy read back from IndexedDB, which on iOS can lose its MIME type or
+  // its bytes. Uploading this avoids depending on that round trip.
+  const freshFileRef = useRef(null);
+  // Recovery can outlive the page. Without this, polling would keep calling setState after
+  // the user has navigated away.
+  const isMountedRef = useRef(true);
   const [floatingAnimation, setFloatingAnimation] = useState(null);
 
   const [loading, setLoading] = useState(true);
@@ -91,6 +106,11 @@ export default function CustomerTryon() {
   useEffect(() => {
     // Check initial auth state
   }, [authToken]);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
 
   useEffect(() => {
     async function loadStoredImage() {
@@ -182,6 +202,7 @@ export default function CustomerTryon() {
       if (selectedImage && selectedImage.startsWith('blob:')) {
         URL.revokeObjectURL(selectedImage);
       }
+      freshFileRef.current = file;
       setSelectedFile(file);
       setSelectedImage(URL.createObjectURL(file));
       setTryonState('initial');
@@ -201,6 +222,7 @@ export default function CustomerTryon() {
       URL.revokeObjectURL(selectedImage);
     }
     
+    freshFileRef.current = null;
     setSelectedImage(null);
     setSelectedFile(null);
     setTryonState('initial');
@@ -233,6 +255,7 @@ export default function CustomerTryon() {
         if (selectedImage && selectedImage.startsWith('blob:')) {
           URL.revokeObjectURL(selectedImage);
         }
+        freshFileRef.current = file;
         setSelectedFile(file);
         setSelectedImage(URL.createObjectURL(file));
         setTryonState('initial');
@@ -311,8 +334,9 @@ export default function CustomerTryon() {
         pingSelfieActivity(activeSelfieId);
       }
     } catch (err) {
-      console.error(err);
-      alert(err.message);
+      // Real reason to the console only -- never to the person.
+      console.error('[ChangeBackground]', err);
+      alert(userFacingMessage(err));
     } finally {
       setIsChangingBackground(false);
     }
@@ -366,7 +390,9 @@ export default function CustomerTryon() {
         pingSelfieActivity(activeSelfieId);
       }
     } catch (err) {
-      alert("Failed to apply modification: " + err.message);
+      // Real reason to the console only -- never to the person.
+      console.error('[ModifyOutfit]', err);
+      alert(userFacingMessage(err));
     } finally {
       setIsModifying(false);
     }
@@ -386,72 +412,118 @@ export default function CustomerTryon() {
     }, 300);
 
     try {
+      // Prefer the file the browser gave us; the stored copy is a fallback only.
+      const sourceFile = freshFileRef.current || selectedFile;
+
       let human_image_url = null;
-      if (selectedFile) {
-        const formData = new FormData();
-        formData.append('image', selectedFile);
-        const uploadRes = await fetch(`${API_URL}/api/tryon/upload?folder=user-uploads`, {
-          method: 'POST',
-          headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {},
-          body: formData
+      if (sourceFile) {
+        const uploaded = await uploadSelfie({
+          apiUrl: API_URL,
+          file: sourceFile,
+          folder: 'user-uploads',
+          headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
         });
 
-        if (uploadRes.status === 401 || uploadRes.status === 403) {
+        if (uploaded.unauthorized) {
           if (intervalRef.current) clearInterval(intervalRef.current);
           handleAuthError();
           return;
         }
 
-        const uploadData = await uploadRes.json();
-        human_image_url = uploadData.url;
-      } else {
-        human_image_url = selectedImage;
+        human_image_url = uploaded.url;
       }
 
+      // A blob: URL is a local browser handle -- reaching here means no photo was uploaded.
       if (!human_image_url || human_image_url.startsWith('blob:')) {
-        throw new Error("Invalid image source. Please upload a fresh photo.");
+        throw new Error('No uploaded photo available for generation');
       }
 
       const garment_image_url = sourceGeneration.resultImageUrl || sourceGeneration.garmentImageUrl;
 
       const lockedSelfieId = activeSelfieId;
 
-      const genRes = await fetch(`${API_URL}/api/tryon/generate`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify({
-          mode: 'with_garment',
-          garment_image_url: garment_image_url,
-          human_image_url,
-          parent_generation_id: id,
-          target_folder: 'results/tryon-results'
-        })
-      });
+      // Named before it is sent, so the result stays claimable if this response is lost.
+      const clientRequestId = newClientRequestId();
 
-      const genData = await genRes.json().catch(() => ({}));
-      
-      if (genRes.status === 401 && genData.error === 'GUEST_LIMIT_REACHED') {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        handleAuthError();
-        return;
-      } else if (genRes.status === 403 && genData.error === 'INSUFFICIENT_CREDITS') {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        setShowUpgradeModal(true);
-        setTryonState('initial');
-        return;
-      } else if (genRes.status === 401 || genRes.status === 403) {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        handleAuthError();
-        return;
-      } else if (!genRes.ok) {
-        throw new Error(genData.error || 'Generation failed');
+      let genRes = null;
+      let genData = {};
+      let transportFailure = null;
+
+      try {
+        genRes = await fetch(`${API_URL}/api/tryon/generate`, {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify({
+            mode: 'with_garment',
+            garment_image_url: garment_image_url,
+            human_image_url,
+            parent_generation_id: id,
+            target_folder: 'results/tryon-results',
+            client_request_id: clientRequestId
+          }),
+          // Stop holding a socket the network has already given up on. Hitting this is not
+          // a failure -- the server is still working, and we go and collect the result below.
+          signal: AbortSignal.timeout(GENERATION_REQUEST_TIMEOUT_MS)
+        });
+        // Deliberately NOT .catch(() => ({})). A body that will not parse means the response
+        // was truncated, which is exactly the case that must trigger recovery rather than be
+        // quietly turned into an empty object.
+        genData = await genRes.json();
+      } catch (err) {
+        transportFailure = err;
       }
+
+      // Refusals are decided by the server before any asset row exists, so they are settled
+      // here and never polled for -- there would be nothing to find.
+      if (genRes && !transportFailure) {
+        if (genRes.status === 401 && genData.error === 'GUEST_LIMIT_REACHED') {
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          handleAuthError();
+          return;
+        } else if (genRes.status === 403 && genData.error === 'INSUFFICIENT_CREDITS') {
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          setShowUpgradeModal(true);
+          setTryonState('initial');
+          return;
+        } else if (genRes.status === 401 || genRes.status === 403) {
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          handleAuthError();
+          return;
+        }
+      }
+
+      let finalUrl = genData?.result_image_url || null;
+
+      if (!finalUrl) {
+        // Either the connection died or the reply carried no image. The credit is already
+        // spent and the server is very likely still finishing the picture, so wait for it
+        // rather than throwing the work away. The progress bar keeps running on purpose.
+        const recovered = await recoverGeneration({
+          apiUrl: API_URL,
+          clientRequestId,
+          headers: getHeaders(),
+          isCancelled: () => !isMountedRef.current
+        });
+
+        if (recovered?.status === 'COMPLETED') {
+          finalUrl = recovered.result_image_url;
+        } else if (recovered?.status === 'FAILED') {
+          throw new Error(recovered.error || 'Generation failed');
+        } else if (transportFailure) {
+          throw new Error('The connection dropped and the try-on could not be recovered. Please try again.');
+        } else if (genRes && !genRes.ok) {
+          throw new Error(genData?.error || 'Generation failed');
+        } else {
+          throw new Error('The try-on did not come back. Please try again.');
+        }
+      }
+
+      if (!isMountedRef.current) return;
 
       if (intervalRef.current) clearInterval(intervalRef.current);
       setProgress(100);
-      const finalUrl = genData.result_image_url || garment_image_url;
       setResultImageUrl(finalUrl);
-      
+
       if (lockedSelfieId) {
         const savedRecord = await saveTryonResult({
           activeSelfieId: lockedSelfieId,
@@ -470,7 +542,7 @@ export default function CustomerTryon() {
       console.error(err);
       if (intervalRef.current) clearInterval(intervalRef.current);
       setTryonState('initial');
-      alert('Try-On failed: ' + err.message);
+      alert(userFacingMessage(err));
     }
   };
 
@@ -569,10 +641,15 @@ export default function CustomerTryon() {
       <div className="flex-1 flex flex-col xl:flex-row relative">
 
         {/* Left Side: Instructions & Upload */}
-        <aside className="w-full xl:w-[400px] bg-[#faf7f2] border-r border-[rgba(26,20,16,0.1)] p-3 md:p-4 shrink-0 flex flex-col justify-start overflow-y-auto style={{scrollbarWidth: 'thin'}}">
+        <aside className="w-full xl:w-[400px] bg-[#faf7f2] border-r border-[rgba(26,20,16,0.1)] p-3 md:p-4 shrink-0 flex flex-col justify-start overflow-y-auto"
+          style={{ scrollbarWidth: 'thin' }}>
 
           {/* Global Hidden Inputs for Camera and File Browser */}
-          <input ref={cameraInputRef} type="file" accept="image/*" capture="camera" onChange={handleFileChange} className="hidden" />
+          {/* capture="environment" -- "camera" is not a value the HTML spec defines (only
+              "user" and "environment"), so browsers fell back to their own default. The photo
+              wanted here is full-length and taken by someone else, so the rear camera is the
+              right one to ask for, explicitly. */}
+          <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
 
           <div className="flex flex-col animate-fade-in w-full">
@@ -920,10 +997,15 @@ export default function CustomerTryon() {
             
             {/* Filmstrip Overlay */}
             {tryonState === 'generated' && carouselResults.length > 0 && (
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 max-w-[90%] z-30 flex justify-center gap-1.5 overflow-x-auto p-1.5 bg-black/50 backdrop-blur-md rounded-xl shadow-2xl border border-white/20 style={{scrollbarWidth: 'none'}}">
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 max-w-[90%] z-30 flex justify-center gap-1.5 overflow-x-auto p-1.5 bg-black/50 backdrop-blur-md rounded-xl shadow-2xl border border-white/20"
+                style={{ scrollbarWidth: 'none' }}>
                 {carouselResults.map((res, idx) => (
                   <div key={res.id} className="relative group/thumb shrink-0 cursor-pointer" onClick={() => setCurrentSlideIndex(idx)}>
-                    <img src={res.garmentImageUrl} alt="Garment" className={`w-10 h-14 object-cover rounded-md transition-all duration-300 ${currentSlideIndex === idx ? 'border-[1.5px] border-[#dd6b20] opacity-100 scale-105 shadow-sm' : 'border border-[rgba(255,255,255,0.2)] opacity-50 hover:opacity-100'}`} />
+                    {/* The RESULT, not the garment. This strip is how you flip between the try-ons you
+                        have done, and every thumbnail showed the same outfit photograph -- so trying
+                        one dress three times gave three identical thumbnails and no way to tell them
+                        apart. Your own results all look different, which is what makes it a carousel. */}
+                    <img src={res.resultImageUrl} alt={`Try-on ${idx + 1}`} className={`w-10 h-14 object-cover rounded-md transition-all duration-300 ${currentSlideIndex === idx ? 'border-[1.5px] border-[#dd6b20] opacity-100 scale-105 shadow-sm' : 'border border-[rgba(255,255,255,0.2)] opacity-50 hover:opacity-100'}`} />
                     {/* Delete button */}
                     <button onClick={(e) => handleCarouselDelete(e, res.id)} className="absolute -top-1.5 -right-1.5 bg-red-500/90 hover:bg-red-500 text-white p-0.5 rounded-full opacity-0 group-hover/thumb:opacity-100 transition-opacity shadow-md">
                       <X className="w-3 h-3 stroke-[3]" />

@@ -1,47 +1,105 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Trash2, Image as ImageIcon, X, RotateCcw } from 'lucide-react';
+import { Clock, Trash2, Image as ImageIcon, X, RotateCcw, Shirt } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getAllHistory, promoteToActive, deleteHistoryImage, EXPIRY_MS, subscribeToImageEvents } from '../utils/imageStore';
+import { createPhotoDock, toPreview } from '../utils/photoDock';
 
-export default function ImageHistoryDock() {
+/** How often a shared dock asks the server what the other devices have been doing. */
+const SHARED_POLL_MS = 10000;
+
+/**
+ * Why every button in here greys out while something is being generated.
+ *
+ * The dock still opens and both tabs still browse -- somebody waiting on a generation is
+ * exactly who wants to look at what to try next. What is refused is APPLYING a change, because
+ * swapping the photograph or the garment out from under a generation already in flight
+ * produces a result belonging to a pair of inputs nobody ever chose together.
+ */
+const BUSY_HINT = 'Wait for the current try-on to finish, then pick another.';
+
+/**
+ * @param {object}  props
+ * @param {object}  [props.dock]    which dock to show. Defaults to this browser's own, so the
+ *                                  shopper pages behave exactly as they always have;
+ *                                  VendorTryon passes the account's shared dock instead.
+ * @param {function}[props.onPickGarment]  called with a garment when somebody picks one out
+ *                                         of the "Tried On" tab. That tab exists only on a
+ *                                         shared dock: it lists the shop's clothes customers
+ *                                         have actually tried, so whoever is serving someone
+ *                                         can see what has been tried today -- on any device,
+ *                                         by any colleague -- and open the same garment.
+ * @param {boolean} [props.busy]   true while the page is generating, modifying an outfit or
+ *                                 changing a background. The dock still OPENS and both tabs
+ *                                 still browse -- somebody waiting on a generation is exactly
+ *                                 who wants to look at what to try next. What it stops is
+ *                                 APPLYING anything: swapping the photograph or the garment
+ *                                 out from under a generation already in flight would produce
+ *                                 a result belonging to inputs nobody chose together.
+ * @param {function}[props.onPick]  called with the chosen photograph when somebody picks one.
+ *                                  This is the ONLY way a shared dock reaches the page: the
+ *                                  list keeps itself current across devices by polling, but
+ *                                  nothing it learns is allowed to change what the page is
+ *                                  working on until a person chooses it. Swapping a
+ *                                  photograph out from under someone mid-session because a
+ *                                  colleague picked a different one on another device is the
+ *                                  thing this arrangement exists to prevent.
+ */
+export default function ImageHistoryDock({ dock, onPick, onPickGarment, busy = false }) {
+  // Created once. A new dock object on every render would restart polling continuously.
+  const [activeDock] = useState(() => dock || createPhotoDock({ shared: false }));
+  const EXPIRY_MS = activeDock.expiryMs;
   const [history, setHistory] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [now, setNow] = useState(Date.now());
+  const [garments, setGarments] = useState([]);
+  const [tab, setTab] = useState('photos');
 
-  // Refresh timer display every 10s and auto-purge expired images
+  // Ticks the countdown, and refreshes when something needs it.
+  //
+  // A shared dock refreshes on every tick regardless: the reason it exists is that another
+  // device may have added or removed a photograph, and nothing local would ever tell us.
   useEffect(() => {
     const int = setInterval(() => {
       const currentTime = Date.now();
       setNow(currentTime);
-      
-      // If any image has crossed the 20m threshold, auto-refresh to purge it
-      if (history.some(img => currentTime - img.lastUsedAt > EXPIRY_MS)) {
-        fetchHistory();
-      }
-    }, 10000);
+
+      // A shared dock is refreshed by the facade's own poll, which announces to everything
+      // subscribed -- this badge and the page's selected photograph together. Polling again
+      // here would double the requests and still leave the two able to disagree.
+      if (activeDock.shared) return;
+      if (history.some(img => currentTime - img.lastUsedAt > EXPIRY_MS)) fetchHistory();
+    }, SHARED_POLL_MS);
     return () => clearInterval(int);
-  }, [history]);
+  }, [history, activeDock]);
+
+  /**
+   * The shop's tried-on garments. Returns nothing at all on a local dock, so the shopper
+   * pages are untouched by this and never render the tab.
+   */
+  const fetchGarments = async () => {
+    try {
+      // No guard on activeDock.shared here on purpose. A local dock's garments() returns an
+      // empty list of its own accord, so this stays structurally identical to fetchHistory --
+      // always awaiting before it touches state, never setting state synchronously.
+      const next = await activeDock.garments();
+      setGarments(next);
+    } catch (e) {
+      console.warn('fetchGarments failed', e);
+    }
+  };
 
   const fetchHistory = async () => {
     try {
-      const records = await getAllHistory();
-      const withUrls = records.map(r => {
-        try {
-          return {
-            ...r,
-            previewUrl: URL.createObjectURL(r.file)
-          };
-        } catch(e) {
-          console.warn("Failed to create URL for history image", e);
-          return { ...r, previewUrl: null };
-        }
-      }).filter(r => r.previewUrl !== null);
-      
+      const records = await activeDock.list();
+
+      // A local entry is a File and needs an object URL; a shared one is already a URL on
+      // the server. toPreview says which, and whether it is ours to revoke afterwards.
+      const withUrls = records
+        .map(r => { const { url, revoke } = toPreview(r); return { ...r, previewUrl: url, ownsPreview: revoke }; })
+        .filter(r => r.previewUrl !== null);
+
       setHistory(prev => {
-        // Revoke old URLs before replacing
-        prev.forEach(h => {
-          if (h.previewUrl) URL.revokeObjectURL(h.previewUrl);
-        });
+        // Only revoke URLs we created. Revoking a server URL would blank the image.
+        prev.forEach(h => { if (h.ownsPreview && h.previewUrl) URL.revokeObjectURL(h.previewUrl); });
         return withUrls;
       });
     } catch (e) {
@@ -53,38 +111,115 @@ export default function ImageHistoryDock() {
   useEffect(() => {
     return () => {
       history.forEach(h => {
-        if (h.previewUrl) URL.revokeObjectURL(h.previewUrl);
+        if (h.ownsPreview && h.previewUrl) URL.revokeObjectURL(h.previewUrl);
       });
     };
   }, []);
 
   useEffect(() => {
     fetchHistory();
-    const unsubscribe = subscribeToImageEvents(() => {
+    // fetchGarments awaits the dock before it touches state, exactly as fetchHistory does;
+    // the rule only spots the difference because this one sets a value while that one uses
+    // the updater form. Nothing is set synchronously, so no cascading render is possible.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchGarments();
+    const unsubscribe = activeDock.subscribe(() => {
       // Small delay to let IndexedDB settle
-      setTimeout(() => fetchHistory(), 50);
+      setTimeout(() => { fetchHistory(); fetchGarments(); }, 50);
     });
     return () => unsubscribe();
-  }, []);
+  }, [activeDock]);
 
   const handlePromote = async (id) => {
-    await promoteToActive(id);
+    if (busy) return;
+    const chosen = await activeDock.activate(id);
     setIsModalOpen(false);
+    if (activeDock.shared) fetchHistory();
+    // Hand it to the page. On a shared dock this is the moment the photograph lands in the
+    // upload slot; activate() also records it as the shop's starting point for a device
+    // opened later, which is a different thing from changing a page already in use.
+    if (chosen && typeof onPick === 'function') onPick(chosen);
   };
 
   const handleDelete = async (id) => {
-    await deleteHistoryImage(id);
-    // fetchHistory will be called by the event listener
+    if (busy) return;
+    await activeDock.remove(id);
+    // the local dock repaints via its event; the shared one has nothing to listen to
+    if (activeDock.shared) fetchHistory();
   };
 
   const inactiveHistory = history.filter(h => !h.isActive);
+
+  // On a local dock garments is always empty, so this reduces to exactly the old condition
+  // and the shopper pages behave as they always have.
+  const hasSomethingToShow = inactiveHistory.length > 0 || garments.length > 0;
+  const showTabs = activeDock.shared;
+
+  const handlePickGarment = (garment) => {
+    if (busy) return;
+    setIsModalOpen(false);
+    if (typeof onPickGarment === 'function') onPickGarment(garment);
+  };
+
+  /**
+   * Erases the try-ons that put this garment on the list, which is what takes it off.
+   *
+   * Confirmed first, and worded so the consequence is on the button rather than in a
+   * paragraph nobody reads: this is shared and permanent, and a colleague on another device
+   * loses the same history.
+   */
+  const handleDeleteGarment = async (garment) => {
+    if (busy) return;
+    const count = garment.tryOnCount;
+    const ok = window.confirm(
+      `Remove "${garment.title}" from Outfits Tried?\n\n` +
+      `This clears ${count} try-on ${count === 1 ? 'image' : 'images'} made with it, for everyone in the shop.\n\n` +
+      `Nothing leaves your gallery: the outfit stays in your catalogue, and any try-on you ` +
+      `saved to it is kept. You can try this outfit on again any time.`
+    );
+    if (!ok) return;
+    try {
+      const first = await activeDock.removeGarment(garment.id);
+
+      /**
+       * Somebody is wearing it on another device.
+       *
+       * Asked again rather than refused, because a shop must be able to clear its own list --
+       * but the first confirmation said "for everyone in the shop" without knowing that
+       * "everyone" included a colleague mid-customer. This is the sentence that was missing.
+       */
+      if (first?.inUse) {
+        const goAhead = window.confirm(
+          `Someone is trying "${garment.title}" on right now, on another device.\n\n` +
+          `Deleting it now removes the try-ons they are looking at. They can carry on and ` +
+          `generate again -- nothing stops mid-way -- but what is already on their screen ` +
+          `will go.\n\nDelete it anyway?`
+        );
+        if (!goAhead) return;
+        await activeDock.removeGarment(garment.id, { force: true });
+      }
+
+      fetchGarments();
+    } catch (e) {
+      console.warn('removeGarment failed', e);
+    }
+  };
+
+  const sinceLabel = (iso) => {
+    const mins = Math.max(0, Math.round((now - new Date(iso).getTime()) / 60000));
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.round(mins / 60);
+    return hrs < 24 ? `${hrs}h ago` : `${Math.round(hrs / 24)}d ago`;
+  };
 
   return (
     <>
       {/* ---- Floating Dock Button (bottom-right) ---- */}
       <AnimatePresence>
-        {inactiveHistory.length > 0 && (
+        {hasSomethingToShow && (
           <motion.div
+            key="dock-button"
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -96,13 +231,13 @@ export default function ImageHistoryDock() {
               className="bg-white p-3 rounded-full shadow-lg border border-[#e2e8f0] flex items-center justify-center hover:shadow-xl transition-all relative group"
             >
               <div className="absolute -top-2 -right-2 bg-[#dd6b20] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
-                {inactiveHistory.length}
+                {inactiveHistory.length + garments.length}
               </div>
               <Clock className="w-5 h-5 text-[#dd6b20]" />
               
               {/* Tooltip */}
               <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-[11px] font-bold py-1 px-2 rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity">
-                Recent Selfies
+                {showTabs ? 'Your photos & outfits' : 'Recent Selfies'}
               </div>
             </button>
           </motion.div>
@@ -112,7 +247,13 @@ export default function ImageHistoryDock() {
       {/* ---- History Modal ---- */}
       <AnimatePresence>
         {isModalOpen && (
+          /* key is REQUIRED, not decoration. AnimatePresence tracks its children by key, and
+             without one it never finishes removing this on exit: the backdrop animated to
+             opacity 0 and then stayed in the DOM, full-screen, with pointer-events auto. The
+             dock looked closed and every click on the page underneath was swallowed by an
+             invisible sheet. Reproduced on all three try-on pages before this line existed. */
           <motion.div
+            key="dock-modal"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -130,23 +271,107 @@ export default function ImageHistoryDock() {
               <div className="flex items-center justify-between p-4 border-b border-[#e2e8f0]">
                 <div className="flex items-center gap-2">
                   <Clock className="w-5 h-5 text-[#dd6b20]" />
-                  <h3 className="font-bold text-[#1a202c]">Recent Selfies</h3>
+                  <h3 className="font-bold text-[#1a202c]">
+                    {showTabs ? 'Your photos' : 'Recent Selfies'}
+                  </h3>
                 </div>
                 <button onClick={() => setIsModalOpen(false)} className="text-[#a0aec0] hover:text-[#1a202c] transition-colors p-1">
                   <X className="w-5 h-5" />
                 </button>
               </div>
               
+              {/* Tabs. Shared docks only -- a shopper's own dock has no shop behind it and
+                  nothing to put in a second tab, so it keeps the single list it always had. */}
+              {showTabs && (
+                <div className="flex border-b border-[#e2e8f0] px-4">
+                  <button
+                    onClick={() => setTab('photos')}
+                    className={`flex items-center gap-1.5 py-2.5 px-3 text-[12px] font-bold border-b-2 transition-colors ${tab === 'photos' ? 'border-[#dd6b20] text-[#dd6b20]' : 'border-transparent text-[#a0aec0] hover:text-[#1a202c]'}`}
+                  >
+                    <ImageIcon className="w-3.5 h-3.5" /> My Photos ({inactiveHistory.length})
+                  </button>
+                  <button
+                    onClick={() => setTab('garments')}
+                    className={`flex items-center gap-1.5 py-2.5 px-3 text-[12px] font-bold border-b-2 transition-colors ${tab === 'garments' ? 'border-[#dd6b20] text-[#dd6b20]' : 'border-transparent text-[#a0aec0] hover:text-[#1a202c]'}`}
+                  >
+                    <Shirt className="w-3.5 h-3.5" /> Outfits Tried ({garments.length})
+                  </button>
+                </div>
+              )}
+
               {/* Body */}
               <div className="p-4 overflow-y-auto">
                 <p className="text-[#718096] text-[12px] mb-4">
-                  Select a previous photo to reuse it instantly. Photos automatically expire 20 minutes after their last use.
+                  {showTabs
+                    ? (tab === 'photos'
+                        ? 'Pick a photo to try on another outfit. Your photos disappear 20 minutes after you last use one.'
+                        : 'Outfits people have tried on here. Pick one to see it on you.')
+                    : 'Select a previous photo to reuse it instantly. Photos automatically expire 20 minutes after their last use.'}
                 </p>
 
-                {inactiveHistory.length === 0 ? (
+                {showTabs && tab === 'garments' ? (
+                  garments.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                      <Shirt className="w-12 h-12 text-[#e2e8f0] mb-3" />
+                      <p className="text-[#a0aec0] text-sm">No outfits tried yet.</p>
+                      <p className="text-[#cbd5e0] text-[11px] mt-1">An outfit shows up here once someone has tried it on.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {/* Laid out exactly like a photograph card below: the picture, then a
+                          row with the two things you can do to it, always visible rather than
+                          revealed on hover. The whole card used to be one big button, so there
+                          was nowhere to put Delete and no way to tell a tap meant to open the
+                          garment from a tap meant to remove it. */}
+                      {garments.map(garment => (
+                        <div
+                          key={garment.id}
+                          className="relative rounded-lg overflow-hidden border border-[#e2e8f0] bg-[#f7fafc]"
+                        >
+                          <div className="aspect-[3/4] overflow-hidden bg-white">
+                            {garment.imageUrl
+                              ? <img src={garment.imageUrl} alt={garment.title} className="w-full h-full object-cover" />
+                              : <div className="w-full h-full flex items-center justify-center"><Shirt className="w-8 h-8 text-[#e2e8f0]" /></div>}
+                          </div>
+
+                          {/* How many people have tried it -- the reason this list is worth
+                              looking at rather than just opening the catalogue. */}
+                          <div className="absolute top-1.5 left-1.5 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                            {garment.tryOnCount} {garment.tryOnCount === 1 ? 'try-on' : 'try-ons'}
+                          </div>
+
+                          <div className="p-2 border-t border-[#e2e8f0]">
+                            <p className="text-[11px] font-bold text-[#1a202c] truncate">{garment.title}</p>
+                            <p className="text-[10px] text-[#a0aec0]">{sinceLabel(garment.lastTriedAt)}</p>
+                          </div>
+
+                          <div className="flex items-center border-t border-[#e2e8f0]">
+                            <button
+                              onClick={() => handlePickGarment(garment)}
+                              disabled={busy}
+                              title={busy ? BUSY_HINT : undefined}
+                              className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[10px] font-bold text-[#dd6b20] hover:bg-[#fffaf0] transition-colors disabled:text-[#cbd5e0] disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                            >
+                              <Shirt className="w-3 h-3" /> Try This
+                            </button>
+                            <div className="w-[1px] h-6 bg-[#e2e8f0]"></div>
+                            <button
+                              onClick={() => handleDeleteGarment(garment)}
+                              disabled={busy}
+                              title={busy ? BUSY_HINT : undefined}
+                              className="flex items-center justify-center gap-1 px-3 py-2 text-[10px] font-bold text-red-500 hover:bg-red-50 transition-colors disabled:text-[#cbd5e0] disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                            >
+                              <Trash2 className="w-3 h-3" /> Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                ) : inactiveHistory.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
                     <ImageIcon className="w-12 h-12 text-[#e2e8f0] mb-3" />
-                    <p className="text-[#a0aec0] text-sm">No recent photos found.</p>
+                    <p className="text-[#a0aec0] text-sm">{showTabs ? 'No other photos yet.' : 'No recent photos found.'}</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -174,14 +399,18 @@ export default function ImageHistoryDock() {
                           <div className="flex items-center border-t border-[#e2e8f0]">
                             <button
                               onClick={() => handlePromote(img.id)}
-                              className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[10px] font-bold text-[#dd6b20] hover:bg-[#fffaf0] transition-colors"
+                              disabled={busy}
+                              title={busy ? BUSY_HINT : undefined}
+                              className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[10px] font-bold text-[#dd6b20] hover:bg-[#fffaf0] transition-colors disabled:text-[#cbd5e0] disabled:hover:bg-transparent disabled:cursor-not-allowed"
                             >
-                              <RotateCcw className="w-3 h-3" /> Use Photo
+                              <RotateCcw className="w-3 h-3" /> {showTabs ? 'Use This' : 'Use Photo'}
                             </button>
                             <div className="w-[1px] h-6 bg-[#e2e8f0]"></div>
                             <button
                               onClick={() => handleDelete(img.id)}
-                              className="flex items-center justify-center gap-1 px-3 py-2 text-[10px] font-bold text-red-500 hover:bg-red-50 transition-colors"
+                              disabled={busy}
+                              title={busy ? BUSY_HINT : undefined}
+                              className="flex items-center justify-center gap-1 px-3 py-2 text-[10px] font-bold text-red-500 hover:bg-red-50 transition-colors disabled:text-[#cbd5e0] disabled:hover:bg-transparent disabled:cursor-not-allowed"
                             >
                               <Trash2 className="w-3 h-3" /> Delete
                             </button>

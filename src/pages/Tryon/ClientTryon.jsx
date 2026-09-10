@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { API_URL, INVENTORY_API_URL } from '../../config';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { API_URL, INVENTORY_API_URL, INVENTORY_APP_URL } from '../../config';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Sparkles, Check, ChevronLeft, RefreshCw, LogOut, Upload, Lightbulb, CloudUpload, FolderOpen, Heart, Lock, ShieldCheck, Shield, Camera, X } from 'lucide-react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
@@ -8,6 +8,9 @@ import { saveToHistory, getActiveImage, deactivateActiveImage, clearAllHistory, 
 import ImageHistoryDock from '../../components/ImageHistoryDock';
 import FloatingImageAnimation from '../../components/FloatingImageAnimation';
 import VendorUpgradeModal from '../../components/VendorUpgradeModal';
+import { uploadSelfie } from '../../utils/imageUpload';
+import { userFacingMessage } from '../../utils/generationRecovery';
+import { resolveBackTarget } from '../../utils/backTarget';
 
 
 // Display-only — no prompts or raw image logic here.
@@ -43,6 +46,14 @@ export default function ClientTryon() {
   const activeImageRef = useRef(null);
   const intervalRef = useRef(null);
   const isAnimatingRef = useRef(false);
+  // The photo exactly as the file input gave it to us.
+  //
+  // selectedFile does NOT stay that object: saveToHistory broadcasts PHOTO_ADDED, and 50ms
+  // later loadStoredImage overwrites it with the copy read back from IndexedDB. On iOS that
+  // copy can come back with no MIME type or no bytes at all, and it is the copy that was
+  // being uploaded -- so even a photo taken seconds earlier failed. Uploading this instead
+  // sidesteps the round trip entirely for the case that matters most.
+  const freshFileRef = useRef(null);
   const [floatingAnimation, setFloatingAnimation] = useState(null);
 
   const [loading, setLoading] = useState(true);
@@ -217,6 +228,7 @@ export default function ClientTryon() {
       if (selectedImage && selectedImage.startsWith('blob:')) {
         URL.revokeObjectURL(selectedImage);
       }
+      freshFileRef.current = file;
       setSelectedFile(file);
       setSelectedImage(URL.createObjectURL(file));
       setTryonState('initial');
@@ -236,6 +248,7 @@ export default function ClientTryon() {
       URL.revokeObjectURL(selectedImage);
     }
     
+    freshFileRef.current = null;
     setSelectedImage(null);
     setSelectedFile(null);
     setTryonState('initial');
@@ -268,6 +281,7 @@ export default function ClientTryon() {
         if (selectedImage && selectedImage.startsWith('blob:')) {
           URL.revokeObjectURL(selectedImage);
         }
+        freshFileRef.current = file;
         setSelectedFile(file);
         setSelectedImage(URL.createObjectURL(file));
         setTryonState('initial');
@@ -347,7 +361,8 @@ export default function ClientTryon() {
       }
     } catch (err) {
       console.error(err);
-      alert(err.message);
+      console.error('[ChangeBackground]', err);
+      alert(userFacingMessage(err));
     } finally {
       setIsChangingBackground(false);
     }
@@ -401,7 +416,8 @@ export default function ClientTryon() {
         pingSelfieActivity(activeSelfieId);
       }
     } catch (err) {
-      alert("Failed to apply modification: " + err.message);
+      console.error('[ModifyOutfit]', err);
+      alert(userFacingMessage(err));
     } finally {
       setIsModifying(false);
     }
@@ -421,30 +437,32 @@ export default function ClientTryon() {
     }, 300);
 
     try {
+      // Prefer the file the browser gave us; fall back to the stored copy only if this is a
+      // photo restored from a previous visit, where no fresh one exists.
+      const sourceFile = freshFileRef.current || selectedFile;
+
       let human_image_url = null;
-      if (selectedFile) {
-        const formData = new FormData();
-        formData.append('image', selectedFile);
-        const uploadRes = await fetch(`${API_URL}/api/tryon/upload?folder=human-images`, {
-          method: 'POST',
-          headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {},
-          body: formData
+      if (sourceFile) {
+        const uploaded = await uploadSelfie({
+          apiUrl: API_URL,
+          file: sourceFile,
+          folder: 'human-images',
+          headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
         });
 
-        if (uploadRes.status === 401 || uploadRes.status === 403) {
+        if (uploaded.unauthorized) {
           if (intervalRef.current) clearInterval(intervalRef.current);
           handleAuthError();
           return;
         }
 
-        const uploadData = await uploadRes.json();
-        human_image_url = uploadData.url;
-      } else {
-        human_image_url = selectedImage;
+        human_image_url = uploaded.url;
       }
 
+      // A blob: URL is a local browser handle. It was never a valid thing to send, and
+      // reaching here means we have no uploaded photo at all.
       if (!human_image_url || human_image_url.startsWith('blob:')) {
-        throw new Error("Invalid image source. Please upload a fresh photo.");
+        throw new Error('No uploaded photo available for generation');
       }
 
       const garment_image_url = sourceGeneration.resultImageUrl || sourceGeneration.garmentImageUrl;
@@ -517,18 +535,41 @@ export default function ClientTryon() {
       console.error(err);
       if (intervalRef.current) clearInterval(intervalRef.current);
       setTryonState('initial');
-      alert('Try-On failed: ' + err.message);
+      alert(userFacingMessage(err));
     }
   };
 
+  /**
+   * Where "back" goes for someone who scanned a tag in a shop.
+   *
+   * Never into Tryon2Buy. This page is reached from a garment in somebody else's shop, and
+   * the previous behaviour sent that shopper to /shop/:vendorId or the Tryon2Buy landing
+   * page -- a storefront belonging to a different business, or a pitch for software they
+   * are not buying. Neither is "back" by any reading.
+   *
+   * Resolved once, from most explicit to least:
+   *   1. ?returnUrl=, when Inventory puts one on the link (allowlisted -- see config.js)
+   *   2. the referring page, when they clicked through from one
+   *   3. in-app history, when they navigated within this app
+   *   4. nothing -- and then the control is not shown at all, because a cold QR scan opens a
+   *      fresh tab and there is genuinely nowhere to go back to. An empty back button that
+   *      dumps someone on a stranger's storefront is worse than no back button.
+   */
+  const backTarget = useMemo(() => resolveBackTarget({
+    search: window.location.search,
+    referrer: document.referrer,
+    currentOrigin: window.location.origin,
+    allowedOrigins: [INVENTORY_APP_URL, INVENTORY_API_URL],
+    hasAppHistory: !!(window.history.state && window.history.state.idx > 0),
+  }), []);
+
   const handleBack = () => {
-    if (window.history.state && window.history.state.idx > 0) {
-      navigate(-1);
-    } else if (sourceGeneration?.vendorId) {
-      navigate(`/shop/${sourceGeneration.vendorId}`);
-    } else {
-      navigate('/');
+    if (!backTarget) return;
+    if (backTarget.kind === 'external') {
+      window.location.href = backTarget.href;
+      return;
     }
+    navigate(-1);
   };
 
   if (loading) {
@@ -607,31 +648,28 @@ export default function ClientTryon() {
 
       {/* Header */}
       <header className="bg-[#faf7f2] border-b border-[rgba(26,20,16,0.1)] h-[60px] flex items-center justify-between px-4 md:px-[32px] shrink-0 relative">
-        {/* Back Button */}
+        {/* Back, only when there is somewhere honest to go. A tag scanned with a phone
+            camera opens a fresh tab with no history and no referrer, so for that shopper the
+            control is simply absent rather than pointing at a page that is not theirs. */}
         <div className="flex-1 md:w-[200px] md:flex-none">
-          <button
-            onClick={handleBack}
-            className="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:text-[#1a1410] transition-colors"
-          >
-            <ChevronLeft className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span className="hidden md:inline">Back</span>
-          </button>
+          {backTarget && (
+            <button
+              onClick={handleBack}
+              className="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:text-[#1a1410] transition-colors"
+            >
+              <ChevronLeft className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span className="hidden md:inline">Back</span>
+            </button>
+          )}
         </div>
 
         {/* Centered Branding */}
         <div className="flex justify-center items-center gap-2 md:gap-3">
-          <div
-            onClick={() => {
-              if (authToken) {
-                navigate('/workspace');
-              } else if (sourceGeneration?.vendorId) {
-                navigate(`/shop/${sourceGeneration.vendorId}`);
-              } else {
-                navigate('/');
-              }
-            }}
-            className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
-          >
+          {/* Branding only. This used to navigate: to /workspace if a vendor_token happened
+              to be in localStorage -- so on a shared shop tablet a shopper tapping the logo
+              landed in the merchant studio -- and otherwise to a storefront or landing page
+              belonging to Tryon2Buy rather than to the shop they are standing in. */}
+          <div className="flex items-center">
             <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-8 md:h-10 object-contain mr-2" />
             {/* Names the garment that was scanned rather than the feature. Someone who has
                 just pointed a phone at a tag needs to know the code found the right thing
@@ -654,7 +692,11 @@ export default function ClientTryon() {
         <aside className="w-full lg:w-[380px] xl:w-[420px] bg-[#faf7f2] border-b lg:border-b-0 lg:border-r border-[rgba(26,20,16,0.1)] p-4 md:p-5 shrink-0 flex flex-col justify-start lg:overflow-y-auto lg:max-h-[calc(100vh-60px)]">
 
           {/* Global Hidden Inputs for Camera and File Browser */}
-          <input ref={cameraInputRef} type="file" accept="image/*" capture="camera" onChange={handleFileChange} className="hidden" />
+          {/* capture="environment" -- "camera" is not a value the HTML spec defines (only
+              "user" and "environment"), so browsers fell back to their own default. The photo
+              wanted here is full-length and taken by someone else, so the rear camera is the
+              right one to ask for, explicitly. */}
+          <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
 
           <div className="flex flex-col animate-fade-in w-full">
@@ -1032,10 +1074,15 @@ export default function ClientTryon() {
             
             {/* Filmstrip Overlay */}
             {tryonState === 'generated' && carouselResults.length > 0 && (
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 max-w-[90%] z-30 flex justify-center gap-1.5 overflow-x-auto p-1.5 bg-black/50 backdrop-blur-md rounded-xl shadow-2xl border border-white/20 style={{scrollbarWidth: 'none'}}">
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 max-w-[90%] z-30 flex justify-center gap-1.5 overflow-x-auto p-1.5 bg-black/50 backdrop-blur-md rounded-xl shadow-2xl border border-white/20"
+                style={{ scrollbarWidth: 'none' }}>
                 {carouselResults.map((res, idx) => (
                   <div key={res.id} className="relative group/thumb shrink-0 cursor-pointer" onClick={() => setCurrentSlideIndex(idx)}>
-                    <img src={res.garmentImageUrl} alt="Garment" className={`w-10 h-14 object-cover rounded-md transition-all duration-300 ${currentSlideIndex === idx ? 'border-[1.5px] border-[#dd6b20] opacity-100 scale-105 shadow-sm' : 'border border-[rgba(255,255,255,0.2)] opacity-50 hover:opacity-100'}`} />
+                    {/* The RESULT, not the garment. This strip is how you flip between the try-ons you
+                        have done, and every thumbnail showed the same outfit photograph -- so trying
+                        one dress three times gave three identical thumbnails and no way to tell them
+                        apart. Your own results all look different, which is what makes it a carousel. */}
+                    <img src={res.resultImageUrl} alt={`Try-on ${idx + 1}`} className={`w-10 h-14 object-cover rounded-md transition-all duration-300 ${currentSlideIndex === idx ? 'border-[1.5px] border-[#dd6b20] opacity-100 scale-105 shadow-sm' : 'border border-[rgba(255,255,255,0.2)] opacity-50 hover:opacity-100'}`} />
                     {/* Delete button */}
                     <button onClick={(e) => handleCarouselDelete(e, res.id)} className="absolute -top-1.5 -right-1.5 bg-red-500/90 hover:bg-red-500 text-white p-0.5 rounded-full opacity-0 group-hover/thumb:opacity-100 transition-opacity shadow-md">
                       <X className="w-3 h-3 stroke-[3]" />
