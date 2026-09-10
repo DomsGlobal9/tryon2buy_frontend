@@ -294,6 +294,28 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
       </AnimatePresence>
 
       {/* ---- History Modal ---- */}
+      {/**
+        * The pointer-events guard lives HERE, on a plain wrapper, and not on the backdrop
+        * inside -- which is the whole point and was wrong on the first attempt.
+        *
+        * AnimatePresence renders an exiting child from the PREVIOUS tree: it keeps the
+        * element exactly as it was when it was removed, with the props it had then. A
+        * state-driven style on that child is therefore frozen at whatever it evaluated to
+        * while the modal was still open, so `isModalOpen ? 'auto' : 'none'` sat there
+        * reading 'auto' for the entire exit. Measured on production: the modal was closed in
+        * state and a full-screen interactive sheet was still over the page.
+        *
+        * This wrapper is not the exiting child, so it re-renders normally and the descendant
+        * backdrop inherits pointer-events: none the instant the modal closes.
+        *
+        * It matters because removal otherwise depends on the exit ANIMATION finishing, and
+        * framer-motion drives that with requestAnimationFrame, which browsers stop firing in
+        * a hidden tab. Put a phone to sleep just after closing the dock and the backdrop
+        * stays: invisible, full-screen, swallowing every tap until the tab is looked at
+        * again. The key on the child fixed a worse version of this; this covers the case
+        * where the animation never gets to run.
+        */}
+      <div style={{ pointerEvents: isModalOpen ? 'auto' : 'none' }}>
       <AnimatePresence>
         {isModalOpen && (
           /* key is REQUIRED, not decoration. AnimatePresence tracks its children by key, and
@@ -307,23 +329,6 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-            /**
-             * Belt as well as braces, and the braces have already snapped once.
-             *
-             * The key above is what makes AnimatePresence remove this on exit. But removal
-             * still depends on the exit ANIMATION finishing, and framer-motion drives that
-             * with requestAnimationFrame -- which browsers stop firing in a hidden tab. Put
-             * a phone to sleep just after closing the dock and the backdrop is left in the
-             * DOM: full-screen, invisible, and still taking clicks. Measured exactly that on
-             * production, in a tab where rAF never fired: React state said closed, and a
-             * full-screen interactive sheet was still there.
-             *
-             * Tying pointer-events to the state rather than to the animation means a stalled
-             * exit can no longer swallow anything. Nobody should be clicking a backdrop that
-             * is on its way out regardless, so this costs nothing when the animation does
-             * run normally.
-             */
-            style={{ pointerEvents: isModalOpen ? 'auto' : 'none' }}
             onClick={() => setIsModalOpen(false)}
           >
             <motion.div
@@ -491,6 +496,7 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
     </>
   );
 }
