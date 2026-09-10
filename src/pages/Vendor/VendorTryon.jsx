@@ -1,13 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { API_URL } from '../../config';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Sparkles, Check, ChevronLeft, RefreshCw, LogOut, Upload, Lightbulb, CloudUpload, FolderOpen, Heart, Lock, ShieldCheck, Shield, Camera, X } from 'lucide-react';
+import { Sparkles, Check, ChevronLeft, RefreshCw, LogOut, Upload, Lightbulb, CloudUpload, FolderOpen, Heart, Lock, ShieldCheck, Shield, Camera, X, Shirt } from 'lucide-react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import VendorLimitModal from '../../components/VendorLimitModal';
 import VendorUpgradeModal from '../../components/VendorUpgradeModal';
-import { saveToHistory, getActiveImage, deactivateActiveImage, clearAllHistory, subscribeToImageEvents, EVENTS, saveTryonResult, getTryonResultsBySelfie, deleteTryonResult, updateTryonResult, pingSelfieActivity } from '../../utils/imageStore';
 import ImageHistoryDock from '../../components/ImageHistoryDock';
 import FloatingImageAnimation from '../../components/FloatingImageAnimation';
+import { newClientRequestId, recoverGeneration, userFacingMessage } from '../../utils/generationRecovery';
+import { createPhotoDock } from '../../utils/photoDock';
+
+// How long to hold the synchronous request open before falling back to polling. Generous
+// enough for a normal generation to answer directly, short enough that we stop waiting on a
+// socket a proxy has already abandoned. Exceeding it is not an error -- see recoverGeneration.
+const GENERATION_REQUEST_TIMEOUT_MS = 120000;
 
 
 // Display-only — no prompts or raw image logic here.
@@ -43,6 +49,34 @@ export default function VendorTryon() {
   const activeImageRef = useRef(null);
   const intervalRef = useRef(null);
   const isAnimatingRef = useRef(false);
+  // The photo exactly as the file input gave it to us. selectedFile does not stay that
+  // object -- saveToHistory broadcasts PHOTO_ADDED and loadStoredImage replaces it 50ms
+  // later with the copy read back from IndexedDB, which on iOS can lose its MIME type or
+  // its bytes. Uploading this avoids depending on that round trip.
+  const freshFileRef = useRef(null);
+  // Recovery can outlive the page. Without this, polling would keep calling setState after
+  // the user has navigated away.
+  const isMountedRef = useRef(true);
+
+  /**
+   * The SHARED dock: this shop's photographs, on the server, the same on every device the
+   * account is signed in on.
+   *
+   * Only this page. The shopper-facing try-on pages keep the browser's own dock, because a
+   * customer scanning a QR code has no account -- and because sharing their photograph into
+   * a shop-wide dock is not a thing to do by accident.
+   *
+   * Created once: a new dock object each render would restart the poll continuously.
+   */
+  const [dock] = useState(() => createPhotoDock({
+    shared: true,
+    apiUrl: API_URL,
+    getToken: () => localStorage.getItem('vendor_token')
+  }));
+  const [dockPhotoId, setDockPhotoId] = useState(null);
+  // Set only when the outfit THIS device is working on is removed from the shop's list by
+  // somebody else. A note, never an interruption -- see the effect further down.
+  const [outfitWithdrawn, setOutfitWithdrawn] = useState(false);
   const [floatingAnimation, setFloatingAnimation] = useState(null);
 
   const [loading, setLoading] = useState(true);
@@ -56,7 +90,6 @@ export default function VendorTryon() {
   const [progress, setProgress] = useState(0);
   const [resultImageUrl, setResultImageUrl] = useState(null);
   
-  const [activeSelfieId, setActiveSelfieId] = useState(null);
   const [carouselResults, setCarouselResults] = useState([]);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   
@@ -93,54 +126,176 @@ export default function VendorTryon() {
   }, [authToken]);
 
   useEffect(() => {
-    async function loadStoredImage() {
-      const activeRecord = await getActiveImage();
-      if (activeRecord) {
-        setActiveSelfieId(activeRecord.id);
-        setSelectedFile(activeRecord.file);
-        // Prevent creating multiple blob URLs for the same active image across renders
-        setSelectedImage(prev => {
-          if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev);
-          return URL.createObjectURL(activeRecord.file);
-        });
-      } else {
-        setActiveSelfieId(null);
-        setSelectedFile(null);
-        setSelectedImage(prev => {
-          if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev);
-          return null;
-        });
-      }
-    }
-    loadStoredImage();
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
 
-    async function loadCarousel() {
-      if (activeSelfieId) {
-        const results = await getTryonResultsBySelfie(activeSelfieId);
-        setCarouselResults(results);
-        setCurrentSlideIndex(0);
-      } else {
-        setCarouselResults([]);
-        setCurrentSlideIndex(0);
-      }
-    }
-    loadCarousel();
-
-    const unsubscribe = subscribeToImageEvents((data) => {
-      if ([EVENTS.PHOTO_PROMOTED, EVENTS.PHOTO_ADDED, EVENTS.PHOTO_DEACTIVATED, EVENTS.HISTORY_CLEARED].includes(data.type)) {
-        setTimeout(() => loadStoredImage(), 50);
-      }
+  /**
+   * What this shop currently has in its dock, from the server.
+   *
+   * Replaces the IndexedDB read this page used to do. The active photograph, and the try-ons
+   * made from it, now come from the account rather than from this browser -- which is the
+   * whole feature: the counter tablet and the owner's laptop see the same thing.
+   *
+   * selectedFile stays null on purpose. A shared photograph is a URL that already exists on
+   * the server, so there is no File to hold and nothing to upload again at generation time.
+   */
+  /**
+   * Puts one of the shop's photographs into the upload slot.
+   *
+   * The ONLY thing that changes which photograph this page is working with. Nothing else
+   * does it -- not the poll, not another device.
+   */
+  const applyPhoto = React.useCallback((photo) => {
+    setDockPhotoId(photo?.id || null);
+    setSelectedFile(null);
+    setSelectedImage(prev => {
+      if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev);
+      return photo?.imageUrl || null;
     });
+    setCarouselResults(photo?.results || []);
+    setCurrentSlideIndex(0);
+  }, []);
 
-    return () => unsubscribe();
-  }, [activeSelfieId]);
+  /**
+   * Puts one of the shop's garments into the page, keeping the photograph already in the slot.
+   *
+   * The counterpart to applyPhoto: one changes who is being dressed, this changes what they
+   * are wearing, and neither disturbs the other. That is the whole point -- somebody who has
+   * just finished a try-on and opens the dock to try the next outfit should not have to find
+   * and re-pick the customer's photograph in between.
+   *
+   * This used to be a plain navigate() to the garment's page. Same destination, but arriving
+   * as a fresh page: the photograph in the slot was gone, and whoever was serving had to set
+   * it up again with the customer standing there. The navigate stays -- the page is addressed
+   * by the garment and the URL has to keep saying which one, or a refresh would go back to
+   * the previous outfit -- but because the route pattern is unchanged React only swaps the
+   * parameter. The component is not remounted, so selectedImage and the dock photograph
+   * survive it and the effect keyed on `id` simply fetches the new garment.
+   *
+   * The RESULT is cleared, and that is not the same as clearing the photograph. A generated
+   * image belongs to a pair -- this person, that outfit -- so leaving the previous garment's
+   * result on screen under a new garment's name would be showing something untrue. It is not
+   * lost: it stays in the dock under the photograph it was made from, which is where past
+   * try-ons live.
+   */
+  const applyGarment = React.useCallback((garment) => {
+    const assetId = garment?.primaryAssetId;
+    if (!assetId || assetId === id) return;
 
-  // Ping selfie activity to extend 20-minute expiry when user interacts with carousel
-  useEffect(() => {
-    if (activeSelfieId) {
-      pingSelfieActivity(activeSelfieId);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
-  }, [currentSlideIndex, carouselResults, activeSelfieId]);
+    setTryonState('initial');
+    setProgress(0);
+    setResultImageUrl(null);
+    setSelectedBg(null);
+
+    // replace, not push: flipping between four outfits should not put four entries in the
+    // history for the back button to walk through one at a time.
+    navigate(`/vendor/preview/${assetId}`, { replace: true });
+  }, [id, navigate]);
+
+  /** Re-reads the try-ons under the photograph already in the slot. Never changes the slot. */
+  const refreshResults = React.useCallback(async () => {
+    if (!dockPhotoId) return;
+    try {
+      const photos = await dock.list();
+      if (!isMountedRef.current) return;
+      const mine = photos.find(p => p.id === dockPhotoId);
+      // Gone from another device: leave the photograph on screen rather than blanking the
+      // page mid-session. The next explicit pick will sort it out.
+      if (mine) setCarouselResults(mine.results || []);
+    } catch (err) {
+      console.error('[VendorTryon] could not refresh try-ons', err);
+    }
+  }, [dock, dockPhotoId]);
+
+  /**
+   * On arrival -- and only on arrival -- start from whatever the shop last selected.
+   *
+   * A sensible starting point on a device that has just been opened, and the last moment
+   * anything remote is allowed to decide what is in the slot. From here the photograph
+   * changes only when somebody picks one out of the dock.
+   *
+   * The dock itself keeps polling, so its list stays current across devices. That is the part
+   * that should follow the shop; the photograph being worked on is not, because swapping it
+   * under someone mid-session is the disruption this arrangement exists to avoid.
+   */
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const photos = await dock.list();
+        if (cancelled || !isMountedRef.current) return;
+        applyPhoto(photos.find(p => p.isActive) || null);
+      } catch (err) {
+        console.error('[VendorTryon] could not read the shared dock', err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [dock, applyPhoto]);
+
+  // Tell the server the photograph is still in use, so it is not aged out from under
+  // someone who is still working with it on another device.
+  useEffect(() => {
+    if (dockPhotoId) dock.touch(dockPhotoId);
+  }, [currentSlideIndex, dockPhotoId, dock]);
+
+  /**
+   * Say that this outfit is being worn, for as long as this page is open.
+   *
+   * Deleting an outfit erases the try-ons made with it, and a colleague on another device can
+   * be in the middle of exactly that. This beat is what lets the dock ask "someone is trying
+   * this on right now -- delete anyway?" instead of taking their work without a word.
+   *
+   * Thirty seconds against a ninety-second window on the server, so a lost beat costs a
+   * warning rather than somebody's session. Beats immediately on arrival too: the risky moment
+   * is the first minute, when a colleague has just seen the outfit appear in their dock.
+   */
+  useEffect(() => {
+    if (!id) return;
+    dock.touchGarment?.(id);
+    const beat = setInterval(() => dock.touchGarment?.(id), 30000);
+    return () => clearInterval(beat);
+  }, [id, dock]);
+
+  /**
+   * Notice -- never interrupt -- when this outfit is taken off the shop's list.
+   *
+   * The rule this enforces is worth stating plainly: **a delete on another device must never
+   * end a try-on in progress here.** It cannot, structurally, because deleting an outfit
+   * removes its try-on RESULTS and never the garment itself, so this page keeps its garment,
+   * its photograph and its ability to generate. What did happen silently was that results
+   * already on screen vanished at the next refresh with nothing to explain why.
+   *
+   * So: watch for our own outfit leaving the list, say so once, quietly, and change nothing
+   * else. No navigation, no cleared slot, no blocked button.
+   *
+   * Only a TRANSITION counts. An outfit with no try-ons yet is legitimately absent from the
+   * list, and warning about that on arrival would be crying wolf on the normal case.
+   */
+  const wasListedRef = useRef(false);
+  useEffect(() => {
+    if (!dock.shared || !id) return;
+    let stop = false;
+
+    const look = async () => {
+      try {
+        const listed = (await dock.garments()).some(g => g.primaryAssetId === id);
+        if (stop || !isMountedRef.current) return;
+        if (wasListedRef.current && !listed) setOutfitWithdrawn(true);
+        if (listed) { wasListedRef.current = true; setOutfitWithdrawn(false); }
+      } catch {
+        // Offline or expired. Not worth a word; the next look sorts it out.
+      }
+    };
+
+    look();
+    const unsubscribe = dock.subscribe(() => look());
+    return () => { stop = true; unsubscribe(); };
+  }, [dock, id]);
 
   useEffect(() => {
     fetch(`${API_URL}/api/tryon/generations/${id}`)
@@ -183,10 +338,31 @@ export default function VendorTryon() {
       if (selectedImage && selectedImage.startsWith('blob:')) {
         URL.revokeObjectURL(selectedImage);
       }
-      setSelectedFile(file);
-      setSelectedImage(URL.createObjectURL(file));
+      freshFileRef.current = file;
       setTryonState('initial');
-      saveToHistory(file);
+      // Uploaded and recorded against the account, then re-read, so the photograph appears
+      // on every signed-in device rather than only in this browser.
+      addToSharedDock(file);
+    }
+  };
+
+  /**
+   * Puts a freshly picked photograph into the shop's dock.
+   *
+   * Uploading happens here rather than at generation time, because a photograph that only
+   * exists as bytes in this browser cannot appear on the owner's laptop. The cost is that a
+   * photograph picked and never used is still uploaded -- which is the price of the dock
+   * being shared at all.
+   */
+  const addToSharedDock = async (file) => {
+    try {
+      const added = await dock.add(file);
+      if (!added) { handleAuthError(); return; }
+      // Picking a photograph here is this person's own action, so it goes into the slot.
+      applyPhoto(added);
+    } catch (err) {
+      console.error('[VendorTryon] could not add to the shared dock', err);
+      alert(userFacingMessage(err));
     }
   };
 
@@ -202,12 +378,17 @@ export default function VendorTryon() {
       URL.revokeObjectURL(selectedImage);
     }
     
+    freshFileRef.current = null;
     setSelectedImage(null);
     setSelectedFile(null);
     setTryonState('initial');
     if (fileInputRef.current) fileInputRef.current.value = '';
     if (cameraInputRef.current) cameraInputRef.current.value = '';
-    await deactivateActiveImage();
+    // Empties the slot here, and drops the shop-wide "start here" mark so a device opening
+    // later does not begin on a photograph nobody is working with. The photograph itself
+    // stays in the dock, and no other open page has its slot changed.
+    applyPhoto(null);
+    await dock.deactivate();
   };
 
   const triggerFileBrowser = (e) => {
@@ -234,10 +415,9 @@ export default function VendorTryon() {
         if (selectedImage && selectedImage.startsWith('blob:')) {
           URL.revokeObjectURL(selectedImage);
         }
-        setSelectedFile(file);
-        setSelectedImage(URL.createObjectURL(file));
+        freshFileRef.current = file;
         setTryonState('initial');
-        saveToHistory(file);
+        addToSharedDock(file);
       }
     }
   };
@@ -296,24 +476,17 @@ export default function VendorTryon() {
       if (!res.ok) throw new Error(data.error || "Failed to change background");
       
       if (targetId) {
-        const updatedRecord = await updateTryonResult(targetId, { resultImageUrl: data.url });
-        if (updatedRecord) {
-          setCarouselResults(prev => prev.map(r => r.id === targetId ? updatedRecord : r));
-        } else {
-          // Fallback update React state even if IndexedDB record expired
-          setCarouselResults(prev => prev.map(r => r.id === targetId ? { ...r, resultImageUrl: data.url } : r));
-        }
+        setCarouselResults(prev => prev.map(r => r.id === targetId ? { ...r, resultImageUrl: data.url } : r));
       } else {
         setResultImageUrl(data.url);
       }
       setSelectedBg(null);
 
-      if (activeSelfieId) {
-        pingSelfieActivity(activeSelfieId);
-      }
+      if (dockPhotoId) dock.touch(dockPhotoId);
     } catch (err) {
-      console.error(err);
-      alert(err.message);
+      // Real reason to the console only -- never to the person.
+      console.error('[ChangeBackground]', err);
+      alert(userFacingMessage(err));
     } finally {
       setIsChangingBackground(false);
     }
@@ -352,22 +525,16 @@ export default function VendorTryon() {
       if (!response.ok) throw new Error(result.error || 'API Error');
 
       if (targetId) {
-        const updatedRecord = await updateTryonResult(targetId, { resultImageUrl: result.resultImageUrl });
-        if (updatedRecord) {
-          setCarouselResults(prev => prev.map(r => r.id === targetId ? updatedRecord : r));
-        } else {
-          // Fallback update React state even if IndexedDB record expired
-          setCarouselResults(prev => prev.map(r => r.id === targetId ? { ...r, resultImageUrl: result.resultImageUrl } : r));
-        }
+        setCarouselResults(prev => prev.map(r => r.id === targetId ? { ...r, resultImageUrl: result.resultImageUrl } : r));
       } else {
         setResultImageUrl(result.resultImageUrl);
       }
       
-      if (activeSelfieId) {
-        pingSelfieActivity(activeSelfieId);
-      }
+      if (dockPhotoId) dock.touch(dockPhotoId);
     } catch (err) {
-      alert("Failed to apply modification: " + err.message);
+      // Real reason to the console only -- never to the person.
+      console.error('[ModifyOutfit]', err);
+      alert(userFacingMessage(err));
     } finally {
       setIsModifying(false);
     }
@@ -387,83 +554,106 @@ export default function VendorTryon() {
     }, 300);
 
     try {
-      let human_image_url = null;
-      if (selectedFile) {
-        const formData = new FormData();
-        formData.append('image', selectedFile);
-        const uploadRes = await fetch(`${API_URL}/api/tryon/upload?folder=user-uploads`, { 
-          method: 'POST', 
-          headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {},
-          body: formData 
-        });
+      // The photograph is already on the server: it was uploaded when it went into the
+      // shared dock, which is what lets the other devices see it. Nothing to upload here.
+      const human_image_url = selectedImage;
 
-        if (uploadRes.status === 401 || uploadRes.status === 403) {
-          if (intervalRef.current) clearInterval(intervalRef.current);
-          handleAuthError();
-          return;
-        }
-
-        const uploadData = await uploadRes.json();
-        human_image_url = uploadData.url;
-      } else {
-        human_image_url = selectedImage;
-      }
-
+      // A blob: URL would mean a local handle that no other device could resolve.
       if (!human_image_url || human_image_url.startsWith('blob:')) {
-        throw new Error("Invalid image source. Please upload a fresh photo.");
+        throw new Error('No shared dock photo available for generation');
       }
 
       const garment_image_url = sourceGeneration.resultImageUrl || sourceGeneration.garmentImageUrl;
 
-      const lockedSelfieId = activeSelfieId;
+      // Named before it is sent, so the result stays claimable if this response is lost.
+      const clientRequestId = newClientRequestId();
 
-      const genRes = await fetch(`${API_URL}/api/tryon/generate`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify({
-          mode: 'with_garment',
-          garment_image_url: garment_image_url,
-          human_image_url,
-          parent_generation_id: id,
-          target_folder: 'results/tryon-results'
-        })
-      });
+      let genRes = null;
+      let genData = {};
+      let transportFailure = null;
 
-      const genData = await genRes.json().catch(() => ({}));
-      
-      if (genRes.status === 401 && genData.error === 'GUEST_LIMIT_REACHED') {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        handleAuthError();
-        return;
-      } else if (genRes.status === 403 && genData.error === 'INSUFFICIENT_CREDITS') {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        setShowUpgradeModal(true);
-        setTryonState('initial');
-        return;
-      } else if (genRes.status === 401 || genRes.status === 403) {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        handleAuthError();
-        return;
-      } else if (!genRes.ok) {
-        throw new Error(genData.error || 'Generation failed');
-      }
-      
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      setProgress(100);
-      const finalUrl = genData.result_image_url || garment_image_url;
-      setResultImageUrl(finalUrl);
-
-      if (lockedSelfieId) {
-        const savedRecord = await saveTryonResult({
-          activeSelfieId: lockedSelfieId,
-          garmentImageUrl: garment_image_url,
-          resultImageUrl: finalUrl
+      try {
+        genRes = await fetch(`${API_URL}/api/tryon/generate`, {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify({
+            mode: 'with_garment',
+            garment_image_url: garment_image_url,
+            human_image_url,
+            parent_generation_id: id,
+            target_folder: 'results/tryon-results',
+            client_request_id: clientRequestId,
+            // Files this try-on under the dock photograph it was made from, so every signed-in
+            // device sees it grouped under the right person.
+            dock_photo_id: dockPhotoId
+          }),
+          // Stop holding a socket the network has already given up on. Hitting this is not
+          // a failure -- the server is still working, and we go and collect the result below.
+          signal: AbortSignal.timeout(GENERATION_REQUEST_TIMEOUT_MS)
         });
-        if (savedRecord) {
-          setCarouselResults(prev => [savedRecord, ...prev]);
-          setCurrentSlideIndex(0);
+        // Deliberately NOT .catch(() => ({})). A body that will not parse means the response
+        // was truncated, which is exactly the case that must trigger recovery rather than be
+        // quietly turned into an empty object.
+        genData = await genRes.json();
+      } catch (err) {
+        transportFailure = err;
+      }
+
+      // Refusals are decided by the server before any asset row exists, so they are settled
+      // here and never polled for -- there would be nothing to find.
+      if (genRes && !transportFailure) {
+        if (genRes.status === 401 && genData.error === 'GUEST_LIMIT_REACHED') {
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          handleAuthError();
+          return;
+        } else if (genRes.status === 403 && genData.error === 'INSUFFICIENT_CREDITS') {
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          setShowUpgradeModal(true);
+          setTryonState('initial');
+          return;
+        } else if (genRes.status === 401 || genRes.status === 403) {
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          handleAuthError();
+          return;
         }
       }
+
+      let finalUrl = genData?.result_image_url || null;
+
+      if (!finalUrl) {
+        // Either the connection died or the reply carried no image. The credit is already
+        // spent and the server is very likely still finishing the picture, so wait for it
+        // rather than throwing the work away. The progress bar keeps running on purpose.
+        const recovered = await recoverGeneration({
+          apiUrl: API_URL,
+          clientRequestId,
+          headers: getHeaders(),
+          isCancelled: () => !isMountedRef.current
+        });
+
+        if (recovered?.status === 'COMPLETED') {
+          finalUrl = recovered.result_image_url;
+        } else if (recovered?.status === 'FAILED') {
+          throw new Error(recovered.error || 'Generation failed');
+        } else if (transportFailure) {
+          throw new Error('The connection dropped and the try-on could not be recovered. Please try again.');
+        } else if (genRes && !genRes.ok) {
+          throw new Error(genData?.error || 'Generation failed');
+        } else {
+          throw new Error('The try-on did not come back. Please try again.');
+        }
+      }
+
+      if (!isMountedRef.current) return;
+
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      setProgress(100);
+      setResultImageUrl(finalUrl);
+
+      // The result recorded itself against the dock photograph server-side, via the
+      // dock_photo_id sent above. Only the try-ons are re-read -- the photograph in the slot
+      // stays exactly where it is.
+      await refreshResults();
 
       setTimeout(() => setTryonState('generated'), 400);
 
@@ -471,7 +661,7 @@ export default function VendorTryon() {
       console.error(err);
       if (intervalRef.current) clearInterval(intervalRef.current);
       setTryonState('initial');
-      alert('Try-On failed: ' + err.message);
+      alert(userFacingMessage(err));
     }
   };
 
@@ -483,8 +673,50 @@ export default function VendorTryon() {
     return <div className="min-h-screen bg-[#ede8df] flex items-center justify-center font-['Courier_Prime',monospace] text-[12px] uppercase tracking-widest text-[#8c8278] animate-pulse">Loading dress details...</div>;
   }
 
+  /**
+   * A garment that is gone, with a way out of it.
+   *
+   * This was a single line of centred red capitals -- "DRESS NOT FOUND OR LINK EXPIRED" -- and
+   * nothing else on the page. No buttons, no links, not even the dock. Somebody who arrived
+   * from a bookmark, a link a colleague sent them, or the browser's back button was simply
+   * stuck: the only escape was knowing to press back again or to retype a URL, with a customer
+   * standing there.
+   *
+   * It became much easier to reach the moment outfits could be deleted, which is how it turned
+   * up -- pressing back after switching outfits landed on one whose try-ons had been erased.
+   *
+   * So: say what happened in a sentence rather than shouting an error code, and offer the two
+   * things a person actually wants next. The dock stays mounted underneath, because "show me
+   * the other outfits" is the most likely answer of all and it is already right there.
+   */
   if (error || !sourceGeneration) {
-    return <div className="min-h-screen bg-[#ede8df] flex items-center justify-center font-['Courier_Prime',monospace] text-[12px] uppercase tracking-widest text-red-800">{error || "Not found"}</div>;
+    return (
+      <div className="min-h-screen bg-[#ede8df] flex flex-col items-center justify-center px-6 text-center">
+        <Shirt className="w-10 h-10 text-[#c4b8a8] mb-4" />
+        <p className="font-['Courier_Prime',monospace] text-[13px] tracking-wide text-[#5c5349] max-w-sm leading-relaxed">
+          This outfit is no longer here. It may have been removed from the shop, or the link
+          may have expired.
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
+          <button
+            onClick={() => navigate('/vendor/catalog')}
+            className="px-5 py-2.5 bg-[#1a202c] text-white font-['Courier_Prime',monospace] text-[11px] uppercase tracking-widest hover:bg-[#2d3748] transition-colors"
+          >
+            Back to your outfits
+          </button>
+          <button
+            onClick={() => navigate('/workspace')}
+            className="px-5 py-2.5 border border-[#c4b8a8] text-[#5c5349] font-['Courier_Prime',monospace] text-[11px] uppercase tracking-widest hover:bg-[#e3ddd2] transition-colors"
+          >
+            Start a new try-on
+          </button>
+        </div>
+
+        {/* Still mounted, deliberately. The shop's other outfits and photographs are the most
+            likely thing wanted next, and they are already loaded. */}
+        <ImageHistoryDock dock={dock} onPick={applyPhoto} onPickGarment={applyGarment} />
+      </div>
+    );
   }
 
   const drapedDressUrl = sourceGeneration.resultImageUrl || sourceGeneration.garmentImageUrl;
@@ -495,10 +727,14 @@ export default function VendorTryon() {
 
   const handleCarouselDelete = async (e, resultId) => {
     e.stopPropagation();
-    const success = await deleteTryonResult(resultId);
-    if (success) {
+    try {
+      await dock.removeResult(resultId);
       setCarouselResults(prev => prev.filter(r => r.id !== resultId));
       setCurrentSlideIndex(prev => Math.max(0, Math.min(prev, carouselResults.length - 2)));
+      await refreshResults();
+    } catch (err) {
+      console.error('[VendorTryon] could not remove the try-on', err);
+      alert(userFacingMessage(err));
     }
   };
 
@@ -555,10 +791,15 @@ export default function VendorTryon() {
       <div className="flex-1 flex flex-col xl:flex-row relative">
         
         {/* Left Side: Instructions & Upload */}
-        <aside className="w-full xl:w-[400px] bg-[#faf7f2] border-r border-[rgba(26,20,16,0.1)] p-3 md:p-4 shrink-0 flex flex-col justify-start overflow-y-auto style={{scrollbarWidth: 'thin'}}">
+        <aside className="w-full xl:w-[400px] bg-[#faf7f2] border-r border-[rgba(26,20,16,0.1)] p-3 md:p-4 shrink-0 flex flex-col justify-start overflow-y-auto"
+          style={{ scrollbarWidth: 'thin' }}>
           
           {/* Global Hidden Inputs for Camera and File Browser */}
-          <input ref={cameraInputRef} type="file" accept="image/*" capture="camera" onChange={handleFileChange} className="hidden" />
+          {/* capture="environment" -- "camera" is not a value the HTML spec defines (only
+              "user" and "environment"), so browsers fell back to their own default. The photo
+              wanted here is full-length and taken by someone else, so the rear camera is the
+              right one to ask for, explicitly. */}
+          <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
 
           <div className="flex flex-col animate-fade-in w-full">
@@ -616,7 +857,10 @@ export default function VendorTryon() {
                   <div className="w-full h-full flex flex-col items-center justify-center group">
                     <div className="bg-[#fffaf0] w-full rounded-md p-2 flex items-center justify-center gap-1.5 mb-2 border border-[#fefcbf]">
                       <Check className="w-3.5 h-3.5 text-[#dd6b20]" />
-                      <span className="text-[#4a5568] text-[9px] font-sans font-bold">Photo saved for all try-ons (Expires 20m)</span>
+                      {/* Says what is actually true on this page now. The photograph is in the shop's
+                          dock, not this browser, and it is kept for a day rather than twenty minutes --
+                          promising "20m" here would have been simply wrong. */}
+                      <span className="text-[#4a5568] text-[9px] font-sans font-bold">Photo saved &mdash; try more outfits with it for 20 minutes</span>
                     </div>
                     
                     <div className="relative mb-3">
@@ -908,10 +1152,15 @@ export default function VendorTryon() {
             
             {/* Filmstrip Overlay */}
             {tryonState === 'generated' && carouselResults.length > 0 && (
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 max-w-[90%] z-30 flex justify-center gap-1.5 overflow-x-auto p-1.5 bg-black/50 backdrop-blur-md rounded-xl shadow-2xl border border-white/20 style={{scrollbarWidth: 'none'}}">
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 max-w-[90%] z-30 flex justify-center gap-1.5 overflow-x-auto p-1.5 bg-black/50 backdrop-blur-md rounded-xl shadow-2xl border border-white/20"
+                style={{ scrollbarWidth: 'none' }}>
                 {carouselResults.map((res, idx) => (
                   <div key={res.id} className="relative group/thumb shrink-0 cursor-pointer" onClick={() => setCurrentSlideIndex(idx)}>
-                    <img src={res.garmentImageUrl} alt="Garment" className={`w-10 h-14 object-cover rounded-md transition-all duration-300 ${currentSlideIndex === idx ? 'border-[1.5px] border-[#dd6b20] opacity-100 scale-105 shadow-sm' : 'border border-[rgba(255,255,255,0.2)] opacity-50 hover:opacity-100'}`} />
+                    {/* The RESULT, not the garment. This strip is how you flip between the try-ons you
+                        have done, and every thumbnail showed the same outfit photograph -- so trying
+                        one dress three times gave three identical thumbnails and no way to tell them
+                        apart. Your own results all look different, which is what makes it a carousel. */}
+                    <img src={res.resultImageUrl} alt={`Try-on ${idx + 1}`} className={`w-10 h-14 object-cover rounded-md transition-all duration-300 ${currentSlideIndex === idx ? 'border-[1.5px] border-[#dd6b20] opacity-100 scale-105 shadow-sm' : 'border border-[rgba(255,255,255,0.2)] opacity-50 hover:opacity-100'}`} />
                     {/* Delete button */}
                     <button onClick={(e) => handleCarouselDelete(e, res.id)} className="absolute -top-1.5 -right-1.5 bg-red-500/90 hover:bg-red-500 text-white p-0.5 rounded-full opacity-0 group-hover/thumb:opacity-100 transition-opacity shadow-md">
                       <X className="w-3 h-3 stroke-[3]" />
@@ -968,7 +1217,45 @@ export default function VendorTryon() {
         onClose={() => setShowUpgradeModal(false)} 
         userType="vendor"
       />
-      <ImageHistoryDock />
+      {/* onPick is the only route from the dock into the upload slot. The dock keeps itself
+          current across devices on its own; nothing it learns changes this page until
+          somebody chooses a photograph out of it. */}
+      {/* A note, not a dialog. Whoever is standing here can read it and carry on, or dismiss
+          it; nothing about the page is blocked by it and the try-on continues either way. */}
+      {outfitWithdrawn && (
+        <div
+          role="status"
+          className="fixed bottom-24 right-6 z-40 max-w-xs bg-white border border-[#e2e8f0] shadow-lg rounded-lg p-3 flex items-start gap-2.5"
+        >
+          <Shirt className="w-4 h-4 text-[#dd6b20] flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-[11px] text-[#1a202c] leading-relaxed">
+              Someone removed this outfit from the shop&rsquo;s list. You can carry on and try
+              it on &mdash; earlier try-ons made with it have gone.
+            </p>
+            <button
+              onClick={() => setOutfitWithdrawn(false)}
+              className="mt-1.5 text-[10px] font-bold uppercase tracking-wider text-[#a0aec0] hover:text-[#1a202c]"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
+      <ImageHistoryDock
+        dock={dock}
+        onPick={applyPhoto}
+        /* Picking a garment changes what this page is working on, and only on this device.
+           The dock's LIST is shared -- an outfit tried on the counter tablet shows up on the
+           owner's laptop, which is the point of it -- but choosing one is a local act. No
+           other device's page moves, because nothing here writes the choice anywhere. */
+        onPickGarment={applyGarment}
+        /* Browsable while a generation runs, not applicable. Someone waiting on a try-on is
+           exactly who wants to look at what to try next; what they must not be able to do is
+           change the inputs underneath the generation already in flight. */
+        busy={tryonState === 'generating' || isModifying || isChangingBackground}
+      />
       
       {floatingAnimation && (
         <FloatingImageAnimation 
