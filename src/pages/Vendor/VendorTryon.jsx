@@ -739,7 +739,7 @@ export default function VendorTryon() {
 
         {/* Still mounted, deliberately. The shop's other outfits and photographs are the most
             likely thing wanted next, and they are already loaded. */}
-        <ImageHistoryDock dock={dock} onPick={applyPhoto} onPickGarment={applyGarment} />
+        <ImageHistoryDock dock={dock} onPick={applyPhoto} onPickGarment={applyGarment} currentPhotoId={dockPhotoId} />
       </div>
     );
   }
@@ -1271,6 +1271,9 @@ export default function VendorTryon() {
       <ImageHistoryDock
         dock={dock}
         onPick={applyPhoto}
+        /* What this page is wearing, so the dock leaves it out of the list and nothing else.
+           Another device's slot is its own business. */
+        currentPhotoId={dockPhotoId}
         /* Picking a garment changes what this page is working on, and only on this device.
            The dock's LIST is shared -- an outfit tried on the counter tablet shows up on the
            owner's laptop, which is the point of it -- but choosing one is a local act. No

@@ -35,6 +35,10 @@ const BUSY_HINT = 'Wait for the current try-on to finish, then pick another.';
  *                                 out from under a generation already in flight would produce
  *                                 a result belonging to inputs nobody chose together.
  * @param {function}[props.onPick]  called with the chosen photograph when somebody picks one.
+ * @param {string}  [props.currentPhotoId]  the photograph already in this page's slot, so the
+ *                                  list can leave it out. On a shared dock this is the ONLY
+ *                                  thing that should be hidden -- the account's isActive flag
+ *                                  belongs to whichever device picked last, not to this one.
  *                                  This is the ONLY way a shared dock reaches the page: the
  *                                  list keeps itself current across devices by polling, but
  *                                  nothing it learns is allowed to change what the page is
@@ -43,7 +47,7 @@ const BUSY_HINT = 'Wait for the current try-on to finish, then pick another.';
  *                                  colleague picked a different one on another device is the
  *                                  thing this arrangement exists to prevent.
  */
-export default function ImageHistoryDock({ dock, onPick, onPickGarment, busy = false }) {
+export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentPhotoId = null, busy = false }) {
   // Created once. A new dock object on every render would restart polling continuously.
   const [activeDock] = useState(() => dock || createPhotoDock({ shared: false }));
   const EXPIRY_MS = activeDock.expiryMs;
@@ -170,7 +174,30 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, busy = f
     if (activeDock.shared) fetchHistory();
   };
 
-  const inactiveHistory = history.filter(h => !h.isActive);
+  /**
+   * Hide the photograph THIS page is working with -- not the one the account calls active.
+   *
+   * The dock has always hidden the active photograph, and on a browser's own dock that is
+   * right: "active" there means "the one in the slot on this screen", so listing it again
+   * would offer somebody the picture they are already looking at.
+   *
+   * On a SHARED dock the word means something else. isActive is one flag for the whole
+   * account, set by whichever device last picked or added. The other device is not using
+   * that photograph -- it has an empty slot and no way to reach the photograph except
+   * through this list -- so hiding it there hid the only copy.
+   *
+   * The effect was the whole feature failing in its most ordinary case: a shop takes ONE
+   * photograph of a customer on the phone, it becomes the account's active one, and the
+   * tablet shows no dock at all. Not a stale list -- no button, nothing to open. It only
+   * started working once a SECOND photograph existed, which is why it looked like the dock
+   * was not syncing when the sync had been correct the whole time.
+   *
+   * So: shared docks hide the photograph this page has in its slot (which is nothing, on a
+   * device that has not picked yet), and local docks keep the old meaning exactly.
+   */
+  const inactiveHistory = activeDock.shared
+    ? history.filter(h => h.id !== currentPhotoId)
+    : history.filter(h => !h.isActive);
 
   // On a local dock garments is always empty, so this reduces to exactly the old condition
   // and the shopper pages behave as they always have.
