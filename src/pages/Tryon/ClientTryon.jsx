@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { API_URL, INVENTORY_API_URL, INVENTORY_APP_URL } from '../../config';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Sparkles, Check, ChevronLeft, RefreshCw, LogOut, Upload, Lightbulb, CloudUpload, FolderOpen, Heart, Lock, ShieldCheck, Shield, Camera, X } from 'lucide-react';
+import { Check, ChevronLeft, RefreshCw, Lightbulb, CloudUpload, FolderOpen, Heart, Lock, Camera, X } from 'lucide-react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import VendorLimitModal from '../../components/VendorLimitModal';
 import { saveToHistory, getActiveImage, deactivateActiveImage, clearAllHistory, subscribeToImageEvents, EVENTS, saveTryonResult, getTryonResultsBySelfie, deleteTryonResult, updateTryonResult, pingSelfieActivity } from '../../utils/imageStore';
 import { swipeable } from '../../utils/swipe';
-import ImageHistoryDock from '../../components/ImageHistoryDock';
 import FloatingImageAnimation from '../../components/FloatingImageAnimation';
 import VendorUpgradeModal from '../../components/VendorUpgradeModal';
 import { uploadSelfie } from '../../utils/imageUpload';
@@ -16,28 +15,8 @@ import { resolveBackTarget } from '../../utils/backTarget';
 
 // Display-only — no prompts or raw image logic here.
 // The backend resolves everything from prompts.js using these IDs.
-const BACKGROUND_OPTIONS = [
-  { id: 'bg1', name: 'Ancient Temple', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg1.png' },
-  { id: 'bg2', name: 'Festive Palace', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg2.png' },
-  { id: 'bg3', name: 'Designer Boutique', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg13.png' },
-  { id: 'bg4', name: 'Luxury Hotel Lobby', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg12.png' },
-  { id: 'bg5', name: 'Floral Garden Archway', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg14.png' },
-  { id: 'bg6', name: 'Golden Palace', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg6.jpg' },
-  { id: 'bg7', name: 'Tropical Garden', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg7.jpg' },
-  { id: 'bg8', name: 'Beach Resort Sunset', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg11.png' }
-];
 
-const SHOWCASE_BLOUSES = [
-  { id: 'elbow-sleeve', name: 'Elbow Sleeve', image: '/assets/blouse/elbow_sleeve.png' },
-  { id: 'full-sleeve', name: 'Full Sleeve', image: '/assets/blouse/full_sleeve.png' },
-  { id: 'sleeveless', name: 'Sleeveless', image: '/assets/blouse/sleeve_less.png' }
-];
 
-const SHOWCASE_NECKS = [
-  { id: 'boat-neck', name: 'Boat Neck', image: '/assets/neck/boat_neck.png' },
-  { id: 'round-neck', name: 'Round Neck', image: '/assets/neck/round_neck.png' },
-  { id: 'collar-neck', name: 'Collar Neck', image: '/assets/neck/collar_neck.png' }
-];
 
 export default function ClientTryon() {
   const { clientId, productCode } = useParams();
@@ -72,37 +51,12 @@ export default function ClientTryon() {
   const [carouselResults, setCarouselResults] = useState([]);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
-  const [isChangingBackground, setIsChangingBackground] = useState(false);
-  const [selectedBg, setSelectedBg] = useState(null);
 
-  const [showcaseBlouse, setShowcaseBlouse] = useState('elbow-sleeve');
-  const [showcaseNeck, setShowcaseNeck] = useState('round-neck');
-  const [activeTab, setActiveTab] = useState('sleeve');
-  const [isModifying, setIsModifying] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
   const [authToken, setAuthToken] = useState(
     localStorage.getItem('vendor_token') || null
   );
-  /**
-   * Tryon2Buy's own styling tools -- change background, and sleeve/neck modification -- are OFF
-   * on this page.
-   *
-   * They call this app's backend directly (/api/tryon/change-background and
-   * /api/tryon/modify-outfit) rather than going through Inventory, which is fine on
-   * CustomerTryon and wrong here. On a scanned garment it would mean:
-   *
-   *   - the shop's own gateway key is never presented, so the gateway cannot tell whose work
-   *     it is and attributes it to the shared guest key
-   *   - the shop's monthly allowance is not checked and not decremented, so a shop that is out
-   *     of allowance can still spend GPU time
-   *   - nothing is metered on our side either, so the console shows usage that is quietly lower
-   *     than what was actually run
-   *
-   * In short: real money spent with nobody billed for it. They come back the moment those two
-   * endpoints are proxied through Inventory and metered the same way the generation already is.
-   */
-  const STYLING_TOOLS_ENABLED = false;
 
   const [showVendorLimitModal, setShowVendorLimitModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -308,121 +262,7 @@ export default function ClientTryon() {
     setIsDragging(false);
   };
 
-  const applyBackground = async () => {
-    const targetUrl = carouselResults.length > 0 ? carouselResults[currentSlideIndex]?.resultImageUrl : resultImageUrl;
-    const targetId = carouselResults.length > 0 ? carouselResults[currentSlideIndex]?.id : null;
-    
-    if (!targetUrl || isChangingBackground || !selectedBg) return;
 
-    const bgOption = BACKGROUND_OPTIONS.find(bg => bg.id === selectedBg);
-    if (!bgOption) return;
-
-    setIsChangingBackground(true);
-
-    try {
-      const res = await fetch(`${API_URL}/api/tryon/change-background`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify({
-          imageUrl: targetUrl,
-          backgroundId: selectedBg,
-          generationId: id
-        })
-      });
-
-      const data = await res.json();
-
-      if (res.status === 403 && data.error === 'INSUFFICIENT_CREDITS') {
-        setShowUpgradeModal(true);
-        setIsChangingBackground(false);
-        return;
-      }
-      if (res.status === 401 || res.status === 403) {
-        handleAuthError();
-        setIsChangingBackground(false);
-        return;
-      }
-      if (!res.ok) throw new Error(data.error || "Failed to change background");
-
-      if (targetId) {
-        const updatedRecord = await updateTryonResult(targetId, { resultImageUrl: data.url });
-        if (updatedRecord) {
-          setCarouselResults(prev => prev.map(r => r.id === targetId ? updatedRecord : r));
-        } else {
-          // Fallback update React state even if IndexedDB record expired
-          setCarouselResults(prev => prev.map(r => r.id === targetId ? { ...r, resultImageUrl: data.url } : r));
-        }
-      } else {
-        setResultImageUrl(data.url);
-      }
-      setSelectedBg(null);
-
-      if (activeSelfieId) {
-        pingSelfieActivity(activeSelfieId);
-      }
-    } catch (err) {
-      console.error(err);
-      console.error('[ChangeBackground]', err);
-      alert(userFacingMessage(err));
-    } finally {
-      setIsChangingBackground(false);
-    }
-  };
-
-  const applyModification = async () => {
-    const targetUrl = carouselResults.length > 0 ? carouselResults[currentSlideIndex]?.resultImageUrl : resultImageUrl;
-    const targetId = carouselResults.length > 0 ? carouselResults[currentSlideIndex]?.id : null;
-    
-    if (!targetUrl) return;
-
-    setIsModifying(true);
-    try {
-      const response = await fetch(`${API_URL}/api/tryon/modify-outfit`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify({
-          imageUrl: targetUrl,
-          modificationType: activeTab === 'sleeve' ? showcaseBlouse : showcaseNeck,
-          generationId: id
-        })
-      });
-
-      const result = await response.json();
-
-      if (response.status === 403 && result.error === 'INSUFFICIENT_CREDITS') {
-        setShowUpgradeModal(true);
-        setIsModifying(false);
-        return;
-      }
-      if (response.status === 401 || response.status === 403) {
-        handleAuthError();
-        setIsModifying(false);
-        return;
-      }
-      if (!response.ok) throw new Error(result.error || 'API Error');
-
-      if (targetId) {
-        const updatedRecord = await updateTryonResult(targetId, { resultImageUrl: result.resultImageUrl });
-        if (updatedRecord) {
-          setCarouselResults(prev => prev.map(r => r.id === targetId ? updatedRecord : r));
-        } else {
-          // Fallback update React state even if IndexedDB record expired
-          setCarouselResults(prev => prev.map(r => r.id === targetId ? { ...r, resultImageUrl: result.resultImageUrl } : r));
-        }
-      } else {
-        setResultImageUrl(result.resultImageUrl);
-      }
-      
-      if (activeSelfieId) {
-        pingSelfieActivity(activeSelfieId);
-      }
-    } catch (err) {
-      console.error('[ModifyOutfit]', err);
-      alert(userFacingMessage(err));
-    } finally {
-      setIsModifying(false);
-    }
-  };
 
   const startGeneration = async () => {
     if (!selectedImage || !sourceGeneration) return;
@@ -898,7 +738,6 @@ export default function ClientTryon() {
           {tryonState === 'generated' && (
             <button
               onClick={startGeneration}
-              disabled={isChangingBackground || isModifying}
               className="w-full mb-6 py-4 text-[11px] font-bold tracking-[2px] uppercase flex items-center justify-center gap-2 transition-all bg-transparent border border-[rgba(26,20,16,0.3)] text-[#1a1410] hover:border-[#1a1410] animate-fade-in disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-[rgba(26,20,16,0.3)]"
             >
               <RefreshCw className="h-4 w-4" />
@@ -906,91 +745,11 @@ export default function ClientTryon() {
             </button>
           )}
 
-          {STYLING_TOOLS_ENABLED && tryonState === 'generated' && (!sourceGeneration?.category || sourceGeneration?.category.toUpperCase() === 'SAREE') && (
-            <div className="mb-6 animate-fade-in border-t border-[rgba(26,20,16,0.1)] pt-6">
-
-              <div className="bg-[rgba(26,20,16,0.05)] rounded-full p-1 flex">
-                <button
-                  onClick={() => setActiveTab('sleeve')}
-                  disabled={isModifying || isChangingBackground}
-                  className={`flex-1 py-3 text-[10px] font-bold tracking-[1.5px] uppercase rounded-full transition-all duration-300 ${(isModifying || isChangingBackground) ? 'opacity-50 cursor-not-allowed' : ''} ${activeTab === 'sleeve'
-                      ? 'bg-white shadow-sm text-[#1a1410]'
-                      : 'text-[#8c8278] hover:text-[#1a1410]'
-                    }`}
-                >
-                  SLEEVE STYLE
-                </button>
-                <button
-                  onClick={() => setActiveTab('neck')}
-                  disabled={isModifying || isChangingBackground}
-                  className={`flex-1 py-3 text-[10px] font-bold tracking-[1.5px] uppercase rounded-full transition-all duration-300 ${(isModifying || isChangingBackground) ? 'opacity-50 cursor-not-allowed' : ''} ${activeTab === 'neck'
-                      ? 'bg-white shadow-sm text-[#1a1410]'
-                      : 'text-[#8c8278] hover:text-[#1a1410]'
-                    }`}
-                >
-                  NECK STYLE
-                </button>
-              </div>
-
-              {activeTab === 'sleeve' && (
-                <div className="grid grid-cols-3 gap-3 animate-fade-in mt-6">
-                  {SHOWCASE_BLOUSES.map((b) => (
-                    <button
-                      key={b.id}
-                      onClick={() => setShowcaseBlouse(b.id)}
-                      disabled={isModifying || isChangingBackground}
-                      className={`relative aspect-square border overflow-hidden transition-all flex items-end justify-center pb-2 ${(isModifying || isChangingBackground) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-[#1a1410]'} ${showcaseBlouse === b.id ? 'ring-2 ring-[#c4933f] border-transparent scale-[1.02] shadow-sm' : 'border-[rgba(26,20,16,0.2)]'}`}
-                      title={b.name}
-                    >
-                      <img src={b.image} alt={b.name} className="absolute inset-0 w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      <span className="relative z-10 text-[8px] uppercase tracking-wider font-bold text-white drop-shadow-md">
-                        {b.name}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {activeTab === 'neck' && (
-                <div className="grid grid-cols-3 gap-3 animate-fade-in mt-6">
-                  {SHOWCASE_NECKS.map((n) => (
-                    <button
-                      key={n.id}
-                      onClick={() => setShowcaseNeck(n.id)}
-                      disabled={isModifying || isChangingBackground}
-                      className={`relative aspect-square border overflow-hidden transition-all flex items-end justify-center pb-2 ${(isModifying || isChangingBackground) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-[#1a1410]'} ${showcaseNeck === n.id ? 'ring-2 ring-[#c4933f] border-transparent scale-[1.02] shadow-sm' : 'border-[rgba(26,20,16,0.2)]'}`}
-                      title={n.name}
-                    >
-                      <img src={n.image} alt={n.name} className="absolute inset-0 w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      <span className="relative z-10 text-[8px] uppercase tracking-widest font-bold text-white drop-shadow-md">
-                        {n.name}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              <button
-                onClick={applyModification}
-                disabled={isModifying || isChangingBackground}
-                className="w-full mt-6 bg-[#1a1410] text-[#faf7f2] py-4 text-[11px] font-bold tracking-[1.5px] uppercase transition-colors hover:bg-black shadow-md flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                {isModifying ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    APPLYING...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4" />
-                    APPLY CHANGES
-                  </>
-                )}
-              </button>
-            </div>
-          )}
+        {/* The background panel and the styling tools used to live here. They called
+            /api/tryon/change-background and /api/tryon/modify-outfit directly rather than
+            through Inventory, so nothing was metered -- real generations with nobody
+            billed. They were switched off behind a flag; now they are gone. This page is
+            upload and try on, nothing else. */}
 
           <button
             onClick={startGeneration}
@@ -1032,7 +791,7 @@ export default function ClientTryon() {
             {tryonState === 'generated' && (
               <div className="relative w-full h-full animate-fade-in group/canvas">
                 <div {...carouselSwipe} className="absolute inset-0">
-  <img src={displayResultUrl} alt="Your Personal Try-On" className={`w-full h-full object-cover transition-opacity duration-700 ${(isChangingBackground || isModifying) ? 'opacity-40 blur-[2px]' : 'opacity-100'}`} />
+  <img src={displayResultUrl} alt="Your Personal Try-On" className="w-full h-full object-cover transition-opacity duration-700 opacity-100" />
                 </div>
 
                 {/* Carousel Navigation Overlays */}
@@ -1051,31 +810,7 @@ export default function ClientTryon() {
                   </>
                 )}
 
-                {/* Background Changing Animation */}
-                {isChangingBackground && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white/60 backdrop-blur-[2px]">
-                    <div className="w-[280px] h-[280px]">
-                      <DotLottieReact
-                        src="https://lottie.host/1014dfd1-04b7-4311-bee6-0807da37a820/KcoFjrbtZT.lottie"
-                        loop
-                        autoplay
-                      />
-                    </div>
-                  </div>
-                )}
 
-                {/* Outfit Modification Animation */}
-                {isModifying && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white/60 backdrop-blur-[2px]">
-                    <div className="w-[280px] h-[280px]">
-                      <DotLottieReact
-                        src="https://lottie.host/1014dfd1-04b7-4311-bee6-0807da37a820/KcoFjrbtZT.lottie"
-                        loop
-                        autoplay
-                      />
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
@@ -1111,37 +846,6 @@ export default function ClientTryon() {
         </main>
 
         {/* Right Side: Background Panel */}
-        {STYLING_TOOLS_ENABLED && tryonState === 'generated' && (
-          <aside className="w-full xl:w-[360px] bg-[#faf7f2] border-l border-[rgba(26,20,16,0.1)] p-8 shrink-0 flex flex-col justify-center animate-fade-in">
-            <h3 className="font-['EB_Garamond',serif] text-[20px] text-[#1a1410] mb-2">Change Background</h3>
-            <p className="text-[10px] tracking-[0.5px] text-[#8c8278] mb-8">Select a background and apply it to your try-on.</p>
-
-            <div className="grid grid-cols-2 gap-3 mb-8">
-              {BACKGROUND_OPTIONS.map((bg) => (
-                <button
-                  key={bg.id}
-                  disabled={isChangingBackground || isModifying}
-                  onClick={() => setSelectedBg(bg.id)}
-                  className={`relative aspect-[4/3] overflow-hidden group border transition-all ${selectedBg === bg.id ? 'border-[#c4933f] ring-2 ring-[#c4933f] scale-[1.02] shadow-md' : 'border-[rgba(26,20,16,0.1)]'} ${(isChangingBackground || isModifying) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-[#1a1410]'}`}
-                >
-                  <img src={bg.image} alt={bg.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-2">
-                    <span className="text-white text-[9px] font-bold tracking-wider uppercase text-left leading-tight">{bg.name}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={applyBackground}
-              disabled={!selectedBg || isChangingBackground || isModifying}
-              className="w-full bg-[#1a1410] text-[#faf7f2] py-4 text-[11px] font-bold tracking-[1.5px] uppercase transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black flex items-center justify-center gap-2 shadow-md"
-            >
-              {isChangingBackground && <RefreshCw className="w-4 h-4 animate-spin" />}
-              {isChangingBackground ? 'APPLYING...' : 'APPLY BACKGROUND'}
-            </button>
-          </aside>
-        )}
       </div>
       <VendorLimitModal
         isOpen={showVendorLimitModal}
@@ -1154,7 +858,10 @@ export default function ClientTryon() {
         onClose={() => setShowUpgradeModal(false)}
         userType="vendor"
       />
-      <ImageHistoryDock />
+      {/* No dock here, deliberately. A shopper who scans a tag has no account and nothing
+          to share a dock with, and this page is upload and try on -- nothing else. The
+          shopper-facing dock kept their selfie in this browser for twenty minutes; the
+          try-on itself never needed it. */}
       
       {floatingAnimation && (
         <FloatingImageAnimation 
