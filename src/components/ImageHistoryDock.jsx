@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Trash2, Image as ImageIcon, X, RotateCcw, Shirt } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ConfirmDialog from './ConfirmDialog';
 import { createPhotoDock, toPreview } from '../utils/photoDock';
 
 /** How often a shared dock asks the server what the other devices have been doing. */
@@ -53,6 +54,21 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
   const EXPIRY_MS = activeDock.expiryMs;
   const [history, setHistory] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  /**
+   * A promise-shaped replacement for window.confirm.
+   *
+   * The handlers below were written against confirm(), which BLOCKS and returns a boolean. A
+   * rendered dialog cannot block, so the question goes into state and the promise it returns
+   * settles when a button is pressed. Every call site then reads exactly as it did --
+   * `const ok = await ask(...)` where it was `const ok = confirm(...)` -- instead of turning
+   * three straightforward handlers into callback chains.
+   */
+  const [confirmState, setConfirmState] = useState(null);
+  const ask = (question) => new Promise((resolve) => setConfirmState({ ...question, resolve }));
+  const settleConfirm = (answer) => {
+    setConfirmState((current) => { current?.resolve(answer); return null; });
+  };
   const [now, setNow] = useState(Date.now());
   const [garments, setGarments] = useState([]);
   const [tab, setTab] = useState('photos');
@@ -161,11 +177,15 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
      * On a local dock this branch is unreachable: one browser, no other device.
      */
     if (first?.inUse) {
-      const goAhead = window.confirm(
-        'Someone is being fitted with this photo right now, on another device.\n\n' +
-        'Deleting it takes it off their screen and clears the try-ons made with it. They can ' +
-        'pick a photo again and carry on -- nothing stops mid-way.\n\nDelete it anyway?'
-      );
+      const goAhead = await ask({
+        title: 'Someone is being fitted with this photo right now',
+        lines: [
+          'They are on another device, and deleting it takes the photo off their screen along with the try-ons made from it.',
+          'They can pick a photo again and carry on — nothing stops mid-way.'
+        ],
+        confirmLabel: 'Delete anyway',
+        cancelLabel: 'Leave it'
+      });
       if (!goAhead) return;
       await activeDock.remove(id, { force: true });
     }
@@ -220,12 +240,16 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
   const handleDeleteGarment = async (garment) => {
     if (busy) return;
     const count = garment.tryOnCount;
-    const ok = window.confirm(
-      `Remove "${garment.title}" from Outfits Tried?\n\n` +
-      `This clears ${count} try-on ${count === 1 ? 'image' : 'images'} made with it, for everyone in the shop.\n\n` +
-      `Nothing leaves your gallery: the outfit stays in your catalogue, and any try-on you ` +
-      `saved to it is kept. You can try this outfit on again any time.`
-    );
+    const ok = await ask({
+      title: `Remove “${garment.title}” from Outfits Tried?`,
+      lines: [
+        `This clears ${count} try-on ${count === 1 ? 'image' : 'images'} made with it, for everyone in the shop.`,
+        'Nothing leaves your gallery: the outfit stays in your catalogue, and any try-on you saved to it is kept.',
+        'You can try this outfit on again any time.'
+      ],
+      confirmLabel: 'Clear it',
+      cancelLabel: 'Keep it'
+    });
     if (!ok) return;
     try {
       const first = await activeDock.removeGarment(garment.id);
@@ -238,12 +262,15 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
        * "everyone" included a colleague mid-customer. This is the sentence that was missing.
        */
       if (first?.inUse) {
-        const goAhead = window.confirm(
-          `Someone is trying "${garment.title}" on right now, on another device.\n\n` +
-          `Deleting it now removes the try-ons they are looking at. They can carry on and ` +
-          `generate again -- nothing stops mid-way -- but what is already on their screen ` +
-          `will go.\n\nDelete it anyway?`
-        );
+        const goAhead = await ask({
+          title: `Someone is trying “${garment.title}” on right now`,
+          lines: [
+            'They are on another device. Removing it now takes away the try-ons they are looking at.',
+            'They can carry on and generate again — nothing stops mid-way — but what is already on their screen will go.'
+          ],
+          confirmLabel: 'Remove anyway',
+          cancelLabel: 'Leave it'
+        });
         if (!goAhead) return;
         await activeDock.removeGarment(garment.id, { force: true });
       }
@@ -292,6 +319,19 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* The shop's own confirmation, above the dock's own modal. Rendered outside the
+          AnimatePresence below on purpose -- it must never depend on an exit animation to
+          leave the screen. See ConfirmDialog for why that matters. */}
+      <ConfirmDialog
+        open={!!confirmState}
+        title={confirmState?.title}
+        lines={confirmState?.lines}
+        confirmLabel={confirmState?.confirmLabel}
+        cancelLabel={confirmState?.cancelLabel}
+        onConfirm={() => settleConfirm(true)}
+        onCancel={() => settleConfirm(false)}
+      />
 
       {/* ---- History Modal ---- */}
       {/**
