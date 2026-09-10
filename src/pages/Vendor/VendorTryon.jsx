@@ -8,6 +8,7 @@ import VendorUpgradeModal from '../../components/VendorUpgradeModal';
 import ImageHistoryDock from '../../components/ImageHistoryDock';
 import FloatingImageAnimation from '../../components/FloatingImageAnimation';
 import { newClientRequestId, recoverGeneration, userFacingMessage } from '../../utils/generationRecovery';
+import { swipeable } from '../../utils/swipe';
 import { createPhotoDock } from '../../utils/photoDock';
 
 // How long to hold the synchronous request open before falling back to polling. Generous
@@ -77,6 +78,24 @@ export default function VendorTryon() {
   // Set only when the outfit THIS device is working on is removed from the shop's list by
   // somebody else. A note, never an interruption -- see the effect further down.
   const [outfitWithdrawn, setOutfitWithdrawn] = useState(false);
+
+  /**
+   * The notice takes itself away after two seconds.
+   *
+   * It used to sit there until somebody pressed Dismiss, which is the wrong ask: whoever is
+   * standing at the counter has a customer in front of them, and a small box in the corner
+   * demanding a click is one more thing between them and the fitting. Nothing about the page
+   * is blocked by it, so nothing about it needs acknowledging -- it is a note, and a note
+   * that has been read should leave on its own.
+   *
+   * Cleared on the way out so a second withdrawal that lands while the first is still showing
+   * gets its own full two seconds rather than inheriting what is left of them.
+   */
+  useEffect(() => {
+    if (!outfitWithdrawn) return;
+    const timer = setTimeout(() => setOutfitWithdrawn(false), 2000);
+    return () => clearTimeout(timer);
+  }, [outfitWithdrawn]);
   const [floatingAnimation, setFloatingAnimation] = useState(null);
 
   const [loading, setLoading] = useState(true);
@@ -750,6 +769,18 @@ export default function VendorTryon() {
   const nextSlide = () => setCurrentSlideIndex(prev => Math.min(prev + 1, carouselResults.length - 1));
   const prevSlide = () => setCurrentSlideIndex(prev => Math.max(prev - 1, 0));
 
+  /**
+   * The same two moves, by dragging the picture.
+   *
+   * Only when there is more than one try-on to move between -- otherwise a swipe on a single
+   * result would do nothing while still claiming the gesture from the page's scroll.
+   */
+  const carouselSwipe = swipeable({
+    onNext: nextSlide,
+    onPrev: prevSlide,
+    enabled: carouselResults.length > 1
+  });
+
   const handleCarouselDelete = async (e, resultId) => {
     e.stopPropagation();
     try {
@@ -1122,7 +1153,9 @@ export default function VendorTryon() {
 
             {tryonState === 'generated' && (
               <div className="relative w-full h-full animate-fade-in group/canvas">
-                <img src={displayResultUrl} alt="Your Personal Try-On" className={`w-full h-full object-cover transition-opacity duration-700 ${(isChangingBackground || isModifying) ? 'opacity-40 blur-[2px]' : 'opacity-100'}`} />
+                <div {...carouselSwipe} className="absolute inset-0">
+  <img src={displayResultUrl} alt="Your Personal Try-On" className={`w-full h-full object-cover transition-opacity duration-700 ${(isChangingBackground || isModifying) ? 'opacity-40 blur-[2px]' : 'opacity-100'}`} />
+                </div>
 
                 {/* Carousel Navigation Overlays */}
                 {carouselResults.length > 1 && (
@@ -1245,8 +1278,8 @@ export default function VendorTryon() {
       {/* onPick is the only route from the dock into the upload slot. The dock keeps itself
           current across devices on its own; nothing it learns changes this page until
           somebody chooses a photograph out of it. */}
-      {/* A note, not a dialog. Whoever is standing here can read it and carry on, or dismiss
-          it; nothing about the page is blocked by it and the try-on continues either way. */}
+      {/* A note, not a dialog. Nothing about the page is blocked by it, the try-on continues
+          either way, and it clears itself after two seconds -- see the effect above. */}
       {outfitWithdrawn && (
         <div
           role="status"
@@ -1258,12 +1291,6 @@ export default function VendorTryon() {
               Someone removed this outfit from the shop&rsquo;s list. You can carry on and try
               it on &mdash; earlier try-ons made with it have gone.
             </p>
-            <button
-              onClick={() => setOutfitWithdrawn(false)}
-              className="mt-1.5 text-[10px] font-bold uppercase tracking-wider text-[#a0aec0] hover:text-[#1a202c]"
-            >
-              Dismiss
-            </button>
           </div>
         </div>
       )}

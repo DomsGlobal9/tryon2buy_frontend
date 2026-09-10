@@ -5,6 +5,7 @@ import { Sparkles, Check, ChevronLeft, RefreshCw, LogOut, Upload, Lightbulb, Clo
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import VendorLimitModal from '../../components/VendorLimitModal';
 import { saveToHistory, getActiveImage, deactivateActiveImage, clearAllHistory, subscribeToImageEvents, EVENTS, saveTryonResult, getTryonResultsBySelfie, deleteTryonResult, updateTryonResult, pingSelfieActivity } from '../../utils/imageStore';
+import { swipeable } from '../../utils/swipe';
 import ImageHistoryDock from '../../components/ImageHistoryDock';
 import FloatingImageAnimation from '../../components/FloatingImageAnimation';
 import VendorUpgradeModal from '../../components/VendorUpgradeModal';
@@ -570,6 +571,18 @@ export default function CustomerTryon() {
   const nextSlide = () => setCurrentSlideIndex(prev => Math.min(prev + 1, carouselResults.length - 1));
   const prevSlide = () => setCurrentSlideIndex(prev => Math.max(prev - 1, 0));
 
+  /**
+   * The same two moves, by dragging the picture.
+   *
+   * Only when there is more than one try-on to move between -- otherwise a swipe on a single
+   * result would do nothing while still claiming the gesture from the page's scroll.
+   */
+  const carouselSwipe = swipeable({
+    onNext: nextSlide,
+    onPrev: prevSlide,
+    enabled: carouselResults.length > 1
+  });
+
   const handleCarouselDelete = async (e, resultId) => {
     e.stopPropagation();
     const success = await deleteTryonResult(resultId);
@@ -941,7 +954,9 @@ export default function CustomerTryon() {
 
             {tryonState === 'generated' && (
               <div className="relative w-full h-full animate-fade-in group/canvas">
-                <img src={displayResultUrl} alt="Your Personal Try-On" className={`w-full h-full object-cover transition-opacity duration-700 ${(isChangingBackground || isModifying) ? 'opacity-40 blur-[2px]' : 'opacity-100'}`} />
+                <div {...carouselSwipe} className="absolute inset-0">
+  <img src={displayResultUrl} alt="Your Personal Try-On" className={`w-full h-full object-cover transition-opacity duration-700 ${(isChangingBackground || isModifying) ? 'opacity-40 blur-[2px]' : 'opacity-100'}`} />
+                </div>
 
                 {/* Carousel Navigation Overlays */}
                 {carouselResults.length > 1 && (
