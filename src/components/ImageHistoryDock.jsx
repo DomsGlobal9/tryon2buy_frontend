@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Clock, Trash2, Image as ImageIcon, X, RotateCcw, Shirt } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ConfirmDialog from './ConfirmDialog';
+import ThumbWithFallback from './ThumbWithFallback';
 import { createPhotoDock, toPreview } from '../utils/photoDock';
 
 /** How often a shared dock asks the server what the other devices have been doing. */
@@ -440,9 +441,12 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
                           className="relative rounded-lg overflow-hidden border border-[#e2e8f0] bg-[#f7fafc]"
                         >
                           <div className="aspect-[3/4] overflow-hidden bg-white">
-                            {garment.imageUrl
-                              ? <img src={garment.imageUrl} alt={garment.title} className="w-full h-full object-cover" />
-                              : <div className="w-full h-full flex items-center justify-center"><Shirt className="w-8 h-8 text-[#e2e8f0]" /></div>}
+                            <ThumbWithFallback
+                              src={garment.imageUrl}
+                              alt={garment.title}
+                              label="Outfit image gone"
+                              icon={Shirt}
+                            />
                           </div>
 
                           {/* How many people have tried it -- the reason this list is worth
@@ -498,7 +502,7 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
                         >
                           {/* Image thumbnail */}
                           <div className="aspect-[3/4] overflow-hidden">
-                            <img src={img.previewUrl} alt="History" className="w-full h-full object-cover" />
+                            <ThumbWithFallback src={img.previewUrl} alt="A photo in the dock" label="Photo gone" />
                           </div>
                           
                           {/* Expiry Badge */}
