@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { API_URL } from '../../config';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Share2, Copy, Check, Trash2, ExternalLink, Eye, X } from 'lucide-react';
+import ConfirmDialog from '../../components/ConfirmDialog';
 
 // Must match the hardcoded vendor ID in backend/index.js
 const DEFAULT_VENDOR_ID = 'feb21067-a3ee-4020-b388-16d3a37a29ce';
@@ -13,6 +14,35 @@ export default function VendorGallery() {
   const [copiedId, setCopiedId] = useState(null);
   const [galleryCopied, setGalleryCopied] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
+
+  /**
+   * The same promise-shaped confirm the dock uses, for the same reason.
+   *
+   * This was window.confirm, which renders as "www.tryon2buy.com says" in chrome nobody
+   * chose and freezes the page while it is up. Deleting from the gallery is the most
+   * destructive thing on this screen -- the try-on does not come back -- so it is the last
+   * place to ask the question in a box that looks like a browser error.
+   */
+  const [confirmState, setConfirmState] = useState(null);
+  const ask = (question) => new Promise((resolve) => setConfirmState({ ...question, resolve }));
+  const settleConfirm = (answer) => {
+    setConfirmState((current) => { current?.resolve(answer); return null; });
+  };
+
+  /**
+   * A failure worth mentioning, in our own words and gone on its own.
+   *
+   * The two alert()s here were native AND wrong: one of them printed the server's error
+   * straight onto the screen -- "Failed to delete: " + data.error -- which is exactly what
+   * nobody outside this codebase should ever read. A merchant needs to know it did not work,
+   * not which table complained.
+   */
+  const [notice, setNotice] = useState(null);
+  useEffect(() => {
+    if (!notice) return;
+    const timer = setTimeout(() => setNotice(null), 2500);
+    return () => clearTimeout(timer);
+  }, [notice]);
 
   const vendor = JSON.parse(localStorage.getItem('vendor_data') || '{}');
   const vendorId = vendor.id || DEFAULT_VENDOR_ID;
@@ -53,7 +83,29 @@ export default function VendorGallery() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this try-on from your gallery?")) return;
+    /**
+     * Worded from what the server actually does, which is more than the old copy admitted.
+     *
+     * These gallery items are the phase-1 drapes -- the flatlay put on a default model and
+     * saved. DELETE /api/tryon/vendor/generations/:id removes the asset AND runs
+     * product.deleteMany on anything using it as its primary image, to clear the foreign key.
+     * So this is not "remove a picture": it takes the product out of the catalogue, and with
+     * it the ability for anyone to try that garment on.
+     *
+     * "Are you sure you want to delete this try-on from your gallery?" described none of
+     * that. Somebody tidying what they thought were old previews would have been removing
+     * stock.
+     */
+    const ok = await ask({
+      title: 'Delete this drape from your catalogue?',
+      lines: [
+        'This is the draped photo of the garment. Deleting it removes the product from your catalogue too, so nobody can try that garment on any more.',
+        'Its share link stops working, and it cannot be undone.'
+      ],
+      confirmLabel: 'Delete product',
+      cancelLabel: 'Keep it'
+    });
+    if (!ok) return;
     
     try {
       const token = localStorage.getItem('vendor_token');
@@ -66,18 +118,35 @@ export default function VendorGallery() {
       if (res.ok) {
         setGenerations(prev => prev.filter(g => g.id !== id));
       } else {
-        const data = await res.json();
+        // Detail to the console, never to the person -- the same rule the try-on pages follow.
+        const data = await res.json().catch(() => ({}));
         console.error("Failed to delete", data.error);
-        alert("Failed to delete: " + data.error);
+        setNotice('That drape could not be deleted. Please try again.');
       }
     } catch (err) {
       console.error("Error deleting", err);
-      alert("Error deleting item");
+      setNotice('That drape could not be deleted. Please try again.');
     }
   };
 
   return (
     <div className="bg-[#faf7f2] min-h-screen font-['Courier_Prime',monospace] text-[#1a1410] flex flex-col items-center py-12 px-6 relative">
+
+      <ConfirmDialog
+        open={!!confirmState}
+        title={confirmState?.title}
+        lines={confirmState?.lines}
+        confirmLabel={confirmState?.confirmLabel}
+        cancelLabel={confirmState?.cancelLabel}
+        onConfirm={() => settleConfirm(true)}
+        onCancel={() => settleConfirm(false)}
+      />
+
+      {notice && (
+        <div role="status" className="fixed bottom-6 right-6 z-40 max-w-xs bg-white border border-[#e2e8f0] shadow-lg rounded-lg px-3.5 py-2.5">
+          <p className="text-[11px] text-[#1a202c] leading-relaxed">{notice}</p>
+        </div>
+      )}
       
       <div className="w-full max-w-[1000px] mb-8">
         <Link to="/workspace" className="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:text-[#1a1410] transition-colors mb-4">
