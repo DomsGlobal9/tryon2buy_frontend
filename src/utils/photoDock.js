@@ -168,7 +168,26 @@ function remoteDock({ apiUrl, getToken, retentionMs }) {
       // moment they describe.
       const [photoBody, garmentBody] = await Promise.all([call(''), call('/garments')]);
       const signature = signatureOf(photoBody?.photos || [], garmentBody?.garments || []);
-      if (lastSignature !== null && signature !== lastSignature) announce();
+
+      /**
+       * The first poll announces too, and that is the whole fix for a device that never
+       * caught up.
+       *
+       * This used to skip announcing while lastSignature was null, on the reasoning that the
+       * first answer is not a CHANGE. But the component has already rendered by then, from
+       * its own read a moment earlier -- and anything that happened in between those two
+       * reads landed in the gap. The first poll quietly recorded the newer state as the
+       * baseline and said nothing, and every poll after it compared equal.
+       *
+       * So: open the page on the second device, have the first device add a photograph
+       * before that device's first tick, and the second device sits on the older list
+       * FOREVER -- not for ten seconds, but until something else changes. Which is exactly
+       * "I logged in on another device and the dock never updated".
+       *
+       * Announcing on the first poll costs one repaint per mount and makes the page match
+       * the server unconditionally, which is the only state worth being in.
+       */
+      if (signature !== lastSignature) announce();
       lastSignature = signature;
     } catch {
       // Offline, or the token expired. Neither is worth interrupting anyone over; the next
@@ -178,6 +197,10 @@ function remoteDock({ apiUrl, getToken, retentionMs }) {
 
   const startPolling = () => {
     if (pollTimer) return;
+    // Ask immediately rather than waiting out the first interval. A device that has just
+    // been opened is the one most likely to be behind, and making it wait ten seconds to
+    // find that out is the worst moment to be slow.
+    pollOnce();
     pollTimer = setInterval(pollOnce, POLL_INTERVAL_MS);
   };
 
@@ -185,6 +208,10 @@ function remoteDock({ apiUrl, getToken, retentionMs }) {
     if (!pollTimer) return;
     clearInterval(pollTimer);
     pollTimer = null;
+    // Forget the baseline with the timer. Whatever is subscribed next has its own idea of
+    // what the dock holds, and it is entitled to be told the truth on the first tick rather
+    // than measured against a signature from a page that is gone.
+    lastSignature = null;
   };
 
   return {
