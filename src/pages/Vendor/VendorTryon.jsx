@@ -9,7 +9,7 @@ import ImageHistoryDock from '../../components/ImageHistoryDock';
 import FloatingImageAnimation from '../../components/FloatingImageAnimation';
 import { newClientRequestId, recoverGeneration, userFacingMessage } from '../../utils/generationRecovery';
 import { swipeable } from '../../utils/swipe';
-import { createPhotoDock } from '../../utils/photoDock';
+import { createPhotoDock, SHARED_RETENTION_MS, SHARED_GARMENT_LIMIT } from '../../utils/photoDock';
 
 // How long to hold the synchronous request open before falling back to polling. Generous
 // enough for a normal generation to answer directly, short enough that we stop waiting on a
@@ -320,19 +320,53 @@ export default function VendorTryon() {
    * Only a TRANSITION counts. An outfit with no try-ons yet is legitimately absent from the
    * list, and warning about that on arrival would be crying wolf on the normal case.
    */
-  const wasListedRef = useRef(false);
+  /**
+   * What the outfit looked like the last time it WAS on the list.
+   *
+   * Needed because "gone from the list" has three causes and only one of them is worth
+   * telling anybody about:
+   *
+   *   - somebody removed it            -> say so
+   *   - its twenty minutes ran out     -> say nothing; that is the dock working
+   *   - it fell off the end of a full list, pushed out by newer try-ons -> say nothing
+   *
+   * The old check treated all three as a removal, so the note appeared when nothing had been
+   * deleted at all -- which on a quiet afternoon is the COMMON case, because every outfit
+   * eventually expires. Crying wolf on the normal case is worse than staying silent on the
+   * rare one, and it taught people to ignore the note.
+   */
+  const lastSeenRef = useRef(null);
   useEffect(() => {
     if (!dock.shared || !id) return;
     let stop = false;
 
     const look = async () => {
       try {
-        const listed = (await dock.garments()).some(g => g.primaryAssetId === id);
+        const garments = await dock.garments();
+        const mine = garments.find(g => g.primaryAssetId === id);
         if (stop || !isMountedRef.current) return;
-        if (wasListedRef.current && !listed) setOutfitWithdrawn(true);
-        if (listed) { wasListedRef.current = true; setOutfitWithdrawn(false); }
+
+        if (mine) {
+          lastSeenRef.current = { lastTriedAt: mine.lastTriedAt, listSize: garments.length };
+          setOutfitWithdrawn(false);
+          return;
+        }
+
+        const seen = lastSeenRef.current;
+        if (!seen) return;                 // never listed: nothing was taken away
+
+        // Old enough to have expired on its own. The dock promised twenty minutes and kept it.
+        const age = Date.now() - new Date(seen.lastTriedAt).getTime();
+        if (age >= SHARED_RETENTION_MS) { lastSeenRef.current = null; return; }
+
+        // The list was full when we last looked, so it may simply have been crowded out.
+        if (seen.listSize >= SHARED_GARMENT_LIMIT) { lastSeenRef.current = null; return; }
+
+        // Still well inside its window, on a list with room: somebody removed it.
+        lastSeenRef.current = null;
+        setOutfitWithdrawn(true);
       } catch {
-        // Offline or expired. Not worth a word; the next look sorts it out.
+        // Offline. Not worth a word; the next look sorts it out.
       }
     };
 

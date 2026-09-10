@@ -359,6 +359,16 @@ const POLL_INTERVAL_MS = 10000;
 export const SHARED_RETENTION_MS = 20 * 60 * 1000;
 
 /**
+ * How many outfits the shared "tried on" list holds. Must match MAX_GARMENTS in the backend
+ * dock service.
+ *
+ * Mirrored here for the same reason the retention window is: a page needs to tell "this
+ * outfit was removed" from "this outfit fell off the end of a full list", and those look
+ * identical from the outside unless it knows where the end is.
+ */
+export const SHARED_GARMENT_LIMIT = 20;
+
+/**
  * @param {object}  opts
  * @param {boolean} opts.shared   true only on pages that have a signed-in account AND are
  *                                meant to share -- today that is VendorTryon alone.
