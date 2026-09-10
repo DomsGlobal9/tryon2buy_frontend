@@ -1,4 +1,9 @@
+import { uniqueId } from './uniqueId';
+
 const DB_NAME = 'TryonHistoryDB';
+// Named rather than inline, so the version and the migration that goes with it are read
+// together. Bumping this is what onversionchange and onblocked in getDB exist for.
+const DB_VERSION = 4;
 const STORE_NAME = 'history_images';
 const RESULTS_STORE_NAME = 'tryon_results';
 const MAX_IMAGES = 10;
@@ -31,9 +36,48 @@ function broadcast(type, payload = {}) {
   localListeners.forEach(cb => cb(message));
 }
 
+/**
+ * One connection for the whole page, not one per call.
+ *
+ * Every exported function here begins with getDB(), and this used to open a brand new
+ * IDBDatabase each time and never close it. A page that polls the dock every ten seconds
+ * accumulates them without limit.
+ *
+ * Leaked connections are not merely untidy: an open connection BLOCKS a version change.
+ * Measured on the version this replaces -- after ~46 leaked connections, both an upgrade to
+ * version 5 and deleteDatabase() hung indefinitely, and neither fired onblocked within
+ * several seconds. There was no onblocked handler either, so the open simply never settled
+ * and every caller waited forever. Reloading the page was the only way out.
+ *
+ * So: cache the promise, hand the same connection to everyone, and give up loudly instead of
+ * hanging if something else is holding the database open.
+ */
+let dbPromise = null;
+
+/** Long enough for another tab to finish what it is doing; short enough not to be a hang. */
+const OPEN_TIMEOUT_MS = 5000;
+
 function getDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 4); // bumped version for activeSelfieId index
+  if (dbPromise) return dbPromise;
+
+  dbPromise = new Promise((resolve, reject) => {
+    let settled = false;
+    const finish = (fn, value) => { if (!settled) { settled = true; fn(value); } };
+
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    // Another tab is holding an older version open. Without this the open never settles and
+    // every caller waits forever; callers all catch and fall back to something safe, so
+    // failing is far better than hanging.
+    request.onblocked = () => {
+      console.warn('[imageStore] database upgrade blocked by another tab');
+    };
+
+    const timer = setTimeout(() => {
+      dbPromise = null;
+      finish(reject, new Error('IndexedDB open timed out'));
+    }, OPEN_TIMEOUT_MS);
+
     request.onupgradeneeded = (e) => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
@@ -51,9 +95,43 @@ function getDB() {
         resultsStore.createIndex('activeSelfieId', 'activeSelfieId', { unique: false });
       }
     };
-    request.onsuccess = (e) => resolve(e.target.result);
-    request.onerror = () => reject('IndexedDB error');
+    request.onsuccess = (e) => {
+      clearTimeout(timer);
+      const db = e.target.result;
+
+      // If another tab wants to change the schema, get out of its way. Holding this open is
+      // exactly what caused the hang above -- and the tab doing the upgrading is often the
+      // one the person is actually looking at.
+      db.onversionchange = () => { db.close(); dbPromise = null; };
+
+      // Closed for any other reason (browser evicted it, storage cleared). Drop the cached
+      // promise so the next call opens a fresh one rather than using a dead handle.
+      db.onclose = () => { dbPromise = null; };
+
+      finish(resolve, db);
+    };
+
+    request.onerror = () => {
+      clearTimeout(timer);
+      dbPromise = null; // let the next call try again rather than caching the failure forever
+
+      // A VersionError means another tab running a NEWER build has already upgraded the
+      // database past DB_VERSION, and this tab cannot open it -- that is IndexedDB working
+      // as designed, not a fault. Every caller here catches and degrades to an empty result,
+      // so the page stays up; it just cannot save photographs until it is reloaded. Named
+      // explicitly because otherwise it presents as "nothing happens when I pick a photo".
+      if (request.error?.name === 'VersionError') {
+        console.warn(
+          '[imageStore] the photo store was upgraded by a newer version of this app in ' +
+          'another tab. Reload the page to use it again.'
+        );
+      }
+
+      finish(reject, new Error('IndexedDB error'));
+    };
   });
+
+  return dbPromise;
 }
 
 // Internal helper to get all without modifying
@@ -127,38 +205,54 @@ export async function getActiveImage() {
 export async function saveToHistory(file) {
   try {
     const db = await getDB();
-    const records = await getAllHistory(); // automatically deletes expired ones
-    
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
-    
-    // Make any existing active image inactive
-    const active = records.find(r => r.isActive);
-    if (active) {
-      active.isActive = false;
-      store.put(active);
-    }
-    
-    // Capacity check
-    if (records.length >= MAX_IMAGES) {
-      // Sort by lastUsedAt ascending (oldest first)
-      const sorted = [...records].sort((a, b) => a.lastUsedAt - b.lastUsedAt);
-      const toDelete = sorted[0];
-      if (toDelete) {
-        store.delete(toDelete.id);
-      }
-    }
-    
+    await getAllHistory(); // purges anything past the expiry, in its own transaction
+
     const newRecord = {
-      id: Date.now().toString(),
+      // Was Date.now().toString(), which two photographs picked in the same millisecond
+      // shared -- and put() silently overwrote one with the other.
+      id: uniqueId('img-'),
       file,
       createdAt: Date.now(),
       lastUsedAt: Date.now(),
       isActive: true
     };
-    
-    store.put(newRecord);
-    
+
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+
+    // Read INSIDE the transaction, not before it.
+    //
+    // This used to work from a snapshot taken beforehand, which was invisible while ids
+    // collided (concurrent saves overwrote each other down to a single row, so "one active"
+    // was true by accident). With ids fixed, all of them survive -- and each one had
+    // deactivated only the photo its own stale snapshot knew about, leaving every one of
+    // them marked active. IndexedDB serialises readwrite transactions on a store, so reading
+    // here sees the previous save's writes and the invariant actually holds.
+    const existing = store.getAll();
+    existing.onsuccess = () => {
+      const records = existing.result || [];
+
+      // Exactly one active photo, whatever else is going on.
+      for (const record of records) {
+        if (record.isActive) {
+          record.isActive = false;
+          store.put(record);
+        }
+      }
+
+      // Trim oldest-first until there is room. The old version deleted a single row no
+      // matter how far over the limit it was, so a history that got ahead never came back.
+      if (records.length >= MAX_IMAGES) {
+        const oldestFirst = [...records].sort((a, b) => a.lastUsedAt - b.lastUsedAt);
+        oldestFirst.slice(0, records.length - MAX_IMAGES + 1)
+          .forEach(record => store.delete(record.id));
+      }
+
+      // Written last, inside the same read, so it cannot be undone by the deactivation
+      // sweep above or removed by the trim.
+      store.put(newRecord);
+    };
+
     return new Promise((resolve) => {
       tx.oncomplete = () => {
         broadcast(EVENTS.PHOTO_ADDED, { imageId: newRecord.id });
@@ -175,28 +269,35 @@ export async function saveToHistory(file) {
 export async function promoteToActive(id) {
   try {
     const db = await getDB();
-    const records = await getAllRecords();
-    
+
     const tx = db.transaction(STORE_NAME, 'readwrite');
     const store = tx.objectStore(STORE_NAME);
-    
+
     let promotedRecord = null;
-    
-    for (const record of records) {
-      if (record.id === id) {
-        record.isActive = true;
-        record.lastUsedAt = Date.now();
-        promotedRecord = record;
-        store.put(record);
-      } else if (record.isActive) {
-        record.isActive = false;
-        store.put(record);
+
+    // Read inside the transaction, for the same reason as saveToHistory: two promotions in
+    // flight together each worked from a snapshot taken before either had written, so both
+    // photos ended up active and "the active photo" became whichever the sort happened to
+    // put first.
+    const existing = store.getAll();
+    existing.onsuccess = () => {
+      for (const record of existing.result || []) {
+        if (record.id === id) {
+          record.isActive = true;
+          record.lastUsedAt = Date.now();
+          promotedRecord = record;
+          store.put(record);
+        } else if (record.isActive) {
+          record.isActive = false;
+          store.put(record);
+        }
       }
-    }
-    
+    };
+
     return new Promise((resolve) => {
       tx.oncomplete = () => {
-        broadcast(EVENTS.PHOTO_PROMOTED, { imageId: id });
+        // null when the id was not there -- the caller can tell "promoted" from "gone".
+        if (promotedRecord) broadcast(EVENTS.PHOTO_PROMOTED, { imageId: id });
         resolve(promotedRecord);
       };
       tx.onerror = () => resolve(null);
@@ -314,7 +415,8 @@ export async function saveTryonResult({ activeSelfieId, garmentImageUrl, resultI
     const store = tx.objectStore(RESULTS_STORE_NAME);
     
     const newRecord = {
-      id: Date.now().toString(),
+      // Same collision as saveToHistory: two results finishing together became one.
+      id: uniqueId('res-'),
       activeSelfieId,
       garmentImageUrl,
       resultImageUrl,
