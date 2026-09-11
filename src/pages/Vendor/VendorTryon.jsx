@@ -1295,24 +1295,18 @@ export default function VendorTryon() {
                 its content without it, so the overflow would do nothing. pr-1 keeps the
                 scrollbar off the thumbnails. */}
             <div
-              className="mb-8 xl:max-h-[60vh] xl:min-h-0 xl:overflow-y-auto xl:pr-1"
-              /* The grid geometry is inline, not utility classes, and that is deliberate.
-                 Reported from a real screen: the tiles rendered touching, at their natural
-                 image heights, with each caption hidden under the tile below. Whatever the
-                 cause on that machine -- a stale stylesheet, a purge, an arbitrary value that
-                 did not survive the build -- the layout of a picker should not depend on it.
-                 display:grid, two equal columns and a gap in a style attribute cannot be
-                 purged, cached stale, or lost to a class-name mismatch. */
-              /* gridAutoRows must be max-content, not the default auto. Once xl:max-h-[60vh]
-                 gives this container a definite height, 'auto' rows become flexible and get
-                 divided evenly across it -- fourteen tiles collapsed to 75px rows, and since
-                 each tile clips its overflow, the name underneath the picture was cut off
-                 entirely. That is why the names were missing on desktop only: below xl there
-                 is no cap, the height is indefinite, and the rows size themselves correctly.
-                 align-content cannot fix it -- by the time alignment runs the rows are already
-                 too short. max-content keeps each row at its true height so the container
-                 genuinely overflows and xl:overflow-y-auto has something to scroll. */
-              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, gridAutoRows: 'max-content' }}
+              /* The cap and the scroller apply at EVERY width, not just xl. Uncapped on a
+                 phone the grid ran 787px tall and pushed APPLY BACKGROUND 1388px past the
+                 fold, which is the same complaint as on desktop. Capped, the button sits on
+                 the same screen as the picker.
+                 gridAutoRows must be max-content. A capped container has a definite height,
+                 and 'auto' rows turn flexible against a definite height -- they were divided
+                 evenly, collapsing fourteen tiles to 75px rows. Each tile clips its overflow,
+                 so the name under the picture was cut off entirely and the container never
+                 overflowed, leaving nothing to scroll. align-content does not help: the rows
+                 are already too short before alignment runs. */
+              className="mb-8 max-h-[46vh] min-h-0 overflow-y-auto pr-1"
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, gridAutoRows: 'max-content' }}
             >
               {BACKGROUND_OPTIONS.map((bg) => (
                 <button
@@ -1326,23 +1320,21 @@ export default function VendorTryon() {
                     width: '100%',
                     textAlign: 'left',
                     overflow: 'hidden',
-                    borderRadius: 8,
+                    borderRadius: 6,
                     background: '#fff',
-                    padding: 5,
+                    padding: 4,
                     boxShadow: selectedBg === bg.id ? '0 2px 8px rgba(196,147,63,0.28)' : '0 1px 2px rgba(26,20,16,0.06)',
                     border: selectedBg === bg.id ? '1px solid #c4933f' : '1px solid rgba(26,20,16,0.12)'
                   }}
                 >
-                  {/* padding-top rather than aspect-ratio: it holds the 4:3 box open on any
-                      engine, with no dependency on a utility class surviving the build. */}
-                  {/* 133% = a 3:4 portrait box. It was 75% (4:3 landscape), and every one of
-                      the fourteen backgrounds is portrait (2:3 to 1:1), so cover was throwing
-                      away 22-50% of each image -- half of most of them. These are vertical
-                      scenes: the arch or lintel at the top and the floor at the bottom are
-                      what identify them, and a centred landscape crop removed both, leaving an
-                      anonymous middle band. A portrait box crops 0-11% instead, and centred is
-                      then correct for all fourteen since every scene is horizontally centred. */}
-                  <div style={{ position: 'relative', width: '100%', paddingTop: '133%', overflow: 'hidden', background: '#efe9e1', borderRadius: 4 }}>
+                  {/* 125% = a 4:5 portrait box, sized by padding-top so it does not depend on a
+                      utility class surviving the build. It was 75% (4:3 landscape) while all
+                      fourteen backgrounds are portrait, so cover discarded 22-50% of each one.
+                      These are vertical scenes -- the arch or lintel above and the floor below
+                      are what identify them -- and a centred landscape crop removed both.
+                      Centred is correct for all fourteen: every scene is horizontally centred,
+                      so no per-image object-position is needed. */}
+                  <div style={{ position: 'relative', width: '100%', paddingTop: '125%', overflow: 'hidden', background: '#efe9e1', borderRadius: 3 }}>
                     <img
                       src={bg.image}
                       alt={bg.name}
@@ -1350,23 +1342,17 @@ export default function VendorTryon() {
                       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     />
                   </div>
-                  {/* The name sits UNDER the picture, not over it. Laid over the image it was
-                      unreadable on the pale backgrounds and, when the tiles collided, hidden
-                      entirely behind the next one. Its own row cannot be covered. */}
-                  <div style={{ padding: '5px 7px 6px', borderTop: '1px solid rgba(26,20,16,0.06)' }}>
-                    {/* Plain block with a reserved two-line height.
-                        This was display:-webkit-box with -webkit-line-clamp:2, and it did not
-                        survive: computed display came back as flow-root, so the clamp never
-                        engaged. Nothing was lost visually -- the height reservation is what
-                        keeps the fourteen tiles identical, and overflow:hidden handles a name
-                        too long for two lines -- but a rule that silently does not apply is not
-                        worth keeping.
-                        Also raised from 9px: at that size the names were technically rendered
-                        and genuinely unreadable on a desktop, which is the same as absent. */}
+                  {/* The name sits UNDER the picture, not over it -- laid over the image it was
+                      unreadable on the pale backgrounds. Fixed two-line height rather than a
+                      line-clamp: -webkit-box silently failed to apply here (computed display
+                      came back flow-root), and the height is what actually keeps every row the
+                      same. Only "Sunflower Terrace Mandap" overruns it; the button carries
+                      title={bg.name} so the full name is still available on hover. */}
+                  <div style={{ padding: '4px 3px 2px', borderTop: '1px solid rgba(26,20,16,0.06)' }}>
                     <span style={{
-                      display: 'block', overflow: 'hidden', minHeight: 26,
-                      fontSize: 11, fontWeight: 700, letterSpacing: '0.04em',
-                      textTransform: 'uppercase', color: '#1a1410', lineHeight: 1.3
+                      display: 'block', overflow: 'hidden', height: 24,
+                      fontSize: 10, fontWeight: 700, letterSpacing: '0.01em',
+                      textTransform: 'uppercase', color: '#1a1410', lineHeight: 1.2
                     }}>{bg.name}</span>
                   </div>
                 </button>
