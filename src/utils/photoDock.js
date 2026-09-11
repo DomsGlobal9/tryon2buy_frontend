@@ -113,13 +113,56 @@ function remoteDock({ apiUrl, getToken, retentionMs }) {
     };
   };
 
-  const call = async (path, options = {}) => {
+  /**
+   * The last token the server refused, so the repeating callers can stop asking with it.
+   *
+   * Every dock endpoint takes the account from the token, so a request made without a usable
+   * one can only come back 401. Three callers repeat for as long as the tab is open -- the
+   * ten-second poll and the two thirty-second heartbeats -- so once a session ended they
+   * produced four 401s and four console errors a minute, forever. Being signed out is a
+   * normal state, not a fault, and it is not worth either the request or the noise.
+   *
+   * Only BACKGROUND callers stand down. A user-initiated call always goes to the network,
+   * because a 401 can be transient and the dock coming back to life on the next thing the
+   * person does is worth one wasted request; a call that succeeds clears this again. That
+   * asymmetry is the point -- latching everything would turn one bad response into a dock
+   * that stays dead until the page is reloaded.
+   */
+  let rejectedToken;
+
+  const authError = (status) => {
+    const err = new Error(
+      status ? `dock request failed: ${status}` : 'dock request skipped: not signed in'
+    );
+    // Additive: nothing reads this today, and every existing caller still just sees a throw.
+    err.unauthorized = true;
+    return err;
+  };
+
+  const call = async (path, options = {}, { background = false } = {}) => {
+    const token = getToken();
+    // No token at all is not worth a round trip from anybody, foreground or background.
+    if (!token) throw authError();
+    if (background && token === rejectedToken) throw authError();
+
     const res = await fetch(`${apiUrl}/api/tryon/dock${path}`, { headers: headers(), ...options });
+
+    if (res.status === 401 || res.status === 403) {
+      // Once per token rather than once per request: this is the line that used to repeat.
+      if (rejectedToken !== token) {
+        console.warn('[photoDock] not signed in -- background dock requests paused', res.status);
+        rejectedToken = token;
+      }
+      throw authError(res.status);
+    }
+
     if (!res.ok) {
       // Detail to the console, never to the person -- the same rule the try-on pages follow.
       console.error('[photoDock] request failed', path, res.status);
       throw new Error(`dock request failed: ${res.status}`);
     }
+
+    rejectedToken = undefined;
     return res.status === 204 ? null : res.json();
   };
 
@@ -169,7 +212,10 @@ function remoteDock({ apiUrl, getToken, retentionMs }) {
     try {
       // Together, so one slow response cannot make the two halves disagree about which
       // moment they describe.
-      const [photoBody, garmentBody] = await Promise.all([call(''), call('/garments')]);
+      const [photoBody, garmentBody] = await Promise.all([
+        call('', {}, { background: true }),
+        call('/garments', {}, { background: true })
+      ]);
       const signature = signatureOf(photoBody?.photos || [], garmentBody?.garments || []);
 
       /**
@@ -278,7 +324,7 @@ function remoteDock({ apiUrl, getToken, retentionMs }) {
       return { success: true };
     },
     async clear()      { await call('', { method: 'DELETE' }); announce(); return true; },
-    async touch(id)    { try { await call(`/photos/${encodeURIComponent(id)}/touch`, { method: 'POST' }); } catch { /* best effort */ } },
+    async touch(id)    { try { await call(`/photos/${encodeURIComponent(id)}/touch`, { method: 'POST' }, { background: true }); } catch { /* best effort */ } },
 
     /** The shop's garments that customers have tried on, newest first. */
     async garments() {
@@ -320,7 +366,7 @@ function remoteDock({ apiUrl, getToken, retentionMs }) {
      * warning to whoever deletes it next, never anybody's work.
      */
     async touchGarment(id) {
-      try { await call(`/garments/${encodeURIComponent(id)}/touch`, { method: 'POST' }); }
+      try { await call(`/garments/${encodeURIComponent(id)}/touch`, { method: 'POST' }, { background: true }); }
       catch { /* best effort */ }
     },
 
