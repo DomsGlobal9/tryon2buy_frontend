@@ -1294,17 +1294,59 @@ export default function VendorTryon() {
                 alongside the cap: this is a flex child, and a flex child will not shrink below
                 its content without it, so the overflow would do nothing. pr-1 keeps the
                 scrollbar off the thumbnails. */}
-            <div className="grid grid-cols-2 gap-3 mb-8 xl:max-h-[60vh] xl:min-h-0 xl:overflow-y-auto xl:pr-1">
+            <div
+              className="mb-8 xl:max-h-[60vh] xl:min-h-0 xl:overflow-y-auto xl:pr-1"
+              /* The grid geometry is inline, not utility classes, and that is deliberate.
+                 Reported from a real screen: the tiles rendered touching, at their natural
+                 image heights, with each caption hidden under the tile below. Whatever the
+                 cause on that machine -- a stale stylesheet, a purge, an arbitrary value that
+                 did not survive the build -- the layout of a picker should not depend on it.
+                 display:grid, two equal columns and a gap in a style attribute cannot be
+                 purged, cached stale, or lost to a class-name mismatch. */
+              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}
+            >
               {BACKGROUND_OPTIONS.map((bg) => (
                 <button
                   key={bg.id}
                   disabled={isChangingBackground || isModifying}
                   onClick={() => setSelectedBg(bg.id)}
-                  className={`relative aspect-[4/3] overflow-hidden group border transition-all ${selectedBg === bg.id ? 'border-[#c4933f] ring-2 ring-[#c4933f] scale-[1.02] shadow-md' : 'border-[rgba(26,20,16,0.1)]'} ${(isChangingBackground || isModifying) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-[#1a1410]'}`}
+                  title={bg.name}
+                  className={`group transition-all ${selectedBg === bg.id ? 'ring-2 ring-[#c4933f] shadow-md' : ''} ${(isChangingBackground || isModifying) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    textAlign: 'left',
+                    overflow: 'hidden',
+                    borderRadius: 8,
+                    background: '#fff',
+                    padding: 5,
+                    boxShadow: selectedBg === bg.id ? '0 2px 8px rgba(196,147,63,0.28)' : '0 1px 2px rgba(26,20,16,0.06)',
+                    border: selectedBg === bg.id ? '1px solid #c4933f' : '1px solid rgba(26,20,16,0.12)'
+                  }}
                 >
-                  <img src={bg.image} alt={bg.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-2">
-                    <span className="text-white text-[9px] font-bold tracking-wider uppercase text-left leading-tight">{bg.name}</span>
+                  {/* padding-top rather than aspect-ratio: it holds the 4:3 box open on any
+                      engine, with no dependency on a utility class surviving the build. */}
+                  <div style={{ position: 'relative', width: '100%', paddingTop: '75%', overflow: 'hidden', background: '#efe9e1', borderRadius: 4 }}>
+                    <img
+                      src={bg.image}
+                      alt={bg.name}
+                      loading="lazy"
+                      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                  </div>
+                  {/* The name sits UNDER the picture, not over it. Laid over the image it was
+                      unreadable on the pale backgrounds and, when the tiles collided, hidden
+                      entirely behind the next one. Its own row cannot be covered. */}
+                  <div style={{ padding: '5px 7px 6px', borderTop: '1px solid rgba(26,20,16,0.06)' }}>
+                    {/* Fixed two-line box. Left to size itself, "Sunflower Terrace Mandap" wraps
+                        and "Marigold Doorway" does not, so tiles in the same grid ended up
+                        different heights and every row sat ragged. Reserving two lines whether
+                        the name needs them or not keeps all fourteen identical. */}
+                    <span style={{
+                      display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden', minHeight: 24, fontSize: 9, fontWeight: 700,
+                      letterSpacing: '0.06em', textTransform: 'uppercase', color: '#1a1410', lineHeight: 1.25
+                    }}>{bg.name}</span>
                   </div>
                 </button>
               ))}
