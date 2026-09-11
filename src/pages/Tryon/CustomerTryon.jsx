@@ -1050,17 +1050,19 @@ export default function CustomerTryon() {
 
         {/* Right Side: Background Panel */}
         {tryonState === 'generated' && (
-          <aside className="w-full xl:w-[360px] bg-[#faf7f2] border-l border-[rgba(26,20,16,0.1)] p-8 shrink-0 flex flex-col justify-center overflow-hidden animate-fade-in">
+          <aside className="w-full xl:w-[360px] bg-[#faf7f2] border-l border-[rgba(26,20,16,0.1)] p-8 shrink-0 flex flex-col justify-start xl:overflow-y-auto animate-fade-in">
             <h3 className="font-['EB_Garamond',serif] text-[20px] text-[#1a1410] mb-2">Change Background</h3>
             <p className="text-[10px] tracking-[0.5px] text-[#8c8278] mb-8">Select a background and apply it to your try-on.</p>
 
-            {/* Scrolls, because the list grew from 8 to 14 and the panel is a fixed-height
-                column. Without a max height the grid pushed the Apply button off the bottom
-                of the aside and the last backgrounds could not be reached at all. min-h-0 is
-                required: this sits in a flex column, and a flex child will not shrink below
-                its content without it, so overflow alone would do nothing. pr-1 keeps the
+            {/* Capped and scrollable ONLY from xl up, where the panel is a fixed 360px column
+                beside the image and has nowhere else to grow. Below that the panel is a
+                full-width block and the PAGE scrolls, so capping the grid there would nest a
+                scrolling box inside a scrolling page -- a phone user would fight to reach the
+                last backgrounds, and Apply would still sit below the fold. min-h-0 is required
+                alongside the cap: this is a flex child, and a flex child will not shrink below
+                its content without it, so the overflow would do nothing. pr-1 keeps the
                 scrollbar off the thumbnails. */}
-            <div className="grid grid-cols-2 gap-3 mb-8 max-h-[46vh] min-h-0 overflow-y-auto pr-1">
+            <div className="grid grid-cols-2 gap-3 mb-8 xl:max-h-[60vh] xl:min-h-0 xl:overflow-y-auto xl:pr-1">
               {BACKGROUND_OPTIONS.map((bg) => (
                 <button
                   key={bg.id}
