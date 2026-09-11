@@ -1303,7 +1303,16 @@ export default function VendorTryon() {
                  did not survive the build -- the layout of a picker should not depend on it.
                  display:grid, two equal columns and a gap in a style attribute cannot be
                  purged, cached stale, or lost to a class-name mismatch. */
-              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}
+              /* gridAutoRows must be max-content, not the default auto. Once xl:max-h-[60vh]
+                 gives this container a definite height, 'auto' rows become flexible and get
+                 divided evenly across it -- fourteen tiles collapsed to 75px rows, and since
+                 each tile clips its overflow, the name underneath the picture was cut off
+                 entirely. That is why the names were missing on desktop only: below xl there
+                 is no cap, the height is indefinite, and the rows size themselves correctly.
+                 align-content cannot fix it -- by the time alignment runs the rows are already
+                 too short. max-content keeps each row at its true height so the container
+                 genuinely overflows and xl:overflow-y-auto has something to scroll. */
+              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, gridAutoRows: 'max-content' }}
             >
               {BACKGROUND_OPTIONS.map((bg) => (
                 <button
@@ -1326,7 +1335,14 @@ export default function VendorTryon() {
                 >
                   {/* padding-top rather than aspect-ratio: it holds the 4:3 box open on any
                       engine, with no dependency on a utility class surviving the build. */}
-                  <div style={{ position: 'relative', width: '100%', paddingTop: '75%', overflow: 'hidden', background: '#efe9e1', borderRadius: 4 }}>
+                  {/* 133% = a 3:4 portrait box. It was 75% (4:3 landscape), and every one of
+                      the fourteen backgrounds is portrait (2:3 to 1:1), so cover was throwing
+                      away 22-50% of each image -- half of most of them. These are vertical
+                      scenes: the arch or lintel at the top and the floor at the bottom are
+                      what identify them, and a centred landscape crop removed both, leaving an
+                      anonymous middle band. A portrait box crops 0-11% instead, and centred is
+                      then correct for all fourteen since every scene is horizontally centred. */}
+                  <div style={{ position: 'relative', width: '100%', paddingTop: '133%', overflow: 'hidden', background: '#efe9e1', borderRadius: 4 }}>
                     <img
                       src={bg.image}
                       alt={bg.name}
