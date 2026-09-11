@@ -1338,14 +1338,19 @@ export default function VendorTryon() {
                       unreadable on the pale backgrounds and, when the tiles collided, hidden
                       entirely behind the next one. Its own row cannot be covered. */}
                   <div style={{ padding: '5px 7px 6px', borderTop: '1px solid rgba(26,20,16,0.06)' }}>
-                    {/* Fixed two-line box. Left to size itself, "Sunflower Terrace Mandap" wraps
-                        and "Marigold Doorway" does not, so tiles in the same grid ended up
-                        different heights and every row sat ragged. Reserving two lines whether
-                        the name needs them or not keeps all fourteen identical. */}
+                    {/* Plain block with a reserved two-line height.
+                        This was display:-webkit-box with -webkit-line-clamp:2, and it did not
+                        survive: computed display came back as flow-root, so the clamp never
+                        engaged. Nothing was lost visually -- the height reservation is what
+                        keeps the fourteen tiles identical, and overflow:hidden handles a name
+                        too long for two lines -- but a rule that silently does not apply is not
+                        worth keeping.
+                        Also raised from 9px: at that size the names were technically rendered
+                        and genuinely unreadable on a desktop, which is the same as absent. */}
                     <span style={{
-                      display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden', minHeight: 24, fontSize: 9, fontWeight: 700,
-                      letterSpacing: '0.06em', textTransform: 'uppercase', color: '#1a1410', lineHeight: 1.25
+                      display: 'block', overflow: 'hidden', minHeight: 26,
+                      fontSize: 11, fontWeight: 700, letterSpacing: '0.04em',
+                      textTransform: 'uppercase', color: '#1a1410', lineHeight: 1.3
                     }}>{bg.name}</span>
                   </div>
                 </button>
