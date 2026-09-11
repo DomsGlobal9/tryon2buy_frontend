@@ -20,15 +20,30 @@ const GENERATION_REQUEST_TIMEOUT_MS = 120000;
 
 // Display-only — no prompts or raw image logic here.
 // The backend resolves everything from prompts.js using these IDs.
+/**
+ * The backgrounds offered in the Change Background panel.
+ *
+ * ids are sequential and are what the UI sends as the payload; the FILE behind each one is an
+ * implementation detail of storage and deliberately not encoded in the id. The backend owns
+ * the prompt and looks it up by this id in prompts.js, so this list and BACKGROUND_PROMPTS
+ * must stay in step -- an id here with no match there fails the generation only after the
+ * customer has already waited for it.
+ */
 const BACKGROUND_OPTIONS = [
-  { id: 'bg1', name: 'Ancient Temple', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg1.png' },
-  { id: 'bg2', name: 'Festive Palace', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg2.png' },
-  { id: 'bg3', name: 'Designer Boutique', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg13.png' },
-  { id: 'bg4', name: 'Luxury Hotel Lobby', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg12.png' },
-  { id: 'bg5', name: 'Floral Garden Archway', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg14.png' },
-  { id: 'bg6', name: 'Golden Palace', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg6.jpg' },
-  { id: 'bg7', name: 'Tropical Garden', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg7.jpg' },
-  { id: 'bg8', name: 'Beach Resort Sunset', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg11.png' }
+  { id: 'bg1', name: 'Temple Colonnade', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg1.png' },
+  { id: 'bg2', name: 'Banana Leaf Mandap', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg10.png' },
+  { id: 'bg3', name: 'Rose Haveli Alcove', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg13.png' },
+  { id: 'bg4', name: 'Candlelit Barn Chapel', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg14.png' },
+  { id: 'bg5', name: 'Diwali Palace Corridor', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg2.png' },
+  { id: 'bg6', name: 'Marigold Haldi Stage', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg15.png' },
+  { id: 'bg7', name: 'Mountain Floral Aisle', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg16.png' },
+  { id: 'bg8', name: 'Marigold Temple Steps', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg17.png' },
+  { id: 'bg9', name: 'Haldi Flower Curtain', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg18.png' },
+  { id: 'bg10', name: 'Bougainvillea Courtyard', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg5.jpg' },
+  { id: 'bg11', name: 'Starlit Garden Aisle', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg20.png' },
+  { id: 'bg12', name: 'Sunflower Terrace Mandap', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg21.png' },
+  { id: 'bg13', name: 'Marigold Doorway', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg22.png' },
+  { id: 'bg14', name: 'Tuberose Gateway', image: 'https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/bg23.png' }
 ];
 
 const SHOWCASE_BLOUSES = [
@@ -1035,11 +1050,17 @@ export default function CustomerTryon() {
 
         {/* Right Side: Background Panel */}
         {tryonState === 'generated' && (
-          <aside className="w-full xl:w-[360px] bg-[#faf7f2] border-l border-[rgba(26,20,16,0.1)] p-8 shrink-0 flex flex-col justify-center animate-fade-in">
+          <aside className="w-full xl:w-[360px] bg-[#faf7f2] border-l border-[rgba(26,20,16,0.1)] p-8 shrink-0 flex flex-col justify-center overflow-hidden animate-fade-in">
             <h3 className="font-['EB_Garamond',serif] text-[20px] text-[#1a1410] mb-2">Change Background</h3>
             <p className="text-[10px] tracking-[0.5px] text-[#8c8278] mb-8">Select a background and apply it to your try-on.</p>
 
-            <div className="grid grid-cols-2 gap-3 mb-8">
+            {/* Scrolls, because the list grew from 8 to 14 and the panel is a fixed-height
+                column. Without a max height the grid pushed the Apply button off the bottom
+                of the aside and the last backgrounds could not be reached at all. min-h-0 is
+                required: this sits in a flex column, and a flex child will not shrink below
+                its content without it, so overflow alone would do nothing. pr-1 keeps the
+                scrollbar off the thumbnails. */}
+            <div className="grid grid-cols-2 gap-3 mb-8 max-h-[46vh] min-h-0 overflow-y-auto pr-1">
               {BACKGROUND_OPTIONS.map((bg) => (
                 <button
                   key={bg.id}
