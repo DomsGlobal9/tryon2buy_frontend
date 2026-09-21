@@ -10,6 +10,7 @@ import FloatingImageAnimation from '../../components/FloatingImageAnimation';
 import { newClientRequestId, recoverGeneration, userFacingMessage } from '../../utils/generationRecovery';
 import { swipeable } from '../../utils/swipe';
 import { createPhotoDock, SHARED_RETENTION_MS, SHARED_GARMENT_LIMIT } from '../../utils/photoDock';
+import { getVendorToken, clearVendorSession, authProblem } from '../../utils/auth';
 
 // How long to hold the synchronous request open before falling back to polling. Generous
 // enough for a normal generation to answer directly, short enough that we stop waiting on a
@@ -136,13 +137,24 @@ export default function VendorTryon() {
   const [isModifying, setIsModifying] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
-  const [authToken, setAuthToken] = useState(
-    localStorage.getItem('vendor_token') || null
-  );
+  const [authToken, setAuthToken] = useState(() => getVendorToken());
   const [showVendorLimitModal, setShowVendorLimitModal] = useState(false);
+  const [limitVariant, setLimitVariant] = useState('guest');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
-  const handleAuthError = () => {
+  /**
+   * @param {'guest_limit' | 'expired'} kind
+   *
+   * This page is behind the vendor login, yet every refusal showed the guest wording --
+   * "Free Trial Ended -- Login as Vendor" -- to somebody already logged in as a vendor. An
+   * expired login now says so and offers to log in again, returning to this same try-on.
+   */
+  const handleAuthError = (kind = 'guest_limit') => {
+    if (kind === 'expired') {
+      clearVendorSession();
+      setAuthToken(null);
+    }
+    setLimitVariant(kind === 'expired' ? 'expired' : 'guest');
     setShowVendorLimitModal(true);
     setTryonState('initial');
   };
@@ -449,7 +461,8 @@ export default function VendorTryon() {
   const addToSharedDock = async (file) => {
     try {
       const added = await dock.add(file);
-      if (!added) { handleAuthError(); return; }
+      // The shared dock needs a working login, so a refused upload here is an expired one.
+      if (!added) { handleAuthError('expired'); return; }
       // Picking a photograph here is this person's own action, so it goes into the slot.
       applyPhoto(added);
     } catch (err) {
@@ -562,7 +575,7 @@ export default function VendorTryon() {
         return;
       }
       if (res.status === 401 || res.status === 403) {
-        handleAuthError();
+        handleAuthError(authProblem(res.status, data));
         setIsChangingBackground(false);
         return;
       }
@@ -611,7 +624,7 @@ export default function VendorTryon() {
         return;
       }
       if (response.status === 401 || response.status === 403) {
-        handleAuthError();
+        handleAuthError(authProblem(response.status, result));
         setIsModifying(false);
         return;
       }
@@ -697,7 +710,7 @@ export default function VendorTryon() {
       if (genRes && !transportFailure) {
         if (genRes.status === 401 && genData.error === 'GUEST_LIMIT_REACHED') {
           if (intervalRef.current) clearInterval(intervalRef.current);
-          handleAuthError();
+          handleAuthError('guest_limit');
           return;
         } else if (genRes.status === 403 && genData.error === 'INSUFFICIENT_CREDITS') {
           if (intervalRef.current) clearInterval(intervalRef.current);
@@ -706,7 +719,7 @@ export default function VendorTryon() {
           return;
         } else if (genRes.status === 401 || genRes.status === 403) {
           if (intervalRef.current) clearInterval(intervalRef.current);
-          handleAuthError();
+          handleAuthError('expired');
           return;
         }
       }
@@ -1373,7 +1386,7 @@ export default function VendorTryon() {
       <VendorLimitModal 
         isOpen={showVendorLimitModal} 
         onClose={() => setShowVendorLimitModal(false)}
-        userType="guest"
+        userType={limitVariant}
       />
 
       <VendorUpgradeModal 

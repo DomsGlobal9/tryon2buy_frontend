@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Sparkles, CheckCircle2, CameraOff, Clock, LayoutGrid, Zap, ShieldCheck, User, Menu, X } from 'lucide-react';
+import { setGuestMode } from '../../utils/auth';
 
 export default function Landing() {
   const [showGuestModal, setShowGuestModal] = useState(false);
@@ -8,7 +9,8 @@ export default function Landing() {
   const navigate = useNavigate();
 
   const handleGuestWorkspace = () => {
-    sessionStorage.setItem('guest_mode', 'true');
+    // Remembered per device, not per tab -- see utils/auth.
+    setGuestMode();
     navigate('/workspace');
   };
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { API_URL } from '../../config';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Sparkles, ArrowRight, Store, Lock, Mail, User, Eye, EyeOff, ChevronLeft } from 'lucide-react';
+import { getVendorToken } from '../../utils/auth';
 
 export default function ClientAuth() {
   const navigate = useNavigate();
@@ -17,8 +18,9 @@ export default function ClientAuth() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Redirect to appropriate workspace if already logged in
-    const token = localStorage.getItem('vendor_token');
+    // Redirect to appropriate workspace if already logged in -- a login that has expired
+    // does not count, or this page would send it straight back to the guard that refused it.
+    const token = getVendorToken();
     const portalType = localStorage.getItem('portal_type');
     
     if (token) {

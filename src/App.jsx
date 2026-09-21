@@ -1,5 +1,6 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { getVendorToken, isGuestMode } from './utils/auth';
 import TryonWorkspace from './pages/Tryon/TryonWorkspace';
 import VendorGallery from './pages/Tryon/VendorGallery';
 import CustomerTryon from './pages/Tryon/CustomerTryon';
@@ -22,10 +23,13 @@ import BlogIndex from './pages/Landing/BlogIndex';
 import BlogPost from './pages/Landing/BlogPost';
 
 // Authentication Guard for Vendor Interface
+// A login that has EXPIRED no longer counts -- it used to, because only the token's presence
+// was checked, so an expired vendor walked into pages whose every request then failed.
+// The address they were heading for rides along, so logging in brings them back to it.
 const VendorRoute = ({ children }) => {
-  const token = localStorage.getItem('vendor_token');
-  const isGuest = sessionStorage.getItem('guest_mode') === 'true';
-  return token || isGuest ? children : <Navigate to="/login" replace />;
+  const location = useLocation();
+  if (getVendorToken() || isGuestMode()) return children;
+  return <Navigate to="/login" replace state={{ returnTo: location.pathname + location.search }} />;
 };
 
 export default function App() {

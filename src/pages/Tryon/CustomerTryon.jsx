@@ -11,6 +11,7 @@ import FloatingImageAnimation from '../../components/FloatingImageAnimation';
 import VendorUpgradeModal from '../../components/VendorUpgradeModal';
 import { newClientRequestId, recoverGeneration, userFacingMessage } from '../../utils/generationRecovery';
 import { uploadSelfie } from '../../utils/imageUpload';
+import { getVendorToken, clearVendorSession, isGuestMode, getGuestDeviceId, authProblem } from '../../utils/auth';
 
 // How long to hold the synchronous request open before falling back to polling. Generous
 // enough for a normal generation to answer directly, short enough that we stop waiting on a
@@ -61,6 +62,14 @@ const SHOWCASE_NECKS = [
 export default function CustomerTryon() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  /**
+   * True only when a vendor opened this page from their own gallery's preview button.
+   *
+   * History state does not survive a copied link, a QR code or a new tab, so a shopper can
+   * never arrive with it -- which is exactly what makes it safe to decide the logo with.
+   */
+  const openedByVendor = !!location.state?.fromVendorGallery;
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
   const activeImageRef = useRef(null);
@@ -100,16 +109,34 @@ export default function CustomerTryon() {
   const [isModifying, setIsModifying] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
-  const [authToken, setAuthToken] = useState(
-    localStorage.getItem('vendor_token') || null
-  );
+  // A login that has expired is treated as no login -- the server would refuse it anyway.
+  const [authToken, setAuthToken] = useState(() => getVendorToken());
   const [showVendorLimitModal, setShowVendorLimitModal] = useState(false);
+  const [limitVariant, setLimitVariant] = useState('guest');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
-  const handleAuthError = () => {
+  /**
+   * @param {'guest_limit' | 'expired'} kind
+   *
+   * These were one case, shown as "Free Trial Ended -- Login as Vendor" -- including to a
+   * vendor whose login had simply run out. An expired login is dropped here, so the next
+   * try goes through as a guest if the person chooses to carry on without logging in.
+   */
+  const handleAuthError = (kind = 'guest_limit') => {
+    if (kind === 'expired') {
+      clearVendorSession();
+      setAuthToken(null);
+      setLimitVariant('expired');
+    } else {
+      setLimitVariant('guest');
+    }
     setShowVendorLimitModal(true);
     setTryonState('initial');
   };
+
+  // Guests are counted per device on the server. Sent only when there is no login, because a
+  // logged-in vendor is charged to their account instead.
+  const guestFields = () => (authToken ? {} : { guest_device_id: getGuestDeviceId() });
 
   const getHeaders = () => {
     return {
@@ -315,7 +342,8 @@ export default function CustomerTryon() {
         body: JSON.stringify({
           imageUrl: targetUrl,
           backgroundId: selectedBg,
-          generationId: id
+          generationId: id,
+          ...guestFields()
         })
       });
 
@@ -327,7 +355,7 @@ export default function CustomerTryon() {
         return;
       }
       if (res.status === 401 || res.status === 403) {
-        handleAuthError();
+        handleAuthError(authProblem(res.status, data));
         setIsChangingBackground(false);
         return;
       }
@@ -372,7 +400,8 @@ export default function CustomerTryon() {
         body: JSON.stringify({
           imageUrl: targetUrl,
           modificationType: activeTab === 'sleeve' ? showcaseBlouse : showcaseNeck,
-          generationId: id
+          generationId: id,
+          ...guestFields()
         })
       });
 
@@ -384,7 +413,7 @@ export default function CustomerTryon() {
         return;
       }
       if (response.status === 401 || response.status === 403) {
-        handleAuthError();
+        handleAuthError(authProblem(response.status, result));
         setIsModifying(false);
         return;
       }
@@ -442,7 +471,7 @@ export default function CustomerTryon() {
 
         if (uploaded.unauthorized) {
           if (intervalRef.current) clearInterval(intervalRef.current);
-          handleAuthError();
+          handleAuthError(authToken ? 'expired' : 'guest_limit');
           return;
         }
 
@@ -475,7 +504,8 @@ export default function CustomerTryon() {
             human_image_url,
             parent_generation_id: id,
             target_folder: 'results/tryon-results',
-            client_request_id: clientRequestId
+            client_request_id: clientRequestId,
+            ...guestFields()
           }),
           // Stop holding a socket the network has already given up on. Hitting this is not
           // a failure -- the server is still working, and we go and collect the result below.
@@ -494,7 +524,7 @@ export default function CustomerTryon() {
       if (genRes && !transportFailure) {
         if (genRes.status === 401 && genData.error === 'GUEST_LIMIT_REACHED') {
           if (intervalRef.current) clearInterval(intervalRef.current);
-          handleAuthError();
+          handleAuthError('guest_limit');
           return;
         } else if (genRes.status === 403 && genData.error === 'INSUFFICIENT_CREDITS') {
           if (intervalRef.current) clearInterval(intervalRef.current);
@@ -503,7 +533,7 @@ export default function CustomerTryon() {
           return;
         } else if (genRes.status === 401 || genRes.status === 403) {
           if (intervalRef.current) clearInterval(intervalRef.current);
-          handleAuthError();
+          handleAuthError('expired');
           return;
         }
       }
@@ -646,7 +676,17 @@ export default function CustomerTryon() {
         <div className="flex justify-center items-center gap-2 md:gap-3">
           <div
             onClick={() => {
-              if (authToken) {
+              /**
+               * This is a CUSTOMER page, so the logo leads back into the customer side.
+               *
+               * It went to /workspace whenever a vendor token was stored on the device --
+               * valid or not -- so on a shop's counter tablet one tap took a shopper into the
+               * owner's private workspace. Now only a vendor who opened this page from their
+               * own gallery goes back to the workspace; a guest goes back to the guest
+               * workspace they came from (it used to strand them on the shop page); anyone
+               * else goes to the shop.
+               */
+              if ((openedByVendor && authToken) || (!authToken && isGuestMode())) {
                 navigate('/workspace');
               } else if (sourceGeneration?.vendorId) {
                 navigate(`/shop/${sourceGeneration.vendorId}`);
@@ -1141,13 +1181,16 @@ export default function CustomerTryon() {
       <VendorLimitModal
         isOpen={showVendorLimitModal}
         onClose={() => setShowVendorLimitModal(false)}
-        userType="guest"
+        userType={limitVariant}
+        allowGuest
       />
 
+      {/* Out of credits here means the SHOP's customer try-ons are used up. The person
+          reading it is usually a shopper, who was being told to subscribe to a merchant plan. */}
       <VendorUpgradeModal
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
-        userType="vendor"
+        userType={openedByVendor ? 'vendor' : 'customer'}
       />
       <ImageHistoryDock />
       

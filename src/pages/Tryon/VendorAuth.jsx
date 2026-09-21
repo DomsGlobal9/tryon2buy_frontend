@@ -3,6 +3,7 @@ import { API_URL } from '../../config';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Sparkles, ArrowRight, Store, Lock, Mail, User, Eye, EyeOff, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getVendorToken, clearGuestMode, safeReturnPath } from '../../utils/auth';
 
 export default function VendorAuth() {
   const navigate = useNavigate();
@@ -36,8 +37,10 @@ export default function VendorAuth() {
   };
 
   useEffect(() => {
-    // Redirect to appropriate workspace if already logged in
-    const token = localStorage.getItem('vendor_token');
+    // Redirect to appropriate workspace if already logged in.
+    // getVendorToken, not a raw read: the route guard rejects an expired token and sends it
+    // here, so if this page still accepted it the two would bounce it back and forth forever.
+    const token = getVendorToken();
     const portalType = localStorage.getItem('portal_type');
     
     if (token) {
@@ -128,11 +131,16 @@ export default function VendorAuth() {
       localStorage.setItem('vendor_data', JSON.stringify(data.vendor));
       localStorage.setItem('portal_type', 'merchant');
       
-      // Clear any lingering guest state to prevent UI conflicts in the workspace
-      sessionStorage.removeItem('guest_mode');
+      // Clear any lingering guest state to prevent UI conflicts in the workspace.
+      // This is the ONLY place guest mode ends on the way into a login -- the buttons that
+      // lead here no longer clear it first, so backing out of the login page leaves a guest
+      // still a guest instead of locked out of the workspace.
+      clearGuestMode();
 
-      // Redirect to merchant dashboard
-      navigate('/workspace');
+      // Back to where they were when they were asked to log in (a try-on, the gallery),
+      // otherwise the merchant dashboard. It used to be the dashboard always, which lost
+      // the piece somebody had been in the middle of trying on.
+      navigate(safeReturnPath(location.state?.returnTo) || '/workspace');
     } catch (err) {
       setError(err.message);
     } finally {

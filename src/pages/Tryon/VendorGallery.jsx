@@ -3,6 +3,7 @@ import { API_URL } from '../../config';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Share2, Copy, Check, Trash2, ExternalLink, Eye, X } from 'lucide-react';
 import ConfirmDialog from '../../components/ConfirmDialog';
+import { getVendorToken, clearVendorSession } from '../../utils/auth';
 
 // Must match the hardcoded vendor ID in backend/index.js
 const DEFAULT_VENDOR_ID = 'feb21067-a3ee-4020-b388-16d3a37a29ce';
@@ -55,15 +56,36 @@ export default function VendorGallery() {
     setTimeout(() => setGalleryCopied(false), 2000);
   };
 
+  /**
+   * Set when the gallery could not be loaded, so the page says so.
+   *
+   * A failed load used to fall through to "No draped garments yet": the error body was not an
+   * array, .filter threw, and the catch left the list empty. A vendor whose login had expired
+   * was told their catalogue was empty, which reads as "your work has been deleted".
+   */
+  const [loadFailed, setLoadFailed] = useState(false);
+
+  // An expired login goes to the login page and comes straight back here afterwards.
+  const sendToLogin = () => {
+    clearVendorSession();
+    navigate('/login', { replace: true, state: { returnTo: '/gallery' } });
+  };
+
   useEffect(() => {
-    const token = localStorage.getItem('vendor_token');
+    const token = getVendorToken();
     fetch(`${API_URL}/api/tryon/vendor/generations`, {
       headers: {
         'Authorization': token ? `Bearer ${token}` : ''
       }
     })
-      .then(res => res.json())
+      .then(async res => {
+        if (res.status === 401 || res.status === 403) { sendToLogin(); return null; }
+        const data = await res.json();
+        if (!res.ok || !Array.isArray(data)) throw new Error(`gallery load failed: ${res.status}`);
+        return data;
+      })
       .then(data => {
+        if (!data) return;
         // Show only Phase 1 vendor drapings with successful AI results (exclude fallbacks/failed images)
         const vendorGens = data.filter(g => g.mode === 'with_garment' && g.phase === 1 && !!g.resultImageUrl);
         setGenerations(vendorGens);
@@ -71,8 +93,10 @@ export default function VendorGallery() {
       })
       .catch(err => {
         console.error("Failed to fetch gallery", err);
+        setLoadFailed(true);
         setLoading(false);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const copyLink = (id) => {
@@ -108,13 +132,14 @@ export default function VendorGallery() {
     if (!ok) return;
     
     try {
-      const token = localStorage.getItem('vendor_token');
+      const token = getVendorToken();
       const res = await fetch(`${API_URL}/api/tryon/vendor/generations/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': token ? `Bearer ${token}` : ''
         }
       });
+      if (res.status === 401) { sendToLogin(); return; }
       if (res.ok) {
         setGenerations(prev => prev.filter(g => g.id !== id));
       } else {
@@ -185,6 +210,16 @@ export default function VendorGallery() {
       {loading ? (
         <div className="text-[12px] uppercase tracking-widest text-[#8c8278] mt-20 animate-pulse">
           Loading your gallery...
+        </div>
+      ) : loadFailed ? (
+        <div className="flex flex-col items-center justify-center mt-20 opacity-70 text-center">
+          <p className="text-[12px] uppercase tracking-widest text-[#8c8278]">We couldn't load your gallery.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-5 py-2.5 text-[9px] font-bold uppercase tracking-widest border border-[#1a1410] text-[#1a1410] hover:bg-[#1a1410] hover:text-[#faf7f2] transition-colors"
+          >
+            Try again
+          </button>
         </div>
       ) : generations.length === 0 ? (
         <div className="flex flex-col items-center justify-center mt-20 opacity-60">
@@ -262,7 +297,9 @@ export default function VendorGallery() {
                     on one device never showed up on another -- it never left that browser.
                   */}
                   <button
-                    onClick={() => navigate(`/tryon/${gen.id}`)}
+                    // fromVendorGallery lets the customer page send its logo back to the
+                    // workspace for the vendor who opened it -- and for nobody else.
+                    onClick={() => navigate(`/tryon/${gen.id}`, { state: { fromVendorGallery: true } })}
                     title="Preview what a customer sees (stays on this device)"
                     className="flex items-center justify-center px-2.5 py-2 text-[9px] font-bold uppercase tracking-widest bg-[#faf7f2] border border-[#1a1410] text-[#1a1410] hover:bg-[#1a1410] hover:text-[#faf7f2] transition-colors"
                   >

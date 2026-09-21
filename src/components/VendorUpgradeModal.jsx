@@ -18,9 +18,11 @@ export default function VendorUpgradeModal({ isOpen, onClose, userType = 'vendor
         </div>
         <h2 className="font-['EB_Garamond',serif] text-3xl text-[#1a1410] mb-3">Out of Credits</h2>
         <p className="text-[12px] text-[#5c544d] font-sans leading-relaxed mb-8">
-          {userType === 'customer' 
-            ? "You've used all 5 of your free try-ons! Contact the boutique to get unlimited access and keep trying on beautiful outfits."
-            : "You've used all 5 of your free merchant try-ons! Subscribe to our Unlimited Plan to keep generating stunning personalized fits for your customers."
+          {/* No count in the wording: it said "5" while every allowance is 10, and the
+              number lives on the server, where it can change without this file knowing. */}
+          {userType === 'customer'
+            ? "The free try-ons for this shop have all been used. Please ask the boutique for more, and keep trying on beautiful outfits."
+            : "You've used all of your free merchant try-ons! Subscribe to our Unlimited Plan to keep generating stunning personalized fits for your customers."
           }
         </p>
         <button 

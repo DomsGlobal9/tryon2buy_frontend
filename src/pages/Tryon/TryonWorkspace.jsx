@@ -6,6 +6,7 @@ import VendorLimitModal from '../../components/VendorLimitModal';
 import VendorUpgradeModal from '../../components/VendorUpgradeModal';
 import SampleWorkspaceModal from '../../components/SampleWorkspaceModal';
 import { motion } from 'framer-motion';
+import { getVendorToken, clearVendorSession, isGuestMode as readGuestMode, clearGuestMode, getGuestDeviceId } from '../../utils/auth';
 
 // Step 1 assets
 const imgSaree = "http://localhost:3845/assets/acdc2b8b07c17fbe38507a6bf5f4d4bfd0719563.png";
@@ -182,7 +183,7 @@ const DEFAULT_MODELS_BY_CATEGORY = {
 export default function TryonWorkspace({ onExit }) {
   const navigate = useNavigate();
   const getHeaders = () => {
-    const token = localStorage.getItem('vendor_token');
+    const token = getVendorToken();
     return {
       'Content-Type': 'application/json',
       'Authorization': token ? `Bearer ${token}` : ''
@@ -190,19 +191,20 @@ export default function TryonWorkspace({ onExit }) {
   };
 
   const getUploadHeaders = () => {
-    const token = localStorage.getItem('vendor_token');
+    const token = getVendorToken();
     return token ? { 'Authorization': `Bearer ${token}` } : {};
   };
 
-  const isGuestMode = sessionStorage.getItem('guest_mode') === 'true';
+  // A working login wins over a leftover guest flag, so a vendor is never shown the guest
+  // workspace (the demo gallery, the guest limit) just because the flag was never cleared.
+  const isGuestMode = !getVendorToken() && readGuestMode();
 
   const handleLogout = () => {
     if (isGuestMode) {
-      sessionStorage.removeItem('guest_mode');
+      clearGuestMode();
       navigate('/');
     } else {
-      localStorage.removeItem('vendor_token');
-      localStorage.removeItem('vendor_data');
+      clearVendorSession();
       navigate('/login');
     }
   };
@@ -400,6 +402,13 @@ export default function TryonWorkspace({ onExit }) {
 
   const startGeneration = async () => {
     if (!isGarmentUploadValid() || !selectedModel) return;
+    // Opened as a vendor, but the login has run out since. Without this the request would go
+    // out with no login and be charged to the free guest allowance -- the same silent
+    // downgrade the server no longer does.
+    if (!isGuestMode && !getVendorToken()) {
+      navigate('/login', { state: { returnTo: '/workspace' } });
+      return;
+    }
     setTryonState('generating');
     setIsSaved(false);
     setProgress(0); setProgressStage(0);
@@ -440,13 +449,24 @@ export default function TryonWorkspace({ onExit }) {
 
       const genRes = await fetch(`${API_URL}/api/tryon/generate`, {
         method: 'POST', headers: getHeaders(),
-        body: JSON.stringify({ mode: 'with_garment', garment_image_url, human_image_url, category, target_folder: 'vendor-drapes', dupatta_style_url: selectedDupattaStyle })
+        body: JSON.stringify({
+          mode: 'with_garment', garment_image_url, human_image_url, category, target_folder: 'vendor-drapes', dupatta_style_url: selectedDupattaStyle,
+          // Guests are counted per device on the server; a logged-in vendor is charged to their account.
+          ...(getVendorToken() ? {} : { guest_device_id: getGuestDeviceId() })
+        })
       });
       if (!genRes.ok) {
-        const errorData = await genRes.json(); clearInterval(interval); setTryonState('initial');
+        const errorData = await genRes.json().catch(() => ({})); clearInterval(interval); setTryonState('initial');
         if (genRes.status === 401 && errorData.error === 'GUEST_LIMIT_REACHED') setShowLimitModal(true);
         else if (genRes.status === 403 && errorData.error === 'INSUFFICIENT_CREDITS') setShowUpgradeModal(true);
-        else alert('Generation failed: ' + (errorData.message || errorData.error || 'Unknown error'));
+        else if (genRes.status === 401) {
+          // The login ran out. Log in again and come straight back to the workspace.
+          clearVendorSession();
+          navigate('/login', { state: { returnTo: '/workspace' } });
+        }
+        // Detail to the console, never to the person: this used to print the server's own
+        // error text on screen, against the rule every other try-on page follows.
+        else { console.error('[Workspace] generation failed', genRes.status, errorData); alert('Try-on failed. Please try again.'); }
         return;
       }
       const genData = await genRes.json();
@@ -461,7 +481,7 @@ export default function TryonWorkspace({ onExit }) {
       console.error(err);
       clearInterval(interval);
       setTryonState('initial');
-      alert('Generation failed: ' + err.message);
+      alert('Try-on failed. Please try again.');
     }
   };
 
@@ -979,7 +999,8 @@ export default function TryonWorkspace({ onExit }) {
             <div className="flex flex-col gap-3">
               <button
                 onClick={() => {
-                  sessionStorage.removeItem('guest_mode');
+                  // Guest mode is left alone: the login page ends it once a login succeeds.
+                  // Clearing it here locked a guest out of the workspace if they backed out.
                   navigate('/login');
                 }}
                 className="w-full bg-[#1a1410] hover:bg-[#7f5700] text-white py-3.5 text-[11px] font-bold tracking-[2px] uppercase transition-colors rounded-xl"
