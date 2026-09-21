@@ -26,9 +26,15 @@ import BlogPost from './pages/Landing/BlogPost';
 // A login that has EXPIRED no longer counts -- it used to, because only the token's presence
 // was checked, so an expired vendor walked into pages whose every request then failed.
 // The address they were heading for rides along, so logging in brings them back to it.
-const VendorRoute = ({ children }) => {
+//
+// Guests are let in only where the page is built for them (allowGuest -- the workspace). The
+// guard used to admit a guest to every vendor page, so typing /vendor/catalog, /vendor/upload
+// or /vendor/preview/... opened a vendor screen whose every request the server then refused:
+// an empty catalogue, an upload form that could not save. Nothing leaked, but it was a dead
+// end. A guest is sent to log in instead, with guest mode left as it was.
+const VendorRoute = ({ children, allowGuest = false }) => {
   const location = useLocation();
-  if (getVendorToken() || isGuestMode()) return children;
+  if (getVendorToken() || (allowGuest && isGuestMode())) return children;
   return <Navigate to="/login" replace state={{ returnTo: location.pathname + location.search }} />;
 };
 
@@ -57,7 +63,7 @@ export default function App() {
           <Route path="/client-login" element={<ClientAuth />} />
 
           {/* Vendor Protected Interface */}
-          <Route path="/workspace" element={<VendorRoute><TryonWorkspace onExit={() => window.location.href = '/'} /></VendorRoute>} />
+          <Route path="/workspace" element={<VendorRoute allowGuest><TryonWorkspace onExit={() => window.location.href = '/'} /></VendorRoute>} />
           <Route path="/gallery" element={<VendorRoute><VendorGallery /></VendorRoute>} />
           <Route path="/vendor/catalog" element={<VendorRoute><VendorCatalog /></VendorRoute>} />
           <Route path="/vendor/upload" element={<VendorRoute><VendorUpload /></VendorRoute>} />

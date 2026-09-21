@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { API_URL } from '../../config';
-import { Sparkles, Upload, Check, ChevronLeft, ArrowRight, RefreshCw, LogOut, Shirt, UserCheck, Wind, Star, Layers, Image, X, Camera, ShieldCheck, Timer } from 'lucide-react';
+import { Sparkles, Upload, Check, ChevronLeft, ArrowRight, RefreshCw, LogOut, Shirt, UserCheck, Wind, Star, Layers, Image, X, Camera, ShieldCheck, Timer, Search, ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import VendorLimitModal from '../../components/VendorLimitModal';
 import VendorUpgradeModal from '../../components/VendorUpgradeModal';
@@ -8,34 +8,40 @@ import SampleWorkspaceModal from '../../components/SampleWorkspaceModal';
 import { motion } from 'framer-motion';
 import { getVendorToken, clearVendorSession, isGuestMode as readGuestMode, clearGuestMode, getGuestDeviceId } from '../../utils/auth';
 
-// Step 1 assets
-const imgSaree = "http://localhost:3845/assets/acdc2b8b07c17fbe38507a6bf5f4d4bfd0719563.png";
-const imgKurti = "http://localhost:3845/assets/d5e5b05a9a6ba0093dcc01d5b3d3690e5d9d10f6.png";
-const imgLehenga = "http://localhost:3845/assets/486b0188b62478ceed283e6e4c8fa8da3b96f448.png";
-const imgBlouse = "http://localhost:3845/assets/8782926965bb3f5cccc7cc13e2856a5027062f35.png";
-const imgDress = "http://localhost:3845/assets/dd6249a9f7c216437dd9fe7cf035368fb6b86bc2.png";
+/**
+ * Every asset here used to point at http://localhost:3845 -- the local asset server of the
+ * design tool this screen was imported from. It exists on the designer's machine and nowhere
+ * else, so for every real visitor these images simply failed: the header's search and bag
+ * buttons were empty, the selected model had no tick, and the Generate button lost its icon.
+ * The onError handlers hid the failures, which is why nobody saw a broken image.
+ *
+ * Icons are now lucide components (already used across this page); pictures are real hosted
+ * images. Literal strings rather than the FALLBACK_* constants below: those are declared
+ * further down, and a const cannot be read before its declaration.
+ */
 
-// Models
-const imgModelClassicStudio = "http://localhost:3845/assets/568a6f72551bfb6386758b8c6e5d3ddd96fcd4d6.png";
-const imgModelHeritageCourt = "http://localhost:3845/assets/b99e1af1067f8445e5da914267019819fb9bc126.png";
+// Step 1 assets (catalogue thumbnails -- the same images their fallbacks already used)
+const imgSaree = "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=120&h=120&q=80";
+const imgKurti = "https://images.unsplash.com/photo-1608748010899-18f300247112?auto=format&fit=crop&w=120&h=120&q=80";
+const imgLehenga = "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=120&h=120&q=80";
+const imgBlouse = "https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?auto=format&fit=crop&w=120&h=120&q=80";
+const imgDress = "https://images.unsplash.com/photo-1595959183075-c1d09e7e951c?auto=format&fit=crop&w=120&h=120&q=80";
 
-// SVGs / Icons
-const imgCheckIcon = "http://localhost:3845/assets/5562447e235a6d5290bd80edeccaad8685635a9d.svg";
-const imgCloudUploadIcon = "http://localhost:3845/assets/5ed675a87992382480595b863c88f043867b5f35.svg";
-const imgSparkleIcon = "http://localhost:3845/assets/57bc61ae51616a14133de6d0ecef9147d2895169.svg";
-const imgSilhouetteIcon = "http://localhost:3845/assets/a249434f512726ee89a8ee251ee587fd341399a0.svg";
-const imgSearchIcon = "http://localhost:3845/assets/6e210d18e84e7be6898081e805c5c52a0b885275.svg";
-const imgCartIcon = "http://localhost:3845/assets/fe48a95e0d65c7fcf86d546a537bcf683b7cb725.svg";
-const imgChevronDown = "http://localhost:3845/assets/09a9e63298cac1d80b6e69971e95da0f6ebb5138.svg";
+// Models -- the first two real saree default models, which DEFAULT_MODELS_BY_CATEGORY uses.
+// Only reached as fallbacks, but one of them is the human image a generation falls back to,
+// so it has to be a real picture of a person.
+const imgModelClassicStudio = "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/41.jpeg";
+const imgModelHeritageCourt = "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/default%20models/42.jpeg";
 
-// Backdrops
-const imgBackdropClassic = "http://localhost:3845/assets/487b58442e3bc149cf2907401b038c005bb8c5f8.png";
-const imgBackdropHeritage = "http://localhost:3845/assets/8f8024eb71678cba872ebfb43d0ef224aaef92ad.png";
+// Shown in the preview when no model image is available.
+const imgSilhouetteIcon = imgModelClassicStudio;
 
-// Samples (draping reference)
-const imgSample1 = "http://localhost:3845/assets/eb3723735f4918d0fea490acc7cf28dbf398e136.png";
-const imgSample2 = "http://localhost:3845/assets/12485f59679dfaa84d051008c4f9b1fa8b47cad3.png";
-const imgSample3 = "http://localhost:3845/assets/2be0b27cbf3bdfc0adec50cbe945bd6dc6e92fe2.png";
+// A draped saree result, for the two places that showed a localhost one.
+const imgDrapedSaree = "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&h=800&q=80";
+
+// Backdrops (the same images their fallbacks already used)
+const imgBackdropClassic = "https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?auto=format&fit=crop&w=150&h=150&q=80";
+const imgBackdropHeritage = "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=150&h=150&q=80";
 
 // Samples moved to SampleWorkspaceModal.jsx
 
@@ -58,7 +64,7 @@ const FALLBACK_USER_3 = "https://images.unsplash.com/photo-1506794778202-cad84cf
 // Draped Models map for results
 const DRAPED_RESULT_MAP = {
   "SAREE": {
-    "Classic Studio": "http://localhost:3845/assets/b8f534b47b928ffbb17116a86e63b2807359e0dd.png",
+    "Classic Studio": imgDrapedSaree,
     "Heritage Court": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&h=800&q=80"
   },
   "KURTI": {
@@ -82,7 +88,7 @@ const DRAPED_RESULT_MAP = {
 // Catalog dresses data for "Without Garment" Step 2
 const CATALOG_DRESSES = {
   "SAREE": [
-    { id: "s1", name: "Banarasi Silk Saree", img: imgSaree, fallback: FALLBACK_SAREE_ICON, draped: "http://localhost:3845/assets/b8f534b47b928ffbb17116a86e63b2807359e0dd.png" },
+    { id: "s1", name: "Banarasi Silk Saree", img: imgSaree, fallback: FALLBACK_SAREE_ICON, draped: imgDrapedSaree },
     { id: "s2", name: "Kanjeevaram Gold Saree", img: FALLBACK_SAMPLE_1, fallback: FALLBACK_SAMPLE_1, draped: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&h=800&q=80" },
     { id: "s3", name: "Brocade Royal Saree", img: FALLBACK_SAREE_ICON, fallback: FALLBACK_SAREE_ICON, draped: "https://images.unsplash.com/photo-1583391733958-d25e07fac200?auto=format&fit=crop&w=600&h=800&q=80" }
   ],
@@ -526,10 +532,10 @@ export default function TryonWorkspace({ onExit }) {
 
         <div className="flex items-center gap-3 md:gap-[24px]">
           <button className="opacity-80 hover:opacity-100 transition-opacity hidden sm:block">
-            <img src={imgSearchIcon} alt="Search" className="h-[18px] w-[14px] object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
+            <Search className="h-[16px] w-[16px] text-[#1A1410]" strokeWidth={1.75} aria-label="Search" />
           </button>
           <button className="opacity-80 hover:opacity-100 transition-opacity hidden sm:block">
-            <img src={imgCartIcon} alt="Bag" className="h-[14px] w-[14px] object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
+            <ShoppingBag className="h-[15px] w-[15px] text-[#1A1410]" strokeWidth={1.75} aria-label="Bag" />
           </button>
 
           <button
@@ -778,7 +784,7 @@ export default function TryonWorkspace({ onExit }) {
                       <img src={model.img} alt={model.name} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
                       <div className="absolute bottom-0 left-0 right-0 bg-[rgba(26,20,16,0.8)] p-1.5 flex items-center justify-between">
                         <span className="text-[7px] font-bold tracking-[0.5px] text-[#faf7f2] uppercase truncate max-w-[80%]">{model.name}</span>
-                        {isSelected && <img src={imgCheckIcon} alt="selected" className="size-[6px] object-contain invert shrink-0" onError={(e) => { e.target.style.display = 'none'; }} />}
+                        {isSelected && <Check className="size-[8px] text-[#faf7f2] shrink-0" strokeWidth={4} aria-label="selected" />}
                       </div>
                     </div>
                   </button>
@@ -793,7 +799,7 @@ export default function TryonWorkspace({ onExit }) {
             disabled={tryonState === 'generating' || !isGarmentUploadValid() || !selectedModel}
             className={`w-full py-4 mt-8 text-[12px] font-bold tracking-[3px] uppercase flex items-center justify-center gap-2 transition-all shrink-0 ${tryonState !== 'generating' && isGarmentUploadValid() && selectedModel ? 'bg-[#1A1410] hover:bg-black text-[#FAF7F2] cursor-pointer shadow-md active:scale-[0.99]' : 'bg-[rgba(26,20,16,0.2)] text-[#8c8278] cursor-not-allowed'}`}
           >
-            <img src={imgSparkleIcon} alt="" className="h-3 w-3 object-contain invert" onError={(e) => { e.target.style.display = 'none'; }} />
+            <Sparkles className="h-3 w-3 shrink-0" aria-hidden="true" />
             <span>GENERATE TRY-ON</span>
           </button>
 
@@ -1001,7 +1007,9 @@ export default function TryonWorkspace({ onExit }) {
                 onClick={() => {
                   // Guest mode is left alone: the login page ends it once a login succeeds.
                   // Clearing it here locked a guest out of the workspace if they backed out.
-                  navigate('/login');
+                  // isLogin:false opens the sign-up form -- the button says Create Account,
+                  // and it used to land on the login form.
+                  navigate('/login', { state: { isLogin: false, returnTo: '/workspace' } });
                 }}
                 className="w-full bg-[#1a1410] hover:bg-[#7f5700] text-white py-3.5 text-[11px] font-bold tracking-[2px] uppercase transition-colors rounded-xl"
               >
