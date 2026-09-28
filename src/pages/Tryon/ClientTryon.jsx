@@ -133,7 +133,23 @@ export default function ClientTryon() {
     // product code PRINTED ON THE TAG rather than by a generation id, because a printed tag has
     // to keep working for the life of the garment and a row id is not something a shop can put
     // on a label.
-    fetch(`${INVENTORY_API_URL}/api/v1/public/tryon/${clientId}/${productCode}`)
+    /*
+     * ?variant= is the colour the tag was tied to.
+     *
+     * A swing tag hangs on ONE saree. Somebody holding the goldenrod one has already chosen, and
+     * showing them the crimson because it happens to be the product's cover is worse than showing
+     * them nothing -- they believe it. Inventory matches the code against that product's own
+     * variants and falls back to the cover if it does not know it, so a tag whose colour was
+     * renamed or whose photograph was removed still opens the saree rather than an error.
+     *
+     * Passed straight through, unvalidated here on purpose: the shop's own data is what decides
+     * whether a code means anything, and that lives on the other side of this call.
+     */
+    const variant = new URLSearchParams(window.location.search).get('variant');
+    const lookup = `${INVENTORY_API_URL}/api/v1/public/tryon/${clientId}/${productCode}`
+      + (variant ? `?variant=${encodeURIComponent(variant)}` : '');
+
+    fetch(lookup)
       .then(async res => {
         const body = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(body?.message || 'That code does not match anything we can try on.');
@@ -147,7 +163,9 @@ export default function ClientTryon() {
         setSourceGeneration({
           garmentImageUrl: garment.imageUrl,
           resultImageUrl: null,
-          dressName: garment.title,
+          // The colour named, when the scan landed on one, so the page says which saree this is
+          // rather than leaving a shopper to wonder if they scanned the right tag.
+          dressName: garment.colourName ? `${garment.title} — ${garment.colourName}` : garment.title,
           category: garment.category
         });
         setLoading(false);
