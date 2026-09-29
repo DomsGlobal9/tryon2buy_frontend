@@ -40,6 +40,22 @@ export default function ClientTryon() {
   const [error, setError] = useState(null);
   const [sourceGeneration, setSourceGeneration] = useState(null);
 
+  /*
+   * WHICH COLOUR THEY ARE HOLDING.
+   *
+   * A QR printed on the PRODUCT names no colour, and that is the ordinary case -- the code beside
+   * a product in the shop's own app, not a swing tag on one saree. So the scan came back with the
+   * cover photograph and the shopper was tried on in whichever colour the shop happens to lead
+   * with, while standing in front of a rack of the same saree in five of them. Nothing on the
+   * screen admitted it, which is the part that matters: they believe the picture.
+   *
+   * A tag that DOES name a colour still skips this -- that shopper has already chosen, by picking
+   * up the garment.
+   */
+  const [colours, setColours] = useState([]);
+  const [chosenVariant, setChosenVariant] = useState(null);
+  const [garmentTitle, setGarmentTitle] = useState('');
+
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
 
@@ -156,6 +172,12 @@ export default function ClientTryon() {
         return body.data;
       })
       .then(garment => {
+        // Offered for the shopper to choose from. A tag that named a colour arrives with
+        // variantCode already set, so that shopper is never asked a question they have answered
+        // by picking the garment up.
+        setColours(Array.isArray(garment.colours) ? garment.colours : []);
+        setChosenVariant(garment.variantCode ?? null);
+        setGarmentTitle(garment.title);
         // Shaped into what the rest of this page already reads. It only ever asks for
         // garmentImageUrl, resultImageUrl and vendorId; vendorId stays absent on purpose,
         // because a scanned garment belongs to a shop in Inventory rather than to a vendor
@@ -342,7 +364,16 @@ export default function ClientTryon() {
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ humanImageUrl: human_image_url })
+          /*
+           * The colour goes with it. Inventory used to resolve the garment from the product code
+           * alone here, so even a swing tag that correctly SHOWED the goldenrod one generated the
+           * shopper wearing the cover -- the lookup honoured the colour and the generation
+           * ignored it. Omitted rather than sent empty when there is only one colour.
+           */
+          body: JSON.stringify({
+            humanImageUrl: human_image_url,
+            ...(chosenVariant ? { variant: chosenVariant } : {})
+          })
         }
       );
 
@@ -556,6 +587,107 @@ export default function ClientTryon() {
         <div className="flex-1 md:w-[200px] md:flex-none flex justify-end">
         </div>
       </header>
+
+      {/*
+        * WHICH ONE ARE YOU HOLDING -- asked before anything else.
+        *
+        * Only when there is a real choice: more than one colour, and the tag did not already name
+        * one. A shopper who scanned a swing tag has chosen by picking the garment up, and asking
+        * them again is a question with an answer already in their hand.
+        *
+        * Over the page rather than woven into it: the upload, the camera and the result all live
+        * in one long column here, and the one thing that must happen first is easiest to
+        * guarantee by putting it in front. There is no way past it except by choosing, because
+        * the alternative -- letting it be dismissed -- is the cover photograph again.
+        */}
+      {!loading && !error && !chosenVariant && colours.length > 1 && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Choose a colour"
+          className="fixed inset-0 z-[1200] flex items-end sm:items-center justify-center bg-[rgba(26,20,16,0.72)] sm:p-4"
+        >
+          {/*
+            * A sheet on a phone, a panel on anything bigger.
+            *
+            * Rounded at the top and flush to the bottom edge below 640px, because that is where a
+            * thumb is and a floating card with a strip of dimmed page under it wastes the only
+            * space a phone has. dvh, not vh: on iOS Safari 100vh is taller than the visible page
+            * while the address bar is showing, so a vh-sized sheet puts its last row of colours
+            * under the browser chrome -- the same trap the shop's own app hit.
+            */}
+          <div
+            className="w-full sm:max-w-[520px] lg:max-w-[600px] flex flex-col
+                       rounded-t-2xl sm:rounded-2xl bg-[#faf7f2] shadow-xl
+                       max-h-[92dvh] sm:max-h-[86dvh]"
+            style={{ maxHeight: 'min(92dvh, 92vh)' }}
+          >
+            <div className="px-4 pt-4 pb-3 sm:px-5 sm:pt-5 shrink-0">
+              {/* The grab handle a sheet is expected to have. Decorative, hence aria-hidden. */}
+              <div aria-hidden className="sm:hidden mx-auto mb-3 h-1 w-10 rounded-full bg-[rgba(26,20,16,0.18)]" />
+              <h2 className="font-['EB_Garamond',serif] text-[20px] sm:text-[22px] leading-tight text-[#1a1410]">
+                Which one are you holding?
+              </h2>
+              <p className="text-[13px] leading-snug text-[#4a5568] mt-1">
+                This comes in {colours.length} colours. Pick the one in your hand and we will put
+                that one on you.
+              </p>
+            </div>
+
+            {/*
+              * The colours scroll, the heading does not. With twenty colours the question itself
+              * would otherwise scroll away, leaving a grid of sarees and no reason for it.
+              */}
+            <div
+              className="flex-1 overflow-y-auto overscroll-contain px-4 sm:px-5 pb-4
+                         grid grid-cols-2 sm:grid-cols-3 gap-3 content-start"
+              style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
+            >
+              {colours.map(c => (
+                <button
+                  key={c.variantCode}
+                  type="button"
+                  onClick={() => {
+                    setChosenVariant(c.variantCode);
+                    // The page already reads these two, so the picture and the name change
+                    // together and the shopper can see their choice took.
+                    setSourceGeneration(prev => ({
+                      ...(prev || {}),
+                      garmentImageUrl: c.imageUrl,
+                      dressName: c.colourName ? `${garmentTitle} — ${c.colourName}` : garmentTitle
+                    }));
+                  }}
+                  title={c.colourName || c.variantCode}
+                  className="text-left rounded-xl border border-[rgba(26,20,16,0.12)] bg-white p-1.5
+                             active:scale-[0.98] transition
+                             focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a1410]"
+                >
+                  <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-[rgba(26,20,16,0.06)]">
+                    {/*
+                      * The name sits UNDER the picture, so a photograph that fails to load leaves
+                      * a readable tile rather than a blank square with a torn-page icon. A
+                      * shopper cannot choose a colour they cannot see named.
+                      */}
+                    <span className="absolute inset-0 grid place-items-center px-2 text-center text-[11px] text-[#4a5568]">
+                      {c.colourName || c.variantCode}
+                    </span>
+                    <img
+                      src={c.imageUrl}
+                      alt=""
+                      loading="lazy"
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      className="relative w-full h-full object-cover block"
+                    />
+                  </div>
+                  <span className="block px-1 pt-2 pb-1 text-[12px] leading-tight text-[#1a1410] truncate">
+                    {c.colourName || c.variantCode}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 flex flex-col lg:flex-row relative">
 
