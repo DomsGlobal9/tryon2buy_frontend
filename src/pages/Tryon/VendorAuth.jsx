@@ -360,7 +360,7 @@ export default function VendorAuth() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#1a1410] hover:bg-accent text-white text-[11px] font-bold uppercase tracking-widest py-4 rounded-xl mt-4 transition-all hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-3 relative disabled:opacity-75 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                className="w-full bg-[#1a1410] hover:bg-accent text-white text-[11px] font-bold uppercase tracking-widest py-4 mt-4 transition-all hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-3 relative disabled:opacity-75 disabled:hover:translate-y-0 disabled:hover:shadow-none"
               >
                 {loading ? (
                   <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />

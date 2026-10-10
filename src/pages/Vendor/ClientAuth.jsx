@@ -161,7 +161,7 @@ export default function ClientAuth() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-accent hover:bg-accent-dark text-white text-[11px] font-bold uppercase tracking-widest py-4 rounded-xl mt-2 transition-all flex items-center justify-center gap-3 relative shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-75 disabled:cursor-not-allowed"
+            className="w-full bg-accent hover:bg-accent-dark text-white text-[11px] font-bold uppercase tracking-widest py-4 mt-2 transition-all flex items-center justify-center gap-3 relative shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-75 disabled:cursor-not-allowed"
           >
             {loading ? (
               <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

@@ -93,13 +93,13 @@ export default function ConfirmDialog({
           <button
             ref={cancelRef}
             onClick={onCancel}
-            className="flex-1 py-2.5 text-[11px] font-bold uppercase tracking-widest text-[#1a202c] bg-white border border-[#e2e8f0] rounded-lg hover:bg-[#edf2f7] transition-colors"
+            className="flex-1 py-2.5 text-[11px] font-bold uppercase tracking-widest text-[#1a202c] bg-white border border-[#e2e8f0] hover:bg-[#edf2f7] transition-colors"
           >
             {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 py-2.5 text-[11px] font-bold uppercase tracking-widest text-white bg-accent rounded-lg hover:bg-accent-dark transition-colors"
+            className="flex-1 py-2.5 text-[11px] font-bold uppercase tracking-widest text-white bg-accent hover:bg-accent-dark transition-colors"
           >
             {confirmLabel}
           </button>

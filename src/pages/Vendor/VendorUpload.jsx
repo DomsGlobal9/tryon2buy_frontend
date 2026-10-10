@@ -295,7 +295,7 @@ const VendorUpload = () => {
               <button
                 type="button"
                 onClick={(e) => { e.preventDefault(); handleRemoveGarmentSlot(slot.id); }}
-                className="bg-white text-red-500 hover:bg-red-500 hover:text-white px-5 py-2.5 rounded-full text-[11px] font-bold tracking-[1.5px] uppercase transition-all duration-300 shadow-[0_8px_16px_rgba(0,0,0,0.15)] flex items-center gap-1.5 transform translate-y-3 group-hover/image:translate-y-0"
+                className="bg-white text-red-500 hover:bg-red-500 hover:text-white px-5 py-2.5 text-[11px] font-bold tracking-[1.5px] uppercase transition-all duration-300 shadow-[0_8px_16px_rgba(0,0,0,0.15)] flex items-center gap-1.5 transform translate-y-3 group-hover/image:translate-y-0"
               >
                 <X className="w-3.5 h-3.5" />
                 Remove
@@ -367,7 +367,7 @@ const VendorUpload = () => {
           
           <button 
             onClick={() => navigate('/vendor/catalog')}
-            className="flex items-center gap-1.5 md:gap-2 bg-[#fdfcf9] hover:bg-white border border-[#dcd6cc] hover:border-accent text-[#5c544d] hover:text-accent px-3 py-1.5 md:px-4 md:py-2 rounded-xl font-bold uppercase tracking-widest text-[11px] md:text-[11px] transition-all shadow-sm ml-2 md:ml-0 flex-shrink-0"
+            className="flex items-center gap-1.5 md:gap-2 bg-[#fdfcf9] hover:bg-white border border-[#dcd6cc] hover:border-accent text-[#5c544d] hover:text-accent px-3 py-1.5 md:px-4 md:py-2 font-bold uppercase tracking-widest text-[11px] md:text-[11px] transition-all shadow-sm ml-2 md:ml-0 flex-shrink-0"
           >
             <LayoutGrid className="w-3.5 h-3.5" />
             <span className="hidden lg:inline">View Catalog</span>
@@ -385,7 +385,7 @@ const VendorUpload = () => {
           
           <button 
             onClick={handleLogout}
-            className="flex items-center gap-1.5 md:gap-2 bg-[#faf7f2] hover:bg-red-50 border border-[#e5e0d8] hover:border-red-200 text-[#5c544d] hover:text-red-600 px-3 py-1.5 md:px-4 md:py-2 rounded-xl font-bold uppercase tracking-widest text-[11px] md:text-[11px] transition-all shadow-sm flex-shrink-0"
+            className="flex items-center gap-1.5 md:gap-2 bg-[#faf7f2] hover:bg-red-50 border border-[#e5e0d8] hover:border-red-200 text-[#5c544d] hover:text-red-600 px-3 py-1.5 md:px-4 md:py-2 font-bold uppercase tracking-widest text-[11px] md:text-[11px] transition-all shadow-sm flex-shrink-0"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span className="hidden lg:inline">Logout</span>
@@ -560,7 +560,7 @@ const VendorUpload = () => {
                   <button 
                     onClick={handleGenerate}
                     disabled={loading}
-                    className="w-full sm:w-auto bg-[#1A1410] hover:bg-black text-white px-10 py-4 rounded-xl font-bold tracking-widest uppercase text-sm flex justify-center items-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                    className="w-full sm:w-auto bg-[#1A1410] hover:bg-black text-white px-10 py-4 font-bold tracking-widest uppercase text-sm flex justify-center items-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:-translate-y-0.5"
                   >
                     {loading ? (
                       <>
@@ -634,14 +634,14 @@ const VendorUpload = () => {
                   <button 
                     onClick={handleDiscard}
                     disabled={loading}
-                    className="flex-1 bg-white border border-[#dcd6cc] text-[#1A1410] px-4 py-3.5 md:py-4 rounded-xl font-bold tracking-widest uppercase text-[11px] md:text-xs hover:bg-gray-50 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="flex-1 bg-white border border-[#dcd6cc] text-[#1A1410] px-4 py-3.5 md:py-4 font-bold tracking-widest uppercase text-[11px] md:text-xs hover:bg-gray-50 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {loading ? 'Discarding...' : 'Discard & Retry'}
                   </button>
                   <button 
                     onClick={handleSaveToCatalog}
                     disabled={loading}
-                    className="flex-1 bg-accent hover:bg-accent-dark text-white px-4 py-3.5 md:py-4 rounded-xl font-bold tracking-widest uppercase text-[11px] md:text-xs transition-all shadow-md hover:shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="flex-1 bg-accent hover:bg-accent-dark text-white px-4 py-3.5 md:py-4 font-bold tracking-widest uppercase text-[11px] md:text-xs transition-all shadow-md hover:shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {loading ? (
                       <>

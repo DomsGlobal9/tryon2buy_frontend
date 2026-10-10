@@ -33,7 +33,7 @@ export default function VendorUpgradeModal({ isOpen, onClose, userType = 'vendor
             onClose();
             window.location.href = 'mailto:info@tryon2buy.com?subject=Upgrade%20to%20Unlimited';
           }} 
-          className="w-full bg-accent hover:bg-accent-dark text-white py-4 text-[11px] font-bold tracking-[2px] uppercase transition-colors rounded-xl shadow-md"
+          className="w-full bg-accent hover:bg-accent-dark text-white py-4 text-[11px] font-bold tracking-[2px] uppercase transition-colors shadow-md"
         >
           Contact Us to Upgrade
         </button>

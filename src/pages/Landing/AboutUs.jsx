@@ -311,10 +311,10 @@ export default function AboutUs() {
 
           <RevealOnScroll delay={200}>
             <div className="flex flex-col sm:flex-row gap-4 mb-20 justify-center">
-              <Link to="/login" className="bg-accent text-white px-8 py-4 rounded-full text-[12px] uppercase tracking-widest font-bold hover:bg-[#1a1410] transition-colors flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform font-sans">
+              <Link to="/login" className="bg-accent text-white px-8 py-4 text-[12px] uppercase tracking-widest font-bold hover:bg-[#1a1410] transition-colors flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform font-sans">
                 Become a Merchant <ArrowRight className="w-4 h-4" />
               </Link>
-              <button onClick={() => setShowDemoModal(true)} className="bg-transparent border-2 border-accent text-accent px-8 py-4 rounded-full text-[12px] uppercase tracking-widest font-bold hover:bg-accent/5 transition-colors flex items-center justify-center font-sans">
+              <button onClick={() => setShowDemoModal(true)} className="bg-transparent border-2 border-accent text-accent px-8 py-4 text-[12px] uppercase tracking-widest font-bold hover:bg-accent/5 transition-colors flex items-center justify-center font-sans">
                 Book a Demo
               </button>
             </div>
@@ -576,7 +576,7 @@ export default function AboutUs() {
           <div className="flex flex-col md:flex-row items-center gap-8">
             <img src="/assets/footer_logo.png" alt="TryOn2Buy Logo" className="h-12 object-contain" />
             <span className="hidden md:block w-px h-8 bg-[#3a3430]"></span>
-            <p className="text-[12px] uppercase tracking-[2px] text-[#a69c92] text-center md:text-left">
+            <p className="text-[12px] text-[#a69c92] text-center md:text-left">
               &copy; {new Date().getFullYear()} Tryon2Buy Technology. All rights reserved.
             </p>
           </div>

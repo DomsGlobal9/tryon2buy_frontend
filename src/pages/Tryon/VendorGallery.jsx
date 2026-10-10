@@ -5,6 +5,8 @@ import { ChevronLeft, Share2, Copy, Check, Trash2, ExternalLink, Eye, X } from '
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { getVendorToken, clearVendorSession } from '../../utils/auth';
 import { categoryLabel } from '../../utils/categories';
+import { GridSkeleton } from '../../components/Skeleton';
+import { thumb } from '../../utils/thumb';
 
 // Must match the hardcoded vendor ID in backend/index.js
 const DEFAULT_VENDOR_ID = 'feb21067-a3ee-4020-b388-16d3a37a29ce';
@@ -184,7 +186,7 @@ export default function VendorGallery() {
             <h2 className="font-serif text-3xl md:text-[36px] font-normal leading-tight text-[#1a1410]">
               Vendor Gallery
             </h2>
-            <p className="text-[11px] tracking-[1.5px] uppercase font-bold text-muted mt-2">
+            <p className="text-[15px] text-muted mt-2">
               Your beautifully draped catalog ready to be shared with customers.
             </p>
           </div>
@@ -208,9 +210,7 @@ export default function VendorGallery() {
       </div>
 
       {loading ? (
-        <div className="text-[12px] uppercase tracking-widest text-muted mt-20 animate-pulse">
-          Loading your gallery...
-        </div>
+        <div className="mt-10 w-full flex justify-center"><GridSkeleton /></div>
       ) : loadFailed ? (
         <div className="flex flex-col items-center justify-center mt-20 opacity-70 text-center">
           <p className="text-[12px] uppercase tracking-widest text-muted">We couldn't load your gallery.</p>
@@ -232,7 +232,7 @@ export default function VendorGallery() {
             <div key={gen.id} className="bg-white border border-[rgba(26,20,16,0.1)] p-3 flex flex-col gap-3 group hover:border-accent transition-all hover:shadow-lg">
               <div className="aspect-[3/4] bg-[#ede8df] overflow-hidden relative group/img">
                 <img 
-                  src={gen.resultImageUrl || gen.garmentImageUrl} 
+                  src={thumb(gen.resultImageUrl || gen.garmentImageUrl, 480)} loading="lazy" 
                   alt="Draped Garment" 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
@@ -312,7 +312,7 @@ export default function VendorGallery() {
                     className="flex items-center justify-center gap-1.5 px-3 py-2 text-[11px] font-bold uppercase tracking-widest bg-accent text-[#faf7f2] hover:bg-[#1a1410] transition-colors"
                   >
                     <ExternalLink className="w-3 h-3" />
-                    <span>Tryon</span>
+                    <span>Try it on</span>
                   </button>
                 </div>
               </div>

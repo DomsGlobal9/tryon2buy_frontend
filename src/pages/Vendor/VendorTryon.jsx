@@ -11,6 +11,7 @@ import { newClientRequestId, recoverGeneration, userFacingMessage } from '../../
 import { swipeable } from '../../utils/swipe';
 import { createPhotoDock, SHARED_RETENTION_MS, SHARED_GARMENT_LIMIT } from '../../utils/photoDock';
 import { getVendorToken, clearVendorSession, authProblem } from '../../utils/auth';
+import { PageSkeleton } from '../../components/Skeleton';
 
 // How long to hold the synchronous request open before falling back to polling. Generous
 // enough for a normal generation to answer directly, short enough that we stop waiting on a
@@ -116,6 +117,7 @@ export default function VendorTryon() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [loadedFor, setLoadedFor] = useState(null);
   const [sourceGeneration, setSourceGeneration] = useState(null);
 
   const [selectedFile, setSelectedFile] = useState(null);
@@ -403,11 +405,11 @@ export default function VendorTryon() {
   }, [dock, id]);
 
   useEffect(() => {
-    // Reset for the new outfit: picking one from the dock on the "no longer here" screen
-    // changes the id, and the old error used to stay up over the outfit that had loaded.
+    // Every answer is stamped with the outfit it belongs to (loadedFor). Picking another outfit
+    // from the dock on the "no longer here" screen changes the id, and the old error used to
+    // stay up over the outfit that had loaded; now anything not stamped with the current id
+    // simply counts as still loading.
     let stale = false;
-    setError(null);
-    setLoading(true);
     fetch(`${API_URL}/api/tryon/generations/${id}`)
       .then(res => {
         if (!res.ok) throw new Error("Dress not found or link expired");
@@ -417,11 +419,14 @@ export default function VendorTryon() {
         // A slower reply for an outfit flipped past must not overwrite the current one.
         if (stale) return;
         setSourceGeneration(data);
+        setError(null);
+        setLoadedFor(id);
         setLoading(false);
       })
       .catch(err => {
         if (stale) return;
         setError(err.message);
+        setLoadedFor(id);
         setLoading(false);
       });
     return () => { stale = true; };
@@ -786,8 +791,8 @@ export default function VendorTryon() {
     navigate('/vendor/catalog');
   };
 
-  if (loading) {
-    return <div className="min-h-screen bg-[#ede8df] flex items-center justify-center font-sans text-[12px] uppercase tracking-widest text-muted animate-pulse">Loading dress details...</div>;
+  if (loading || loadedFor !== id) {
+    return <PageSkeleton />;
   }
 
   /**
@@ -999,13 +1004,13 @@ export default function VendorTryon() {
                     <div className="flex items-center gap-2 z-10 justify-center w-full max-w-[200px]">
                       <button 
                         onClick={triggerFileBrowser} 
-                        className="flex-1 border border-[rgba(26,20,16,0.2)] text-[#4a5568] bg-white rounded-md px-3 py-1.5 flex items-center justify-center gap-1.5 font-bold text-[11px] uppercase tracking-wider font-sans hover:border-[#1a1410] hover:text-[#1a1410] transition-colors"
+                        className="flex-1 border border-[rgba(26,20,16,0.2)] text-[#4a5568] bg-white px-3 py-1.5 flex items-center justify-center gap-1.5 font-bold text-[11px] uppercase tracking-wider font-sans hover:border-[#1a1410] hover:text-[#1a1410] transition-colors"
                       >
                         <RefreshCw className="w-3 h-3" /> Replace
                       </button>
                       <button 
                         onClick={clearImage}
-                        className="flex-1 border border-red-200 text-red-600 bg-red-50 rounded-md px-3 py-1.5 flex items-center justify-center gap-1.5 font-bold text-[11px] uppercase tracking-wider font-sans hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
+                        className="flex-1 border border-red-200 text-red-600 bg-red-50 px-3 py-1.5 flex items-center justify-center gap-1.5 font-bold text-[11px] uppercase tracking-wider font-sans hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
                       >
                         <X className="w-3 h-3" /> Remove
                       </button>
@@ -1073,13 +1078,13 @@ export default function VendorTryon() {
               <div className="flex items-center gap-2 z-10 justify-center w-full">
                 <button 
                   onClick={triggerFileBrowser} 
-                  className="flex-1 border border-[rgba(26,20,16,0.2)] text-[#4a5568] bg-white rounded-md px-3 py-2 flex items-center justify-center gap-1.5 font-bold text-[11px] uppercase tracking-wider font-sans hover:border-[#1a1410] hover:text-[#1a1410] transition-colors"
+                  className="flex-1 border border-[rgba(26,20,16,0.2)] text-[#4a5568] bg-white px-3 py-2 flex items-center justify-center gap-1.5 font-bold text-[11px] uppercase tracking-wider font-sans hover:border-[#1a1410] hover:text-[#1a1410] transition-colors"
                 >
                   <RefreshCw className="w-3 h-3" /> Replace
                 </button>
                 <button 
                   onClick={clearImage}
-                  className="flex-1 border border-red-200 text-red-600 bg-red-50 rounded-md px-3 py-2 flex items-center justify-center gap-1.5 font-bold text-[11px] uppercase tracking-wider font-sans hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
+                  className="flex-1 border border-red-200 text-red-600 bg-red-50 px-3 py-2 flex items-center justify-center gap-1.5 font-bold text-[11px] uppercase tracking-wider font-sans hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
                 >
                   <X className="w-3 h-3" /> Remove
                 </button>
@@ -1101,11 +1106,11 @@ export default function VendorTryon() {
           {tryonState === 'generated' && (!sourceGeneration?.category || sourceGeneration?.category.toUpperCase() === 'SAREE') && (
             <div className="mb-6 animate-fade-in border-t border-[rgba(26,20,16,0.1)] pt-6">
               
-              <div className="bg-[rgba(26,20,16,0.05)] rounded-full p-1 flex">
+              <div className="bg-[rgba(26,20,16,0.05)] p-1 flex">
                 <button
                   onClick={() => setActiveTab('sleeve')}
                   disabled={isModifying || isChangingBackground}
-                  className={`flex-1 py-3 text-[11px] font-bold tracking-[1.5px] uppercase rounded-full transition-all duration-300 ${(isModifying || isChangingBackground) ? 'opacity-50 cursor-not-allowed' : ''} ${
+                  className={`flex-1 py-3 text-[11px] font-bold tracking-[1.5px] uppercase transition-all duration-300 ${(isModifying || isChangingBackground) ? 'opacity-50 cursor-not-allowed' : ''} ${
                     activeTab === 'sleeve'
                       ? 'bg-white shadow-sm text-[#1a1410]'
                       : 'text-muted hover:text-[#1a1410]'
@@ -1116,7 +1121,7 @@ export default function VendorTryon() {
                 <button
                   onClick={() => setActiveTab('neck')}
                   disabled={isModifying || isChangingBackground}
-                  className={`flex-1 py-3 text-[11px] font-bold tracking-[1.5px] uppercase rounded-full transition-all duration-300 ${(isModifying || isChangingBackground) ? 'opacity-50 cursor-not-allowed' : ''} ${
+                  className={`flex-1 py-3 text-[11px] font-bold tracking-[1.5px] uppercase transition-all duration-300 ${(isModifying || isChangingBackground) ? 'opacity-50 cursor-not-allowed' : ''} ${
                     activeTab === 'neck'
                       ? 'bg-white shadow-sm text-[#1a1410]'
                       : 'text-muted hover:text-[#1a1410]'
@@ -1189,7 +1194,7 @@ export default function VendorTryon() {
           <button
             onClick={startGeneration}
             disabled={!selectedImage || tryonState === 'generating'}
-            className={`w-full py-4 text-[11px] font-bold tracking-[2px] uppercase flex items-center justify-center gap-2 transition-all shadow-lg rounded-full ${
+            className={`w-full py-4 text-[11px] font-bold tracking-[2px] uppercase flex items-center justify-center gap-2 transition-all shadow-lg ${
               selectedImage && tryonState !== 'generating'
                 ? 'bg-accent hover:bg-accent-dark text-white cursor-pointer hover:shadow-xl active:scale-[0.99]'
                 : 'bg-[rgba(26,20,16,0.1)] text-muted cursor-not-allowed shadow-none'

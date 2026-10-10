@@ -540,7 +540,7 @@ export default function Landing() {
         </div>
         
         <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-[#a69c92]">
-          <p className="text-[11px] uppercase tracking-[2px]">
+          <p className="text-[12px]">
             &copy; {new Date().getFullYear()} Tryon2Buy Technology. All rights reserved.
           </p>
           <div className="flex items-center gap-6">

@@ -77,7 +77,7 @@ export default function VendorLimitModal({ isOpen, onClose, userType = 'guest', 
               goToLogin();
             }
           }}
-          className="w-full bg-[#1a1410] hover:bg-accent text-white py-4 text-[11px] font-bold tracking-[2px] uppercase transition-colors rounded-xl"
+          className="w-full bg-[#1a1410] hover:bg-accent text-white py-4 text-[11px] font-bold tracking-[2px] uppercase transition-colors"
         >
           {userType === 'vendor' ? 'Contact Us' : userType === 'expired' ? 'Log In Again' : isShopper ? 'OK' : 'Login as Vendor'}
         </button>
@@ -85,7 +85,7 @@ export default function VendorLimitModal({ isOpen, onClose, userType = 'guest', 
         {userType === 'expired' && allowGuest && (
           <button
             onClick={onClose}
-            className="w-full mt-3 bg-transparent border border-[#1a1410] hover:bg-[rgba(26,20,16,0.05)] text-[#1a1410] py-3.5 text-[11px] font-bold tracking-[2px] uppercase transition-colors rounded-xl"
+            className="w-full mt-3 bg-transparent border border-[#1a1410] hover:bg-[rgba(26,20,16,0.05)] text-[#1a1410] py-3.5 text-[11px] font-bold tracking-[2px] uppercase transition-colors"
           >
             Continue as Guest
           </button>

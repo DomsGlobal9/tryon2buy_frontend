@@ -196,7 +196,7 @@ export default function VendorProfileModal({ isOpen, onClose }) {
                   <button
                     type="submit"
                     disabled={saving || message?.type === 'success'}
-                    className={`w-full text-white py-3 rounded-xl text-[11px] font-bold tracking-widest uppercase transition-all shadow-md flex items-center justify-center gap-2 ${
+                    className={`w-full text-white py-3 text-[11px] font-bold tracking-widest uppercase transition-all shadow-md flex items-center justify-center gap-2 ${
                       message?.type === 'success' ? 'bg-green-600' : 'bg-[#1a1410] hover:bg-black disabled:opacity-70'
                     }`}
                   >

@@ -575,7 +575,7 @@ export default function TryonWorkspace({ onExit }) {
         <div className="flex items-center gap-3 md:gap-[24px]">
           <button
             onClick={() => navigate(isGuestMode ? '/shop/demo' : '/gallery')}
-            className="text-[11px] md:text-[11px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 transition-all text-[#1A1410] bg-white border border-[#1A1410]/20 px-3 py-1.5 md:px-4 md:py-2 rounded-full hover:border-[#1A1410] hover:bg-[#1A1410] hover:text-white shadow-sm whitespace-nowrap"
+            className="text-[11px] md:text-[11px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 transition-all text-[#1A1410] bg-white border border-[#1A1410]/20 px-3 py-1.5 md:px-4 md:py-2 hover:border-[#1A1410] hover:bg-[#1A1410] hover:text-white shadow-sm whitespace-nowrap"
           >
             <Image className="w-3 h-3 md:w-3.5 md:h-3.5" />
             <span className="hidden sm:inline">MY TRYON GALLERY</span>
@@ -700,7 +700,7 @@ export default function TryonWorkspace({ onExit }) {
                           <button
                             type="button"
                             onClick={(e) => handleRemoveGarmentSlot(slot.id, e)}
-                            className="bg-white text-red-500 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-full text-[11px] font-bold tracking-[1px] uppercase transition-all duration-300 shadow-[0_4px_10px_rgba(0,0,0,0.1)] flex items-center gap-1.5 transform translate-y-2 group-hover:translate-y-0"
+                            className="bg-white text-red-500 hover:bg-red-500 hover:text-white px-3 py-1.5 text-[11px] font-bold tracking-[1px] uppercase transition-all duration-300 shadow-[0_4px_10px_rgba(0,0,0,0.1)] flex items-center gap-1.5 transform translate-y-2 group-hover:translate-y-0"
                           >
                             <X className="w-3 h-3" />
                             Remove
@@ -799,7 +799,7 @@ export default function TryonWorkspace({ onExit }) {
             <div className="mt-3 flex justify-center">
               <button
                 onClick={() => setShowSampleModal(true)}
-                className="text-[11px] border border-[#dcd6cc] bg-[#fdfcf9] hover:bg-[#ede8df] hover:border-accent text-[#5c544d] px-6 py-2 rounded-full transition-colors flex items-center gap-2 uppercase tracking-[1.5px] font-bold shadow-sm"
+                className="text-[11px] border border-[#dcd6cc] bg-[#fdfcf9] hover:bg-[#ede8df] hover:border-accent text-[#5c544d] px-6 py-2 transition-colors flex items-center gap-2 uppercase tracking-[1.5px] font-bold shadow-sm"
               >
                 <Image className="w-3.5 h-3.5" /> Sample Materials
               </button>
@@ -856,14 +856,16 @@ export default function TryonWorkspace({ onExit }) {
         </aside>
 
         {/* Right Side Result Canvas Column */}
-        <main ref={previewRef} className="flex-1 bg-[#FFFFFF] relative overflow-hidden flex flex-col items-center justify-center p-4 md:p-8 min-h-[600px] md:min-h-0 shrink-0 md:shrink">
+        {/* On a phone the preview sat above every control and filled the first screen; until there is
+            a result it is a small picture, so the steps are what a person sees first. */}
+        <main ref={previewRef} className={`flex-1 bg-[#FFFFFF] relative overflow-hidden flex flex-col items-center justify-center p-4 md:p-8 md:min-h-0 shrink-0 md:shrink ${tryonState === 'initial' ? 'min-h-0' : 'min-h-[600px]'}`}>
 
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="absolute border-[rgba(26,20,16,0.2)] border-r border-t right-[-192px] size-[384px] top-[-192px]" />
             <div className="absolute border-[rgba(26,20,16,0.2)] border-b border-l bottom-[-128px] left-[-128px] size-[256px]" />
           </div>
 
-          <div className="aspect-[3/4] bg-[#FAF7F2] w-full max-w-[500px] shadow-2xl border border-[rgba(26,20,16,0.05)] relative overflow-hidden flex items-center justify-center animate-fade-in z-10">
+          <div className={`aspect-[3/4] bg-[#FAF7F2] w-full ${tryonState === 'initial' ? 'max-w-[160px] md:max-w-[500px]' : 'max-w-[500px]'} shadow-2xl border border-[rgba(26,20,16,0.05)] relative overflow-hidden flex items-center justify-center animate-fade-in z-10`}>
 
             {/* STATE A: Initial Model Preview */}
             {tryonState === 'initial' && (
@@ -877,8 +879,8 @@ export default function TryonWorkspace({ onExit }) {
                   alt="Base model preview"
                   className="w-full h-full object-cover transition-all duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col items-center justify-end pb-12 pointer-events-none">
-                  <h4 className="font-serif text-[18px] tracking-[2px] uppercase text-white drop-shadow-lg font-bold mb-2">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col items-center justify-end pb-4 md:pb-12 pointer-events-none">
+                  <h4 className="font-serif text-[12px] md:text-[18px] tracking-[2px] uppercase text-white drop-shadow-lg font-bold mb-0 md:mb-2">
                     SELECTED MODEL
                   </h4>
                 </div>
@@ -1056,13 +1058,13 @@ export default function TryonWorkspace({ onExit }) {
                   // and it used to land on the login form.
                   navigate('/login', { state: { isLogin: false, returnTo: '/workspace' } });
                 }}
-                className="w-full bg-[#1a1410] hover:bg-accent text-white py-3.5 text-[11px] font-bold tracking-[2px] uppercase transition-colors rounded-xl"
+                className="w-full bg-[#1a1410] hover:bg-accent text-white py-3.5 text-[11px] font-bold tracking-[2px] uppercase transition-colors"
               >
                 Create Account
               </button>
               <button
                 onClick={() => navigate('/shop/demo')}
-                className="w-full bg-transparent border border-[#1a1410] hover:bg-[rgba(26,20,16,0.05)] text-[#1A1410] py-3.5 text-[11px] font-bold tracking-[2px] uppercase transition-colors rounded-xl"
+                className="w-full bg-transparent border border-[#1a1410] hover:bg-[rgba(26,20,16,0.05)] text-[#1A1410] py-3.5 text-[11px] font-bold tracking-[2px] uppercase transition-colors"
               >
                 View Demo Gallery
               </button>

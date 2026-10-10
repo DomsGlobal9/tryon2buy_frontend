@@ -7,6 +7,8 @@ import { API_URL } from '../../config';
 import VendorProfileModal from '../../components/VendorProfileModal';
 import { expireVendorSession, loginPath } from '../../utils/auth';
 import { categoryLabel } from '../../utils/categories';
+import { GridSkeleton } from '../../components/Skeleton';
+import { thumb } from '../../utils/thumb';
 
 const VendorCatalog = () => {
   const navigate = useNavigate();
@@ -136,7 +138,7 @@ const VendorCatalog = () => {
           <div className="flex items-center gap-2 md:gap-4">
             <button 
               onClick={() => navigate('/vendor/upload')}
-              className="bg-accent hover:bg-accent-dark text-white px-3 py-2 md:px-6 md:py-3 rounded-xl font-bold tracking-widest uppercase text-[11px] md:text-xs flex items-center gap-1.5 md:gap-2 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
+              className="bg-accent hover:bg-accent-dark text-white px-3 py-2 md:px-6 md:py-3 font-bold tracking-widest uppercase text-[11px] md:text-xs flex items-center gap-1.5 md:gap-2 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
             >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Digitize New Product</span>
@@ -155,7 +157,7 @@ const VendorCatalog = () => {
 
             <button 
               onClick={handleLogout}
-              className="flex items-center gap-1.5 md:gap-2 bg-[#faf7f2] hover:bg-red-50 border border-[#e5e0d8] hover:border-red-200 text-[#5c544d] hover:text-red-600 px-3 py-2 md:px-4 md:py-2.5 rounded-xl font-bold uppercase tracking-widest text-[11px] md:text-[11px] transition-all shadow-sm flex-shrink-0"
+              className="flex items-center gap-1.5 md:gap-2 bg-[#faf7f2] hover:bg-red-50 border border-[#e5e0d8] hover:border-red-200 text-[#5c544d] hover:text-red-600 px-3 py-2 md:px-4 md:py-2.5 font-bold uppercase tracking-widest text-[11px] md:text-[11px] transition-all shadow-sm flex-shrink-0"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Logout</span>
@@ -213,7 +215,7 @@ const VendorCatalog = () => {
                       <div className="p-1.5 max-h-60 overflow-y-auto">
                         <button
                           onClick={() => { setSelectedCategory('ALL'); setIsFilterOpen(false); }}
-                          className={`w-full text-left px-3 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl transition-colors ${selectedCategory === 'ALL' ? 'bg-accent/10 text-accent' : 'text-[#1A1410] hover:bg-[#faf7f2]'}`}
+                          className={`w-full text-left px-3 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors ${selectedCategory === 'ALL' ? 'bg-accent/10 text-accent' : 'text-[#1A1410] hover:bg-[#faf7f2]'}`}
                         >
                           All Categories
                         </button>
@@ -221,7 +223,7 @@ const VendorCatalog = () => {
                           <button
                             key={cat}
                             onClick={() => { setSelectedCategory(cat); setIsFilterOpen(false); }}
-                            className={`w-full text-left px-3 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl transition-colors mt-0.5 ${selectedCategory === cat ? 'bg-accent/10 text-accent' : 'text-[#1A1410] hover:bg-[#faf7f2]'}`}
+                            className={`w-full text-left px-3 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors mt-0.5 ${selectedCategory === cat ? 'bg-accent/10 text-accent' : 'text-[#1A1410] hover:bg-[#faf7f2]'}`}
                           >
                             {categoryLabel(cat)}
                           </button>
@@ -241,9 +243,7 @@ const VendorCatalog = () => {
 
         {/* Loading State */}
         {loading && (
-          <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
-          </div>
+          <div className="flex justify-center"><GridSkeleton /></div>
         )}
 
         {!loading && loadFailed && (
@@ -253,7 +253,7 @@ const VendorCatalog = () => {
             <p className="text-gray-500 max-w-md mb-6">Your products are safe. Please check your connection and try again.</p>
             <button
               onClick={() => { setLoading(true); fetchData(); }}
-              className="bg-[#1A1410] hover:bg-black text-white px-8 py-3.5 rounded-xl font-bold tracking-widest uppercase text-xs transition-all shadow-md"
+              className="bg-[#1A1410] hover:bg-black text-white px-8 py-3.5 font-bold tracking-widest uppercase text-xs transition-all shadow-md"
             >
               Try again
             </button>
@@ -270,7 +270,7 @@ const VendorCatalog = () => {
             <p className="text-gray-500 max-w-md mb-8">You haven't digitized any products yet. Upload your flat lays or mannequin photos to generate AI drapes.</p>
             <button 
               onClick={() => navigate('/vendor/upload')}
-              className="bg-[#1A1410] hover:bg-black text-white px-8 py-3.5 rounded-xl font-bold tracking-widest uppercase text-xs transition-all shadow-md"
+              className="bg-[#1A1410] hover:bg-black text-white px-8 py-3.5 font-bold tracking-widest uppercase text-xs transition-all shadow-md"
             >
               Digitize First Product
             </button>
@@ -310,7 +310,7 @@ const VendorCatalog = () => {
                   {/* Image Container */}
                   <div className="aspect-[4/5] bg-[#faf7f2] relative overflow-hidden">
                     {imageUrl ? (
-                      <img src={imageUrl} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                      <img src={thumb(imageUrl, 480)} loading="lazy" alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-300">
                         <ImageIcon className="w-12 h-12 opacity-50" />
@@ -362,7 +362,7 @@ const VendorCatalog = () => {
                     <div className="mt-auto pt-3 flex gap-2">
                       <button 
                         onClick={() => handleTryOn(product)}
-                        className="flex-1 bg-[#1A1410] hover:bg-black text-white py-2 md:py-2.5 rounded-lg text-[11px] md:text-xs font-bold uppercase tracking-widest transition-colors"
+                        className="flex-1 bg-[#1A1410] hover:bg-black text-white py-2 md:py-2.5 text-[11px] md:text-xs font-bold uppercase tracking-widest transition-colors"
                       >
                         Try It On
                       </button>
@@ -391,14 +391,14 @@ const VendorCatalog = () => {
                 <button
                   onClick={() => setProductToDelete(null)}
                   disabled={isDeleting}
-                  className="flex-1 py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-widest text-[#5c544d] bg-[#faf7f2] hover:bg-[#e5e0d8] transition-colors"
+                  className="flex-1 py-3 px-4 font-bold text-xs uppercase tracking-widest text-[#5c544d] bg-[#faf7f2] hover:bg-[#e5e0d8] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={confirmDelete}
                   disabled={isDeleting}
-                  className="flex-1 py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-widest text-white bg-red-600 hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 py-3 px-4 font-bold text-xs uppercase tracking-widest text-white bg-red-600 hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
                 >
                   {isDeleting ? (
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
