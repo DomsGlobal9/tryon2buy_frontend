@@ -562,8 +562,8 @@ export default function Landing() {
                   info@tryon2buy.com
                 </a>
               </li>
-              <li><a href="#" className="text-[13px] text-[#a69c92] hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="text-[13px] text-[#a69c92] hover:text-white transition-colors">Terms of Service</a></li>
+              <li><Link to="/privacy" className="text-[13px] text-[#a69c92] hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/terms" className="text-[13px] text-[#a69c92] hover:text-white transition-colors">Terms of Service</Link></li>
             </ul>
           </div>
         </div>

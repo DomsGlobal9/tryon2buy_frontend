@@ -48,7 +48,6 @@ export default function VendorGallery() {
 
   const vendor = JSON.parse(localStorage.getItem('vendor_data') || '{}');
   const vendorId = vendor.id || DEFAULT_VENDOR_ID;
-  const isMasterVendor = vendor.email === 'vendor@store.com';
 
   const copyGalleryLink = () => {
     const link = `${window.location.origin}/shop/${vendorId}`;
@@ -241,20 +240,20 @@ export default function VendorGallery() {
                 <div className="absolute top-2 right-2 md:opacity-0 md:group-hover/img:opacity-100 transition-opacity flex bg-white/95 rounded-md shadow-sm overflow-hidden border border-[rgba(26,20,16,0.1)]">
                   <button 
                     onClick={() => setPreviewImage(gen.resultImageUrl || gen.garmentImageUrl)}
-                    className={`hover:bg-gray-100 text-[#1a1410] p-2 transition-colors ${isMasterVendor ? 'border-r border-[rgba(26,20,16,0.05)]' : ''}`}
+                    className={`hover:bg-gray-100 text-[#1a1410] p-2 transition-colors border-r border-[rgba(26,20,16,0.05)]`}
                     title="Preview Full Image"
                   >
                     <Eye className="w-3.5 h-3.5" />
                   </button>
-                  {isMasterVendor && (
-                    <button 
-                      onClick={() => handleDelete(gen.id)}
-                      className="hover:bg-red-50 text-red-500 p-2 transition-colors"
-                      title="Delete from Gallery"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
+                  {/* Every vendor, not just the master account: the server deletes only the caller's own drapes. */}
+                  <button
+                    onClick={() => handleDelete(gen.id)}
+                    className="hover:bg-red-50 text-red-500 p-2 transition-colors"
+                    title="Delete from Gallery"
+                    aria-label="Delete from gallery"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
               <div className="flex flex-col gap-2">

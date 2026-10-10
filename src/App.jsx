@@ -21,6 +21,8 @@ import ShararaTryOn from './pages/Landing/Categories/ShararaTryOn';
 import KurtiTryOn from './pages/Landing/Categories/KurtiTryOn';
 import BlogIndex from './pages/Landing/BlogIndex';
 import BlogPost from './pages/Landing/BlogPost';
+import { PrivacyPolicy, TermsOfService } from './pages/Landing/Legal';
+import ErrorScreen from './components/ErrorScreen';
 
 // Authentication Guard for Vendor Interface
 // A login that has EXPIRED no longer counts -- it used to, because only the token's presence
@@ -58,6 +60,9 @@ export default function App() {
           <Route path="/blog" element={<BlogIndex />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
 
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
+
           {/* Auth Routes */}
           <Route path="/login" element={<VendorAuth />} />
           <Route path="/client-login" element={<ClientAuth />} />
@@ -81,7 +86,9 @@ export default function App() {
               was: a 200, then a redirect. */}
           <Route path="/try/:clientId/:productCode" element={<ClientTryon />} />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* Said, not silently redirected: a mistyped or dead link used to land on the home
+              page as if it had worked. */}
+          <Route path="*" element={<ErrorScreen message="We couldn't find that page. The link may be mistyped or no longer exist." />} />
         </Routes>
       </div>
     </Router>
