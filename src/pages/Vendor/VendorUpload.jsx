@@ -279,11 +279,11 @@ const VendorUpload = () => {
         onDragOver={(e) => handleDragOver(e, slot.id)}
         onDragLeave={handleDragLeave}
         onDrop={(e) => handleDrop(e, slot.id)}
-        className={`relative border border-dashed rounded-2xl overflow-hidden flex flex-col items-center justify-center min-h-[220px] transition-all duration-300 ${isDragging ? 'border-[#7F5700] bg-[#faf7f2] scale-[1.02] shadow-md' : 'border-[#dcd6cc] bg-[#fdfcf9] hover:border-[#7F5700]'}`}
+        className={`relative border border-dashed rounded-2xl overflow-hidden flex flex-col items-center justify-center min-h-[220px] transition-all duration-300 ${isDragging ? 'border-accent bg-[#faf7f2] scale-[1.02] shadow-md' : 'border-[#dcd6cc] bg-[#fdfcf9] hover:border-accent'}`}
       >
         {isUploading ? (
           <div className="flex flex-col items-center gap-3 w-full h-full justify-center">
-            <div className="w-6 h-6 border-2 border-[#7F5700] border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
             <span className="text-xs text-gray-500 font-medium">Uploading...</span>
           </div>
         ) : slotData ? (
@@ -295,7 +295,7 @@ const VendorUpload = () => {
               <button
                 type="button"
                 onClick={(e) => { e.preventDefault(); handleRemoveGarmentSlot(slot.id); }}
-                className="bg-white text-red-500 hover:bg-red-500 hover:text-white px-5 py-2.5 rounded-full text-[10px] font-bold tracking-[1.5px] uppercase transition-all duration-300 shadow-[0_8px_16px_rgba(0,0,0,0.15)] flex items-center gap-1.5 transform translate-y-3 group-hover/image:translate-y-0"
+                className="bg-white text-red-500 hover:bg-red-500 hover:text-white px-5 py-2.5 rounded-full text-[11px] font-bold tracking-[1.5px] uppercase transition-all duration-300 shadow-[0_8px_16px_rgba(0,0,0,0.15)] flex items-center gap-1.5 transform translate-y-3 group-hover/image:translate-y-0"
               >
                 <X className="w-3.5 h-3.5" />
                 Remove
@@ -305,7 +305,7 @@ const VendorUpload = () => {
         ) : (
           <div className="flex flex-col items-center gap-2 mt-6 opacity-70 group-hover/image:opacity-100 transition-opacity w-full h-full justify-center pb-2">
             {slot.id !== 'full' && slot.id !== 'saree' && (
-              <div className="text-[10px] font-bold text-[#1A1410] uppercase tracking-widest mb-2 pointer-events-none md:hidden">
+              <div className="text-[11px] font-bold text-[#1A1410] uppercase tracking-widest mb-2 pointer-events-none md:hidden">
                 {slot.label.replace(' View', '')} {slot.required && <span className="text-red-500">*</span>}
               </div>
             )}
@@ -315,9 +315,9 @@ const VendorUpload = () => {
               <label htmlFor={`file-${slot.id}`} className="flex flex-col items-center gap-1.5 md:gap-2 cursor-pointer group/upload">
                 <div className="bg-[#f2efe9] p-3 md:p-3.5 rounded-full group-hover/upload:bg-[#ede8df] group-hover/upload:scale-110 group-hover/upload:shadow-sm transition-all duration-300">
                   <input id={`file-${slot.id}`} type="file" accept="image/*" onChange={(e) => handleGarmentSlotChange(slot.id, e)} className="hidden" />
-                  <Upload className="h-5 w-5 text-[#7f5700]" />
+                  <Upload className="h-5 w-5 text-accent" />
                 </div>
-                <span className="text-[9px] font-bold text-[#1A1410] uppercase tracking-widest md:hidden">Gallery</span>
+                <span className="text-[11px] font-bold text-[#1A1410] uppercase tracking-widest md:hidden">Gallery</span>
                 <span className="hidden md:block text-[11px] font-bold text-[#1A1410]">Upload {slot.label.replace(' View', '')}</span>
               </label>
 
@@ -325,13 +325,13 @@ const VendorUpload = () => {
               <label htmlFor={`camera-${slot.id}`} className="flex flex-col items-center gap-1.5 cursor-pointer group/camera md:hidden">
                 <div className="bg-[#f2efe9] p-3 rounded-full group-hover/camera:bg-[#ede8df] group-hover/camera:scale-110 group-hover/camera:shadow-sm transition-all duration-300">
                   <input id={`camera-${slot.id}`} type="file" accept="image/*" capture="environment" onChange={(e) => handleGarmentSlotChange(slot.id, e)} className="hidden" />
-                  <Camera className="h-5 w-5 text-[#7f5700]" />
+                  <Camera className="h-5 w-5 text-accent" />
                 </div>
-                <span className="text-[9px] font-bold text-[#1A1410] uppercase tracking-widest">Camera</span>
+                <span className="text-[11px] font-bold text-[#1A1410] uppercase tracking-widest">Camera</span>
               </label>
             </div>
             
-            <div className="text-[9px] text-[#8c8278] font-sans mt-1">JPG, PNG • Max 10MB</div>
+            <div className="text-[11px] text-muted font-sans mt-1">JPG, PNG • Max 10MB</div>
           </div>
         )}
       </div>
@@ -339,7 +339,7 @@ const VendorUpload = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#faf7f2] font-['Space_Grotesk',sans-serif]">
+    <div className="min-h-screen bg-[#faf7f2] font-sans">
       {/* Header */}
       <header className="bg-white border-b border-[#e5e0d8] px-4 md:px-8 py-4 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-3">
@@ -350,24 +350,24 @@ const VendorUpload = () => {
           >
             <Home className="w-5 h-5 md:w-6 md:h-6" />
           </button>
-          <div className="flex items-center">
+          <div className="flex items-center shrink-0">
             <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-6 md:h-8 object-contain" />
           </div>
         </div>
         <div className="flex items-center gap-2 md:gap-4 text-xs md:text-sm font-medium overflow-x-auto no-scrollbar">
-          <div className={`flex items-center gap-1.5 md:gap-2 whitespace-nowrap ${step >= 1 ? 'text-[#1A1410]' : 'text-gray-400'}`}>
-            <div className={`w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-[10px] md:text-xs ${step >= 1 ? 'bg-[#7F5700] text-white' : 'bg-gray-200'}`}>1</div>
+          <div className={`hidden sm:flex items-center gap-1.5 md:gap-2 whitespace-nowrap ${step >= 1 ? 'text-[#1A1410]' : 'text-gray-500'}`}>
+            <div className={`w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-[11px] md:text-xs ${step >= 1 ? 'bg-accent text-white' : 'bg-gray-200 text-gray-600'}`}>1</div>
             <span className="hidden sm:inline">Upload</span>
           </div>
-          <ChevronRight className="w-3 h-3 md:w-4 md:h-4 text-gray-300 flex-shrink-0" />
-          <div className={`flex items-center gap-1.5 md:gap-2 whitespace-nowrap ${step >= 2 ? 'text-[#1A1410]' : 'text-gray-400'}`}>
-            <div className={`w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-[10px] md:text-xs ${step >= 2 ? 'bg-[#7F5700] text-white' : 'bg-gray-200'}`}>2</div>
+          <ChevronRight className="hidden sm:block w-3 h-3 md:w-4 md:h-4 text-gray-300 flex-shrink-0" />
+          <div className={`hidden sm:flex items-center gap-1.5 md:gap-2 whitespace-nowrap ${step >= 2 ? 'text-[#1A1410]' : 'text-gray-500'}`}>
+            <div className={`w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-[11px] md:text-xs ${step >= 2 ? 'bg-accent text-white' : 'bg-gray-200 text-gray-600'}`}>2</div>
             <span className="hidden sm:inline">Preview & Save</span>
           </div>
           
           <button 
             onClick={() => navigate('/vendor/catalog')}
-            className="flex items-center gap-1.5 md:gap-2 bg-[#fdfcf9] hover:bg-white border border-[#dcd6cc] hover:border-[#7F5700] text-[#5c544d] hover:text-[#7F5700] px-3 py-1.5 md:px-4 md:py-2 rounded-xl font-bold uppercase tracking-widest text-[9px] md:text-[10px] transition-all shadow-sm ml-2 md:ml-0 flex-shrink-0"
+            className="flex items-center gap-1.5 md:gap-2 bg-[#fdfcf9] hover:bg-white border border-[#dcd6cc] hover:border-accent text-[#5c544d] hover:text-accent px-3 py-1.5 md:px-4 md:py-2 rounded-xl font-bold uppercase tracking-widest text-[11px] md:text-[11px] transition-all shadow-sm ml-2 md:ml-0 flex-shrink-0"
           >
             <LayoutGrid className="w-3.5 h-3.5" />
             <span className="hidden lg:inline">View Catalog</span>
@@ -377,7 +377,7 @@ const VendorUpload = () => {
 
           <button 
             onClick={() => setIsProfileModalOpen(true)}
-            className="flex items-center justify-center bg-[#faf7f2] hover:bg-white border border-[#e5e0d8] hover:border-[#7F5700] text-[#5c544d] hover:text-[#7F5700] w-8 h-8 md:w-9 md:h-9 rounded-xl transition-all shadow-sm flex-shrink-0"
+            className="flex items-center justify-center bg-[#faf7f2] hover:bg-white border border-[#e5e0d8] hover:border-accent text-[#5c544d] hover:text-accent w-8 h-8 md:w-9 md:h-9 rounded-xl transition-all shadow-sm flex-shrink-0"
             title="Business Profile"
           >
             <User className="w-4 h-4" />
@@ -385,7 +385,7 @@ const VendorUpload = () => {
           
           <button 
             onClick={handleLogout}
-            className="flex items-center gap-1.5 md:gap-2 bg-[#faf7f2] hover:bg-red-50 border border-[#e5e0d8] hover:border-red-200 text-[#5c544d] hover:text-red-600 px-3 py-1.5 md:px-4 md:py-2 rounded-xl font-bold uppercase tracking-widest text-[9px] md:text-[10px] transition-all shadow-sm flex-shrink-0"
+            className="flex items-center gap-1.5 md:gap-2 bg-[#faf7f2] hover:bg-red-50 border border-[#e5e0d8] hover:border-red-200 text-[#5c544d] hover:text-red-600 px-3 py-1.5 md:px-4 md:py-2 rounded-xl font-bold uppercase tracking-widest text-[11px] md:text-[11px] transition-all shadow-sm flex-shrink-0"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span className="hidden lg:inline">Logout</span>
@@ -405,7 +405,7 @@ const VendorUpload = () => {
             {/* Metadata Section (Left Column) */}
             <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#e5e0d8] flex flex-col">
               <div className="flex items-center gap-3 mb-6">
-                <FileText className="w-5 h-5 text-[#7F5700]" />
+                <FileText className="w-5 h-5 text-accent" />
                 <h2 className="text-lg font-bold text-[#1A1410]">Product Details</h2>
               </div>
               
@@ -417,7 +417,7 @@ const VendorUpload = () => {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="e.g. Midnight Blue Silk Saree"
-                    className="w-full bg-[#fdfcf9] border border-[#dcd6cc] rounded-xl px-4 py-3 focus:outline-none focus:border-[#7F5700] focus:ring-1 focus:ring-[#7F5700] transition-all"
+                    className="w-full bg-[#fdfcf9] border border-[#dcd6cc] rounded-xl px-4 py-3 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
                   />
                 </div>
                 
@@ -428,7 +428,7 @@ const VendorUpload = () => {
                     value={sku}
                     onChange={(e) => setSku(e.target.value)}
                     placeholder="e.g. SAREE-MB-001"
-                    className="w-full bg-[#fdfcf9] border border-[#dcd6cc] rounded-xl px-4 py-3 focus:outline-none focus:border-[#7F5700] focus:ring-1 focus:ring-[#7F5700] transition-all"
+                    className="w-full bg-[#fdfcf9] border border-[#dcd6cc] rounded-xl px-4 py-3 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
                   />
                 </div>
                 
@@ -439,7 +439,7 @@ const VendorUpload = () => {
                     onChange={(e) => setDescription(e.target.value)}
                     rows={3}
                     placeholder="Product details, fabric info, styling notes..."
-                    className="w-full bg-[#fdfcf9] border border-[#dcd6cc] rounded-xl px-4 py-3 focus:outline-none focus:border-[#7F5700] focus:ring-1 focus:ring-[#7F5700] transition-all resize-none"
+                    className="w-full bg-[#fdfcf9] border border-[#dcd6cc] rounded-xl px-4 py-3 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all resize-none"
                   />
                 </div>
 
@@ -449,12 +449,12 @@ const VendorUpload = () => {
                     <button 
                       type="button"
                       onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-                      className="w-full bg-[#fdfcf9] border border-[#dcd6cc] rounded-xl px-4 py-3 text-left focus:outline-none focus:border-[#7F5700] focus:ring-1 focus:ring-[#7F5700] transition-all flex items-center justify-between shadow-sm hover:shadow-md"
+                      className="w-full bg-[#fdfcf9] border border-[#dcd6cc] rounded-xl px-4 py-3 text-left focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all flex items-center justify-between shadow-sm hover:shadow-md"
                     >
-                      <span className={category ? "text-[#1A1410] font-medium" : "text-[#8c8278]"}>
+                      <span className={category ? "text-[#1A1410] font-medium" : "text-muted"}>
                         {category ? categoryLabel(category) : "Select Category"}
                       </span>
-                      <ChevronDown className={`w-4 h-4 text-[#8c8278] transition-transform duration-200 ${categoryDropdownOpen ? 'rotate-180' : ''}`} />
+                      <ChevronDown className={`w-4 h-4 text-muted transition-transform duration-200 ${categoryDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
                     
                     {categoryDropdownOpen && (
@@ -465,7 +465,7 @@ const VendorUpload = () => {
                             <button
                               key={cat}
                               type="button"
-                              className="w-full text-left px-5 py-3.5 hover:bg-[#faf7f2] transition-colors border-b border-[#f0ece3] last:border-b-0 text-[#1A1410] font-medium hover:text-[#7F5700] flex items-center justify-between group"
+                              className="w-full text-left px-5 py-3.5 hover:bg-[#faf7f2] transition-colors border-b border-[#f0ece3] last:border-b-0 text-[#1A1410] font-medium hover:text-accent flex items-center justify-between group"
                               onClick={() => {
                                 setCategory(cat);
                                 setGarmentUploads({}); // Reset uploads on category change
@@ -474,7 +474,7 @@ const VendorUpload = () => {
                               }}
                             >
                               <span>{categoryLabel(cat)}</span>
-                              {category === cat && <Check className="w-4 h-4 text-[#7F5700]" />}
+                              {category === cat && <Check className="w-4 h-4 text-accent" />}
                             </button>
                           ))}
                         </div>
@@ -490,10 +490,10 @@ const VendorUpload = () => {
               <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#e5e0d8] flex flex-col h-full">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <ImageIcon className="w-5 h-5 text-[#7F5700]" />
+                    <ImageIcon className="w-5 h-5 text-accent" />
                     <h2 className="text-lg font-bold text-[#1A1410]">Garment Assets</h2>
                   </div>
-                  <span className="text-xs text-gray-400 font-medium bg-gray-100 px-3 py-1 rounded-full uppercase tracking-wider">{categoryLabel(category)}</span>
+                  <span className="text-xs text-gray-600 font-medium bg-gray-100 px-3 py-1 rounded-full uppercase tracking-wider">{categoryLabel(category)}</span>
                 </div>
 
                 {category !== 'SAREE' ? (
@@ -502,7 +502,7 @@ const VendorUpload = () => {
                     <div>
                       <div className="flex items-center gap-4 mb-4 mt-2">
                         <div className="h-px bg-[#e5e0d8] flex-1"></div>
-                        <span className="text-[10px] uppercase font-bold tracking-[2px] text-[#1A1410]">Full Garment</span>
+                        <span className="text-[11px] uppercase font-bold tracking-[2px] text-[#1A1410]">Full Garment</span>
                         <div className="h-px bg-[#e5e0d8] flex-1"></div>
                       </div>
                       {renderSlot(activeSlots.find(s => s.id === 'full'))}
@@ -512,7 +512,7 @@ const VendorUpload = () => {
                     <div>
                       <div className="flex items-center gap-4 mb-4 mt-2">
                         <div className="h-px bg-[#e5e0d8] flex-1"></div>
-                        <span className="text-[10px] uppercase font-bold tracking-[2px] text-[#1A1410]">
+                        <span className="text-[11px] uppercase font-bold tracking-[2px] text-[#1A1410]">
                           Garment Parts {category === 'LEHANGA' ? '& Dupatta Style (Optional)' : ''}
                         </span>
                         <div className="h-px bg-[#e5e0d8] flex-1"></div>
@@ -531,16 +531,16 @@ const VendorUpload = () => {
                             <button
                               key={style.id}
                               onClick={() => setSelectedDupattaStyle(selectedDupattaStyle === style.url ? null : style.url)}
-                              className={`relative group rounded-xl overflow-hidden border-2 transition-all min-h-[160px] ${selectedDupattaStyle === style.url ? 'border-[#7F5700] ring-4 ring-[#7F5700]/20' : 'border-[#e5e0d8] hover:border-[#7F5700]/50'}`}
+                              className={`relative group rounded-xl overflow-hidden border-2 transition-all min-h-[160px] ${selectedDupattaStyle === style.url ? 'border-accent ring-4 ring-accent/20' : 'border-[#e5e0d8] hover:border-accent/50'}`}
                             >
                               <div className="w-full h-full bg-[#faf7f2]">
                                 <img src={style.url} alt={style.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                               </div>
                               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 md:p-4">
-                                <span className="text-white text-[10px] md:text-xs font-bold uppercase tracking-wider text-left drop-shadow-md">{style.name}</span>
+                                <span className="text-white text-[11px] md:text-xs font-bold uppercase tracking-wider text-left drop-shadow-md">{style.name}</span>
                               </div>
                               {selectedDupattaStyle === style.url && (
-                                <div className="absolute top-2 right-2 md:top-3 md:right-3 bg-[#7F5700] text-white p-1 md:p-1.5 rounded-full shadow-lg">
+                                <div className="absolute top-2 right-2 md:top-3 md:right-3 bg-accent text-white p-1 md:p-1.5 rounded-full shadow-lg">
                                   <Check className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                 </div>
                               )}
@@ -590,8 +590,8 @@ const VendorUpload = () => {
                     <img src={resultImage} alt="Generated Preview" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                   )}
                   <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20 shadow-sm flex items-center gap-2">
-                    <Box className="w-3.5 h-3.5 text-[#7F5700]" />
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#1A1410]">{categoryLabel(category)}</span>
+                    <Box className="w-3.5 h-3.5 text-accent" />
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#1A1410]">{categoryLabel(category)}</span>
                   </div>
                 </div>
               </div>
@@ -612,18 +612,18 @@ const VendorUpload = () => {
                   {/* Summary Block */}
                   <div className="bg-[#faf7f2] rounded-xl p-5 md:p-6 border border-[#e5e0d8] mb-8 space-y-5">
                     <div>
-                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Product Title</p>
+                      <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Product Title</p>
                       <p className="text-[#1A1410] font-medium text-sm md:text-base">{title}</p>
                     </div>
                     {sku && (
                       <div>
-                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">SKU / Product ID</p>
+                        <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">SKU / Product ID</p>
                         <p className="text-[#1A1410] font-medium text-sm">{sku}</p>
                       </div>
                     )}
                     {description && (
                       <div>
-                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Description</p>
+                        <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Description</p>
                         <p className="text-[#5c544d] font-medium text-xs md:text-sm leading-relaxed line-clamp-4">{description}</p>
                       </div>
                     )}
@@ -634,14 +634,14 @@ const VendorUpload = () => {
                   <button 
                     onClick={handleDiscard}
                     disabled={loading}
-                    className="flex-1 bg-white border border-[#dcd6cc] text-[#1A1410] px-4 py-3.5 md:py-4 rounded-xl font-bold tracking-widest uppercase text-[10px] md:text-xs hover:bg-gray-50 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="flex-1 bg-white border border-[#dcd6cc] text-[#1A1410] px-4 py-3.5 md:py-4 rounded-xl font-bold tracking-widest uppercase text-[11px] md:text-xs hover:bg-gray-50 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {loading ? 'Discarding...' : 'Discard & Retry'}
                   </button>
                   <button 
                     onClick={handleSaveToCatalog}
                     disabled={loading}
-                    className="flex-1 bg-[#7F5700] hover:bg-[#664600] text-white px-4 py-3.5 md:py-4 rounded-xl font-bold tracking-widest uppercase text-[10px] md:text-xs transition-all shadow-md hover:shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="flex-1 bg-accent hover:bg-accent-dark text-white px-4 py-3.5 md:py-4 rounded-xl font-bold tracking-widest uppercase text-[11px] md:text-xs transition-all shadow-md hover:shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {loading ? (
                       <>

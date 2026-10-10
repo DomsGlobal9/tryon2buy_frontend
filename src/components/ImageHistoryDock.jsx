@@ -307,10 +307,10 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
               onClick={() => setIsModalOpen(true)}
               className="bg-white p-3 rounded-full shadow-lg border border-[#e2e8f0] flex items-center justify-center hover:shadow-xl transition-all relative group"
             >
-              <div className="absolute -top-2 -right-2 bg-[#dd6b20] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
+              <div className="absolute -top-2 -right-2 bg-accent text-white text-[11px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
                 {inactiveHistory.length + garments.length}
               </div>
-              <Clock className="w-5 h-5 text-[#dd6b20]" />
+              <Clock className="w-5 h-5 text-accent" />
               
               {/* Tooltip */}
               <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-[11px] font-bold py-1 px-2 rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity">
@@ -382,12 +382,12 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-[#e2e8f0]">
                 <div className="flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-[#dd6b20]" />
+                  <Clock className="w-5 h-5 text-accent" />
                   <h3 className="font-bold text-[#1a202c]">
                     {showTabs ? 'Your photos' : 'Recent Selfies'}
                   </h3>
                 </div>
-                <button onClick={() => setIsModalOpen(false)} className="text-[#a0aec0] hover:text-[#1a202c] transition-colors p-1">
+                <button onClick={() => setIsModalOpen(false)} className="text-muted hover:text-[#1a202c] transition-colors p-1">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -398,13 +398,13 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
                 <div className="flex border-b border-[#e2e8f0] px-4">
                   <button
                     onClick={() => setTab('photos')}
-                    className={`flex items-center gap-1.5 py-2.5 px-3 text-[12px] font-bold border-b-2 transition-colors ${tab === 'photos' ? 'border-[#dd6b20] text-[#dd6b20]' : 'border-transparent text-[#a0aec0] hover:text-[#1a202c]'}`}
+                    className={`flex items-center gap-1.5 py-2.5 px-3 text-[12px] font-bold border-b-2 transition-colors ${tab === 'photos' ? 'border-accent text-accent' : 'border-transparent text-muted hover:text-[#1a202c]'}`}
                   >
                     <ImageIcon className="w-3.5 h-3.5" /> My Photos ({inactiveHistory.length})
                   </button>
                   <button
                     onClick={() => setTab('garments')}
-                    className={`flex items-center gap-1.5 py-2.5 px-3 text-[12px] font-bold border-b-2 transition-colors ${tab === 'garments' ? 'border-[#dd6b20] text-[#dd6b20]' : 'border-transparent text-[#a0aec0] hover:text-[#1a202c]'}`}
+                    className={`flex items-center gap-1.5 py-2.5 px-3 text-[12px] font-bold border-b-2 transition-colors ${tab === 'garments' ? 'border-accent text-accent' : 'border-transparent text-muted hover:text-[#1a202c]'}`}
                   >
                     <Shirt className="w-3.5 h-3.5" /> Outfits Tried ({garments.length})
                   </button>
@@ -413,7 +413,7 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
 
               {/* Body */}
               <div className="p-4 overflow-y-auto">
-                <p className="text-[#718096] text-[12px] mb-4">
+                <p className="text-muted text-[12px] mb-4">
                   {showTabs
                     ? (tab === 'photos'
                         ? 'Pick a photo to try on another outfit. Your photos disappear 20 minutes after you last use one.'
@@ -425,7 +425,7 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
                   garments.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-8 text-center">
                       <Shirt className="w-12 h-12 text-[#e2e8f0] mb-3" />
-                      <p className="text-[#a0aec0] text-sm">No outfits tried yet.</p>
+                      <p className="text-muted text-sm">No outfits tried yet.</p>
                       <p className="text-[#cbd5e0] text-[11px] mt-1">An outfit shows up here once someone has tried it on.</p>
                     </div>
                   ) : (
@@ -451,13 +451,13 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
 
                           {/* How many people have tried it -- the reason this list is worth
                               looking at rather than just opening the catalogue. */}
-                          <div className="absolute top-1.5 left-1.5 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                          <div className="absolute top-1.5 left-1.5 bg-black/60 backdrop-blur-md text-white text-[11px] font-bold px-1.5 py-0.5 rounded">
                             {garment.tryOnCount} {garment.tryOnCount === 1 ? 'try-on' : 'try-ons'}
                           </div>
 
                           <div className="p-2 border-t border-[#e2e8f0]">
                             <p className="text-[11px] font-bold text-[#1a202c] truncate">{garment.title}</p>
-                            <p className="text-[10px] text-[#a0aec0]">{sinceLabel(garment.lastTriedAt)}</p>
+                            <p className="text-[11px] text-muted">{sinceLabel(garment.lastTriedAt)}</p>
                           </div>
 
                           <div className="flex items-center border-t border-[#e2e8f0]">
@@ -465,7 +465,7 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
                               onClick={() => handlePickGarment(garment)}
                               disabled={busy}
                               title={busy ? BUSY_HINT : undefined}
-                              className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[10px] font-bold text-[#dd6b20] hover:bg-[#fffaf0] transition-colors disabled:text-[#cbd5e0] disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                              className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-bold text-accent hover:bg-[#fffaf0] transition-colors disabled:text-[#cbd5e0] disabled:hover:bg-transparent disabled:cursor-not-allowed"
                             >
                               <Shirt className="w-3 h-3" /> Try This
                             </button>
@@ -474,7 +474,7 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
                               onClick={() => handleDeleteGarment(garment)}
                               disabled={busy}
                               title={busy ? BUSY_HINT : undefined}
-                              className="flex items-center justify-center gap-1 px-3 py-2 text-[10px] font-bold text-red-500 hover:bg-red-50 transition-colors disabled:text-[#cbd5e0] disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                              className="flex items-center justify-center gap-1 px-3 py-2 text-[11px] font-bold text-red-500 hover:bg-red-50 transition-colors disabled:text-[#cbd5e0] disabled:hover:bg-transparent disabled:cursor-not-allowed"
                             >
                               <Trash2 className="w-3 h-3" /> Delete
                             </button>
@@ -486,7 +486,7 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
                 ) : inactiveHistory.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
                     <ImageIcon className="w-12 h-12 text-[#e2e8f0] mb-3" />
-                    <p className="text-[#a0aec0] text-sm">{showTabs ? 'No other photos yet.' : 'No recent photos found.'}</p>
+                    <p className="text-muted text-sm">{showTabs ? 'No other photos yet.' : 'No recent photos found.'}</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -506,7 +506,7 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
                           </div>
                           
                           {/* Expiry Badge */}
-                          <div className="absolute top-1.5 left-1.5 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
+                          <div className="absolute top-1.5 left-1.5 bg-black/60 backdrop-blur-md text-white text-[11px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
                             <Clock className="w-3 h-3" /> {minsRemaining}m
                           </div>
 
@@ -516,7 +516,7 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
                               onClick={() => handlePromote(img.id)}
                               disabled={busy}
                               title={busy ? BUSY_HINT : undefined}
-                              className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[10px] font-bold text-[#dd6b20] hover:bg-[#fffaf0] transition-colors disabled:text-[#cbd5e0] disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                              className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-bold text-accent hover:bg-[#fffaf0] transition-colors disabled:text-[#cbd5e0] disabled:hover:bg-transparent disabled:cursor-not-allowed"
                             >
                               <RotateCcw className="w-3 h-3" /> {showTabs ? 'Use This' : 'Use Photo'}
                             </button>
@@ -525,7 +525,7 @@ export default function ImageHistoryDock({ dock, onPick, onPickGarment, currentP
                               onClick={() => handleDelete(img.id)}
                               disabled={busy}
                               title={busy ? BUSY_HINT : undefined}
-                              className="flex items-center justify-center gap-1 px-3 py-2 text-[10px] font-bold text-red-500 hover:bg-red-50 transition-colors disabled:text-[#cbd5e0] disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                              className="flex items-center justify-center gap-1 px-3 py-2 text-[11px] font-bold text-red-500 hover:bg-red-50 transition-colors disabled:text-[#cbd5e0] disabled:hover:bg-transparent disabled:cursor-not-allowed"
                             >
                               <Trash2 className="w-3 h-3" /> Delete
                             </button>

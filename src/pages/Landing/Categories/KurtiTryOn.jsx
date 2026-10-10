@@ -4,7 +4,7 @@ import CategoryLayout from '../CategoryLayout';
 export default function KurtiTryOn() {
   return (
     <CategoryLayout 
-      title={<>AI Kurti Try-On <br/><span className="italic text-[#8c8278]">Fit, Structure, and Regional Tailoring.</span></>}
+      title={<>AI Kurti Try-On <br/><span className="italic text-muted">Fit, Structure, and Regional Tailoring.</span></>}
       subtitle="A kurti's fit is everything."
       description="TryOn2Buy is trained on how kurtis sit on different body types and how regional tailoring conventions affect the final look. Shoppers see fit, not just style. Brands see return rates drop."
       heroImage="/ChatGPT%20Image%20Aug%204,%202026,%2002_47_43%20PM.png"
@@ -16,11 +16,6 @@ export default function KurtiTryOn() {
         { title: "Fit Across Body Types", desc: "How a kurti sits on different shoulder widths, how length works on different heights — our AI models real-world variation." },
         { title: "For Sets and Layering", desc: "Kurti sets (kurti + pajama or palazzo) are handled as ensembles. We show how pieces layer and interact." },
         { title: "No Photoshoot Required", desc: "Start with hanger, flat lay, or model shots. We generate fit-accurate try-ons across body types automatically." }
-      ]}
-      impact={[
-        { metric: "-20%", desc: "Reduction in return rates for fit-related issues" },
-        { metric: "+15%", desc: "AOV lift on kurti categories" },
-        { metric: "-40%", desc: "Drop in 'sleeves too long' complaints" }
       ]}
     />
   );

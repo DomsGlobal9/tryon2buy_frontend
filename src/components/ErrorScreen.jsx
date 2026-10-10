@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 /** A full-page problem a visitor can act on: what happened, and a way out. */
 export default function ErrorScreen({ message, onRetry }) {
   return (
-    <div className="min-h-screen bg-[#ede8df] flex flex-col items-center justify-center gap-6 px-6 text-center font-['Courier_Prime',monospace]">
+    <div className="min-h-screen bg-[#ede8df] flex flex-col items-center justify-center gap-6 px-6 text-center font-sans">
       <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy" className="h-10 object-contain" />
       <p role="alert" className="text-[13px] text-[#1A1410] max-w-sm leading-relaxed">{message}</p>
       <div className="flex gap-3">

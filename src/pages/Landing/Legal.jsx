@@ -16,12 +16,12 @@ const CONTACT = 'info@tryon2buy.com';
 
 function LegalPage({ title, children }) {
   return (
-    <div className="min-h-screen bg-[#faf7f2] font-['Montserrat',sans-serif] text-[#1a1410]">
+    <div className="min-h-screen bg-[#faf7f2] font-sans text-[#1a1410]">
       <PublicNavbar />
       <main className="pt-32 pb-24 md:pt-44 px-6 md:px-12 max-w-3xl mx-auto">
-        <h1 className="text-4xl md:text-5xl font-['EB_Garamond',serif] tracking-tight mb-3">{title}</h1>
-        <p className="text-sm text-[#8c8278] mb-12">Last updated {UPDATED}</p>
-        <div className="space-y-8 text-[15px] leading-relaxed text-[#3d342c] [&_h2]:text-xl [&_h2]:font-['EB_Garamond',serif] [&_h2]:text-[#1a1410] [&_h2]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_a]:underline">
+        <h1 className="text-4xl md:text-5xl font-serif tracking-tight mb-3">{title}</h1>
+        <p className="text-sm text-muted mb-12">Last updated {UPDATED}</p>
+        <div className="space-y-8 text-[15px] leading-relaxed text-[#3d342c] [&_h2]:text-xl [&_h2]:font-serif [&_h2]:text-[#1a1410] [&_h2]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_a]:underline">
           {children}
         </div>
       </main>

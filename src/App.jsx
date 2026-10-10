@@ -1,27 +1,30 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
+// Every page except the home page loads on demand: the whole app used to be one 1.1 MB file,
+// downloaded in full before a phone could show anything.
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { getVendorToken, isGuestMode, loginPath } from './utils/auth';
-import TryonWorkspace from './pages/Tryon/TryonWorkspace';
-import VendorGallery from './pages/Tryon/VendorGallery';
-import CustomerTryon from './pages/Tryon/CustomerTryon';
-import CustomerGallery from './pages/Tryon/CustomerGallery';
-import ClientTryon from './pages/Tryon/ClientTryon';
+const TryonWorkspace = lazy(() => import('./pages/Tryon/TryonWorkspace'));
+const VendorGallery = lazy(() => import('./pages/Tryon/VendorGallery'));
+const CustomerTryon = lazy(() => import('./pages/Tryon/CustomerTryon'));
+const CustomerGallery = lazy(() => import('./pages/Tryon/CustomerGallery'));
+const ClientTryon = lazy(() => import('./pages/Tryon/ClientTryon'));
 
-import VendorAuth from './pages/Tryon/VendorAuth';
-import ClientAuth from './pages/Vendor/ClientAuth';
-import VendorCatalog from './pages/Vendor/VendorCatalog';
-import VendorUpload from './pages/Vendor/VendorUpload';
-import VendorTryon from './pages/Vendor/VendorTryon';
+const VendorAuth = lazy(() => import('./pages/Tryon/VendorAuth'));
+const ClientAuth = lazy(() => import('./pages/Vendor/ClientAuth'));
+const VendorCatalog = lazy(() => import('./pages/Vendor/VendorCatalog'));
+const VendorUpload = lazy(() => import('./pages/Vendor/VendorUpload'));
+const VendorTryon = lazy(() => import('./pages/Vendor/VendorTryon'));
 import Landing from './pages/Landing/Landing';
-import AboutUs from './pages/Landing/AboutUs';
-import SareeTryOn from './pages/Landing/Categories/SareeTryOn';
-import LehengaTryOn from './pages/Landing/Categories/LehengaTryOn';
-import AnarkaliTryOn from './pages/Landing/Categories/AnarkaliTryOn';
-import ShararaTryOn from './pages/Landing/Categories/ShararaTryOn';
-import KurtiTryOn from './pages/Landing/Categories/KurtiTryOn';
-import BlogIndex from './pages/Landing/BlogIndex';
-import BlogPost from './pages/Landing/BlogPost';
-import { PrivacyPolicy, TermsOfService } from './pages/Landing/Legal';
+const AboutUs = lazy(() => import('./pages/Landing/AboutUs'));
+const SareeTryOn = lazy(() => import('./pages/Landing/Categories/SareeTryOn'));
+const LehengaTryOn = lazy(() => import('./pages/Landing/Categories/LehengaTryOn'));
+const AnarkaliTryOn = lazy(() => import('./pages/Landing/Categories/AnarkaliTryOn'));
+const ShararaTryOn = lazy(() => import('./pages/Landing/Categories/ShararaTryOn'));
+const KurtiTryOn = lazy(() => import('./pages/Landing/Categories/KurtiTryOn'));
+const BlogIndex = lazy(() => import('./pages/Landing/BlogIndex'));
+const BlogPost = lazy(() => import('./pages/Landing/BlogPost'));
+const PrivacyPolicy = lazy(() => import('./pages/Landing/Legal').then(m => ({ default: m.PrivacyPolicy })));
+const TermsOfService = lazy(() => import('./pages/Landing/Legal').then(m => ({ default: m.TermsOfService })));
 import ErrorScreen from './components/ErrorScreen';
 
 // Authentication Guard for Vendor Interface
@@ -44,6 +47,7 @@ export default function App() {
   return (
     <Router>
       <div className="w-full min-h-screen bg-[#ede8df]">
+        <Suspense fallback={<div className="min-h-screen bg-[#faf7f2]" />}>
         <Routes>
           {/* Public Landing */}
           <Route path="/" element={<Landing />} />
@@ -90,6 +94,7 @@ export default function App() {
               page as if it had worked. */}
           <Route path="*" element={<ErrorScreen message="We couldn't find that page. The link may be mistyped or no longer exist." />} />
         </Routes>
+        </Suspense>
       </div>
     </Router>
   );

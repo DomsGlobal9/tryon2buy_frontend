@@ -30,7 +30,7 @@ const BLOG_POSTS = [
 
 export default function BlogIndex() {
   return (
-    <div className="min-h-screen bg-[#faf7f2] font-['Montserrat',sans-serif] text-[#1a1410] selection:bg-[#7F5700] selection:text-white">
+    <div className="min-h-screen bg-[#faf7f2] font-sans text-[#1a1410] selection:bg-accent selection:text-white">
       <PublicNavbar />
       
       <section className="pt-32 pb-24 md:pt-48 md:pb-32 px-6 md:px-12 max-w-[1400px] mx-auto">
@@ -40,7 +40,7 @@ export default function BlogIndex() {
           transition={{ duration: 0.6 }}
           className="max-w-3xl mb-16"
         >
-          <h1 className="text-4xl md:text-6xl font-['EB_Garamond',serif] tracking-tight mb-6">
+          <h1 className="text-4xl md:text-6xl font-serif tracking-tight mb-6">
             The TryOn2Buy Journal
           </h1>
           <p className="text-lg text-[#5c544d] leading-relaxed">
@@ -59,12 +59,12 @@ export default function BlogIndex() {
               <Link to={`/blog/${post.slug}`} className="group block h-full bg-white rounded-3xl overflow-hidden border border-[#1A1410]/10 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                 <div className="relative aspect-[4/3] overflow-hidden bg-[#ede8df]">
                   <img src={post.image} alt={post.title} className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105" />
-                  <div className="absolute top-4 left-4 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-[10px] uppercase tracking-widest font-bold text-[#1A1410]">
+                  <div className="absolute top-4 left-4 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-[11px] uppercase tracking-widest font-bold text-[#1A1410]">
                     {post.category}
                   </div>
                 </div>
                 <div className="p-8">
-                  <h3 className="text-2xl font-bold mb-3 group-hover:text-[#7F5700] transition-colors line-clamp-2">{post.title}</h3>
+                  <h3 className="text-2xl font-bold mb-3 group-hover:text-accent transition-colors line-clamp-2">{post.title}</h3>
                   <p className="text-[#5c544d] text-sm leading-relaxed line-clamp-3">
                     {post.description}
                   </p>

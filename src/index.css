@@ -1,8 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
+/*
+ * The whole site's type and colour, in one place. Pages used to set their own (eight font
+ * families, four oranges/golds), so moving between them felt like changing websites.
+ *   font-serif   headings only
+ *   font-sans    everything else
+ *   accent       links, active states, buttons -- the logo's orange, darkened so white text on
+ *                it is readable (5.2:1; the old #ED7B22 was 2.8:1)
+ *   muted        secondary text -- readable on white and cream (6:1; the old #8C8278 was 3.5:1)
+ */
+@theme {
+  --font-serif: 'EB Garamond', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --color-accent: #c2410c;
+  --color-accent-dark: #9a3412;
+  --color-muted: #6b6158;
+}
+
 :root {
-  font-family: 'Outfit', 'Inter', sans-serif;
+  font-family: var(--font-sans);
 }
 
 body {

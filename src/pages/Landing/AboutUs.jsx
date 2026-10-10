@@ -61,43 +61,9 @@ export default function AboutUs() {
     return () => { document.body.style.overflow = 'unset'; };
   }, [showDemoModal, isMobileMenuOpen]);
 
-  useEffect(() => {
-    const linkGaramond = document.createElement('link');
-    linkGaramond.href = 'https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap';
-    linkGaramond.rel = 'stylesheet';
-    document.head.appendChild(linkGaramond);
-
-    const linkCourier = document.createElement('link');
-    linkCourier.href = 'https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap';
-    linkCourier.rel = 'stylesheet';
-    document.head.appendChild(linkCourier);
-
-    const linkOutfit = document.createElement('link');
-    linkOutfit.href = 'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap';
-    linkOutfit.rel = 'stylesheet';
-    document.head.appendChild(linkOutfit);
-
-    const linkMontserrat = document.createElement('link');
-    linkMontserrat.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap';
-    linkMontserrat.rel = 'stylesheet';
-    document.head.appendChild(linkMontserrat);
-
-    const linkMerriweather = document.createElement('link');
-    linkMerriweather.href = 'https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&display=swap';
-    linkMerriweather.rel = 'stylesheet';
-    document.head.appendChild(linkMerriweather);
-
-    return () => {
-      document.head.removeChild(linkGaramond);
-      document.head.removeChild(linkCourier);
-      document.head.removeChild(linkOutfit);
-      document.head.removeChild(linkMontserrat);
-      document.head.removeChild(linkMerriweather);
-    };
-  }, []);
 
   return (
-    <div className="min-h-screen bg-[#faf7f2] font-['Montserrat',sans-serif] text-[#1a1410] selection:bg-[#ed7b22] selection:text-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#faf7f2] font-sans text-[#1a1410] selection:bg-accent selection:text-white overflow-x-hidden">
       
       {/* Custom Animations */}
       <style dangerouslySetInnerHTML={{__html: `
@@ -165,7 +131,7 @@ export default function AboutUs() {
         .menu__icon.open span { background-color: #faf7f2; }
         .menu__icon.open span:nth-child(1) { animation: ease .8s menu-icon-top forwards; }
         .menu__icon.open span:nth-child(2) { animation: ease .8s menu-icon-scaled forwards; }
-        .menu__icon.open span:nth-child(3) { animation: ease .8s menu-icon-bottom forwards; background-color: #ed7b22; }
+        .menu__icon.open span:nth-child(3) { animation: ease .8s menu-icon-bottom forwards; background-color: #c2410c; }
 
         @keyframes menu-icon-top { 0% { top: 0; transform: rotate(0); } 50% { top: .5rem; transform: rotate(0); } 100% { top: .5rem; transform: rotate(45deg); } }
         @keyframes menu-icon-top-2 { 0% { top: .5rem; transform: rotate(45deg); } 50% { top: .5rem; transform: rotate(0); } 100% { top: 0; transform: rotate(0); } }
@@ -183,47 +149,47 @@ export default function AboutUs() {
         
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-8">
-          <Link to="/" className="text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors font-['Merriweather',serif]">
+          <Link to="/" className="text-[11px] uppercase tracking-widest font-bold hover:text-accent transition-colors font-sans">
             HOME
           </Link>
           
           <div className="group relative">
-            <span className="text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors font-['Merriweather',serif] cursor-pointer flex items-center gap-1 py-4">
+            <span className="text-[11px] uppercase tracking-widest font-bold hover:text-accent transition-colors font-sans cursor-pointer flex items-center gap-1 py-4">
               SOLUTIONS
               <svg className="w-3 h-3 transition-transform duration-200 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
             </span>
             <div className="absolute top-[80%] left-1/2 -translate-x-1/2 mt-2 w-[280px] bg-white/95 backdrop-blur-xl border border-[#8c8278]/10 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col p-2 rounded-2xl z-[120] transform group-hover:translate-y-1 text-left">
               <Link to="/saree" className="flex flex-col px-4 py-3 hover:bg-[#faf7f2] rounded-xl transition-colors group/item">
-                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-[#ed7b22] font-['Merriweather',serif] mb-1">Saree Try-On</span>
-                <span className="text-[10px] text-[#8c8278] font-['Inter',sans-serif] capitalize">Nivi, Bengali & Regional drapes</span>
+                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-accent font-sans mb-1">Saree Try-On</span>
+                <span className="text-[11px] text-muted font-sans capitalize">Nivi, Bengali & Regional drapes</span>
               </Link>
               <Link to="/lehenga" className="flex flex-col px-4 py-3 hover:bg-[#faf7f2] rounded-xl transition-colors group/item">
-                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-[#ed7b22] font-['Merriweather',serif] mb-1">Lehenga Try-On</span>
-                <span className="text-[10px] text-[#8c8278] font-['Inter',sans-serif] capitalize">Accurate flare & volume physics</span>
+                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-accent font-sans mb-1">Lehenga Try-On</span>
+                <span className="text-[11px] text-muted font-sans capitalize">Accurate flare & volume physics</span>
               </Link>
               <Link to="/anarkali" className="flex flex-col px-4 py-3 hover:bg-[#faf7f2] rounded-xl transition-colors group/item">
-                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-[#ed7b22] font-['Merriweather',serif] mb-1">Anarkali Try-On</span>
-                <span className="text-[10px] text-[#8c8278] font-['Inter',sans-serif] capitalize">Floor-length flow & fit</span>
+                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-accent font-sans mb-1">Anarkali Try-On</span>
+                <span className="text-[11px] text-muted font-sans capitalize">Floor-length flow & fit</span>
               </Link>
               <Link to="/sharara" className="flex flex-col px-4 py-3 hover:bg-[#faf7f2] rounded-xl transition-colors group/item">
-                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-[#ed7b22] font-['Merriweather',serif] mb-1">Sharara Try-On</span>
-                <span className="text-[10px] text-[#8c8278] font-['Inter',sans-serif] capitalize">Trouser volume & layering</span>
+                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-accent font-sans mb-1">Sharara Try-On</span>
+                <span className="text-[11px] text-muted font-sans capitalize">Trouser volume & layering</span>
               </Link>
               <Link to="/kurti" className="flex flex-col px-4 py-3 hover:bg-[#faf7f2] rounded-xl transition-colors group/item">
-                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-[#ed7b22] font-['Merriweather',serif] mb-1">Kurti Try-On</span>
-                <span className="text-[10px] text-[#8c8278] font-['Inter',sans-serif] capitalize">Regional tailoring conventions</span>
+                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-accent font-sans mb-1">Kurti Try-On</span>
+                <span className="text-[11px] text-muted font-sans capitalize">Regional tailoring conventions</span>
               </Link>
             </div>
           </div>
           
-          <Link to="/blog" className="text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors font-['Merriweather',serif]">
+          <Link to="/blog" className="text-[11px] uppercase tracking-widest font-bold hover:text-accent transition-colors font-sans">
             JOURNAL
           </Link>
           
-          <Link to="/login" state={{ isLogin: false }} className="text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors font-['Merriweather',serif]">
+          <Link to="/login" state={{ isLogin: false }} className="text-[11px] uppercase tracking-widest font-bold hover:text-accent transition-colors font-sans">
             SIGNUP
           </Link>
-          <Link to="/login" state={{ isLogin: true }} className="bg-[#1a1410] text-white px-6 py-2.5 text-[11px] uppercase tracking-widest font-bold hover:bg-[#ed7b22] transition-colors flex items-center gap-2 font-['Merriweather',serif]">
+          <Link to="/login" state={{ isLogin: true }} className="bg-[#1a1410] text-white px-6 py-2.5 text-[11px] uppercase tracking-widest font-bold hover:bg-accent transition-colors flex items-center gap-2 font-sans">
             LOGIN <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -246,8 +212,8 @@ export default function AboutUs() {
           
           {/* Background Decorative Marquee */}
           <div className="absolute top-1/2 left-0 -translate-y-1/2 w-full overflow-hidden opacity-5 pointer-events-none flex whitespace-nowrap -z-10">
-            <span className="text-[120px] font-['EB_Garamond',serif] italic font-bold">TRYON2BUY STUDIO&nbsp;</span>
-            <span className="text-[120px] font-['EB_Garamond',serif] italic font-bold">TRYON2BUY STUDIO&nbsp;</span>
+            <span className="text-[120px] font-serif italic font-bold">TRYON2BUY STUDIO&nbsp;</span>
+            <span className="text-[120px] font-serif italic font-bold">TRYON2BUY STUDIO&nbsp;</span>
           </div>
 
           <div className="flex-1 flex flex-col justify-center px-8 relative z-10">
@@ -256,8 +222,8 @@ export default function AboutUs() {
               onClick={() => setIsMobileMenuOpen(false)}
               className="group flex items-end gap-6 py-6 border-b border-white/10 animate-fade-up delay-100"
             >
-              <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">01</span>
-              <span className="font-['EB_Garamond',serif] text-4xl tracking-wide text-white group-hover:text-[#ed7b22] group-hover:italic transition-all duration-300">Home</span>
+              <span className="text-[12px] font-sans font-light text-muted mb-2">01</span>
+              <span className="font-serif text-4xl tracking-wide text-white group-hover:text-accent group-hover:italic transition-all duration-300">Home</span>
             </Link>
 
             <Link 
@@ -265,8 +231,8 @@ export default function AboutUs() {
               onClick={() => setIsMobileMenuOpen(false)}
               className="group flex items-end gap-6 py-6 border-b border-white/10 animate-fade-up delay-150"
             >
-              <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">02</span>
-              <span className="font-['EB_Garamond',serif] text-4xl tracking-wide text-white group-hover:text-[#ed7b22] group-hover:italic transition-all duration-300">Solutions</span>
+              <span className="text-[12px] font-sans font-light text-muted mb-2">02</span>
+              <span className="font-serif text-4xl tracking-wide text-white group-hover:text-accent group-hover:italic transition-all duration-300">Solutions</span>
             </Link>
 
             <Link 
@@ -274,8 +240,8 @@ export default function AboutUs() {
               onClick={() => setIsMobileMenuOpen(false)}
               className="group flex items-end gap-6 py-6 border-b border-white/10 animate-fade-up delay-200"
             >
-              <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">03</span>
-              <span className="font-['EB_Garamond',serif] text-4xl tracking-wide text-white group-hover:text-[#ed7b22] group-hover:italic transition-all duration-300">Journal</span>
+              <span className="text-[12px] font-sans font-light text-muted mb-2">03</span>
+              <span className="font-serif text-4xl tracking-wide text-white group-hover:text-accent group-hover:italic transition-all duration-300">Journal</span>
             </Link>
             
             <Link 
@@ -284,8 +250,8 @@ export default function AboutUs() {
               onClick={() => setIsMobileMenuOpen(false)}
               className="group flex items-end gap-6 py-6 border-b border-white/10 animate-fade-up delay-300"
             >
-              <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">04</span>
-              <span className="font-['EB_Garamond',serif] text-4xl tracking-wide text-white group-hover:text-[#ed7b22] group-hover:italic transition-all duration-300">Sign Up</span>
+              <span className="text-[12px] font-sans font-light text-muted mb-2">04</span>
+              <span className="font-serif text-4xl tracking-wide text-white group-hover:text-accent group-hover:italic transition-all duration-300">Sign Up</span>
             </Link>
 
             <Link 
@@ -294,32 +260,32 @@ export default function AboutUs() {
               onClick={() => setIsMobileMenuOpen(false)}
               className="group flex items-end gap-6 py-6 border-b border-white/10 animate-fade-up delay-400"
             >
-              <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">05</span>
-              <span className="font-['EB_Garamond',serif] text-4xl tracking-wide text-[#ed7b22] group-hover:text-white transition-all duration-300">Login</span>
+              <span className="text-[12px] font-sans font-light text-muted mb-2">05</span>
+              <span className="font-serif text-4xl tracking-wide text-accent group-hover:text-white transition-all duration-300">Login</span>
             </Link>
           </div>
 
           <div className="px-8 pb-12 animate-fade-up delay-400 relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#8c8278] font-bold leading-loose">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-muted font-bold leading-loose">
               Tryon2Buy Technology <br/>
               © {new Date().getFullYear()} All Rights Reserved
             </p>
             <div className="flex gap-2 md:gap-3 flex-wrap">
-              <a href="https://www.instagram.com/tryon2buy/?hl=en" aria-label="TryOn2Buy on Instagram" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://www.instagram.com/tryon2buy/?hl=en" aria-label="TryOn2Buy on Instagram" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-accent hover:border-accent transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
               </a>
-              <a href="https://x.com/Tryon2buy" aria-label="TryOn2Buy on X" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://x.com/Tryon2buy" aria-label="TryOn2Buy on X" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-accent hover:border-accent transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               </a>
-              <a href="https://in.pinterest.com/tryon2buy/" aria-label="TryOn2Buy on Pinterest" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://in.pinterest.com/tryon2buy/" aria-label="TryOn2Buy on Pinterest" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-accent hover:border-accent transition-colors">
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.951-7.252 4.168 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.625 0 12.017 0z"/>
                 </svg>
               </a>
-              <a href="https://www.youtube.com/@Tryon2buy" aria-label="TryOn2Buy on YouTube" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://www.youtube.com/@Tryon2buy" aria-label="TryOn2Buy on YouTube" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-accent hover:border-accent transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
               </a>
-              <a href="https://www.linkedin.com/company/132194315/" aria-label="TryOn2Buy on LinkedIn" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://www.linkedin.com/company/132194315/" aria-label="TryOn2Buy on LinkedIn" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-accent hover:border-accent transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
               </a>
             </div>
@@ -332,23 +298,23 @@ export default function AboutUs() {
         <div className="max-w-[900px] mx-auto px-6 md:px-12 relative z-10 flex flex-col items-center">
           
           <RevealOnScroll delay={0}>
-            <h1 className="font-['EB_Garamond',serif] text-5xl md:text-6xl lg:text-7xl leading-[1.1] mb-6 font-normal tracking-tight text-[#1a1410]">
-              Revolutionizing How The World Experiences <span className="text-[#ed7b22] italic pr-2">Fashion.</span>
+            <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl leading-[1.1] mb-6 font-normal tracking-tight text-[#1a1410]">
+              Revolutionizing How The World Experiences <span className="text-accent italic pr-2">Fashion.</span>
             </h1>
           </RevealOnScroll>
           
           <RevealOnScroll delay={100}>
-            <p className="text-[16px] md:text-[18px] leading-relaxed text-[#5c544d] font-['Inter',sans-serif] max-w-2xl mb-10 mx-auto">
+            <p className="text-[16px] md:text-[18px] leading-relaxed text-[#5c544d] font-sans max-w-2xl mb-10 mx-auto">
               We're a passionate team united by a common goal — to create meaningful solutions that bridge the gap between physical retail and digital commerce through unparalleled AI technology.
             </p>
           </RevealOnScroll>
 
           <RevealOnScroll delay={200}>
             <div className="flex flex-col sm:flex-row gap-4 mb-20 justify-center">
-              <Link to="/login" className="bg-[#ed7b22] text-white px-8 py-4 rounded-full text-[12px] uppercase tracking-widest font-bold hover:bg-[#1a1410] transition-colors flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform font-['Merriweather',serif]">
+              <Link to="/login" className="bg-accent text-white px-8 py-4 rounded-full text-[12px] uppercase tracking-widest font-bold hover:bg-[#1a1410] transition-colors flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform font-sans">
                 Become a Merchant <ArrowRight className="w-4 h-4" />
               </Link>
-              <button onClick={() => setShowDemoModal(true)} className="bg-transparent border-2 border-[#ed7b22] text-[#ed7b22] px-8 py-4 rounded-full text-[12px] uppercase tracking-widest font-bold hover:bg-[#ed7b22]/5 transition-colors flex items-center justify-center font-['Merriweather',serif]">
+              <button onClick={() => setShowDemoModal(true)} className="bg-transparent border-2 border-accent text-accent px-8 py-4 rounded-full text-[12px] uppercase tracking-widest font-bold hover:bg-accent/5 transition-colors flex items-center justify-center font-sans">
                 Book a Demo
               </button>
             </div>
@@ -359,9 +325,9 @@ export default function AboutUs() {
             
             {/* Left Decorative Semi-Circles (Curved on the right) */}
             <div className="flex items-center gap-2 md:gap-4 shrink-0">
-              <div className={`${heroVisible ? 'animate-slide-left' : 'opacity-0'} delay-600 w-8 h-20 md:w-12 md:h-32 bg-[#ed7b22]/10 rounded-r-full shrink-0`}></div>
-              <div className={`${heroVisible ? 'animate-slide-left' : 'opacity-0'} delay-500 w-12 h-32 md:w-16 md:h-48 bg-[#ed7b22]/20 rounded-r-full shrink-0`}></div>
-              <div className={`${heroVisible ? 'animate-slide-left' : 'opacity-0'} delay-400 w-16 h-48 md:w-24 md:h-72 bg-[#ed7b22]/30 rounded-r-full shrink-0`}></div>
+              <div className={`${heroVisible ? 'animate-slide-left' : 'opacity-0'} delay-600 w-8 h-20 md:w-12 md:h-32 bg-accent/10 rounded-r-full shrink-0`}></div>
+              <div className={`${heroVisible ? 'animate-slide-left' : 'opacity-0'} delay-500 w-12 h-32 md:w-16 md:h-48 bg-accent/20 rounded-r-full shrink-0`}></div>
+              <div className={`${heroVisible ? 'animate-slide-left' : 'opacity-0'} delay-400 w-16 h-48 md:w-24 md:h-72 bg-accent/30 rounded-r-full shrink-0`}></div>
             </div>
 
             {/* Central Video (Pop In) - Vertical Pill */}
@@ -378,9 +344,9 @@ export default function AboutUs() {
 
             {/* Right Decorative Semi-Circles (Curved on the left) */}
             <div className="flex items-center gap-2 md:gap-4 shrink-0">
-              <div className={`${heroVisible ? 'animate-slide-right' : 'opacity-0'} delay-400 w-16 h-48 md:w-24 md:h-72 bg-[#ed7b22]/30 rounded-l-full shrink-0`}></div>
-              <div className={`${heroVisible ? 'animate-slide-right' : 'opacity-0'} delay-500 w-12 h-32 md:w-16 md:h-48 bg-[#ed7b22]/20 rounded-l-full shrink-0`}></div>
-              <div className={`${heroVisible ? 'animate-slide-right' : 'opacity-0'} delay-600 w-8 h-20 md:w-12 md:h-32 bg-[#ed7b22]/10 rounded-l-full shrink-0`}></div>
+              <div className={`${heroVisible ? 'animate-slide-right' : 'opacity-0'} delay-400 w-16 h-48 md:w-24 md:h-72 bg-accent/30 rounded-l-full shrink-0`}></div>
+              <div className={`${heroVisible ? 'animate-slide-right' : 'opacity-0'} delay-500 w-12 h-32 md:w-16 md:h-48 bg-accent/20 rounded-l-full shrink-0`}></div>
+              <div className={`${heroVisible ? 'animate-slide-right' : 'opacity-0'} delay-600 w-8 h-20 md:w-12 md:h-32 bg-accent/10 rounded-l-full shrink-0`}></div>
             </div>
             
           </div>
@@ -393,15 +359,15 @@ export default function AboutUs() {
           <RevealOnScroll className="relative h-auto md:h-[500px] flex flex-col md:block justify-center items-center gap-6" delay={100}>
             
             {/* Background Decorative Rings */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] border border-[#ed7b22]/10 rounded-full animate-ping duration-[3000ms] -z-10 hidden md:block"></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] border border-accent/10 rounded-full animate-ping duration-[3000ms] -z-10 hidden md:block"></div>
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] h-[250px] border border-[#1a1410]/5 rounded-full animate-pulse -z-10 hidden md:block"></div>
 
             {/* Top Left Badge (Black) */}
             <div className="relative md:absolute md:top-8 md:left-0 w-full md:w-[280px] z-10 animate-float group/card">
-              <div className="bg-[#1a1410] text-white p-8 shadow-[0_20px_50px_rgba(0,0,0,0.15)] hover:shadow-[0_30px_60px_rgba(237,123,34,0.15)] hover:scale-[1.03] transition-all duration-500 rounded-sm border border-transparent hover:border-[#ed7b22]/40 cursor-default">
-                <CameraOff className="w-8 h-8 text-[#ed7b22] mb-4 transition-transform duration-500 group-hover/card:scale-125 group-hover/card:-rotate-12" />
-                <h4 className="text-[14px] font-bold uppercase tracking-widest mb-2 font-['Outfit',sans-serif] transition-colors duration-300 group-hover/card:text-[#ed7b22]">The Old Way</h4>
-                <p className="text-[13px] font-['Inter',sans-serif] text-[#a69c92] leading-relaxed">
+              <div className="bg-[#1a1410] text-white p-8 shadow-[0_20px_50px_rgba(0,0,0,0.15)] hover:shadow-[0_30px_60px_rgba(237,123,34,0.15)] hover:scale-[1.03] transition-all duration-500 rounded-sm border border-transparent hover:border-accent/40 cursor-default">
+                <CameraOff className="w-8 h-8 text-accent mb-4 transition-transform duration-500 group-hover/card:scale-125 group-hover/card:-rotate-12" />
+                <h4 className="text-[14px] font-bold uppercase tracking-widest mb-2 font-sans transition-colors duration-300 group-hover/card:text-accent">The Old Way</h4>
+                <p className="text-[13px] font-sans text-[#a69c92] leading-relaxed">
                   Traditional fashion cataloging is slow, expensive, and heavily limited by physical constraints.
                 </p>
               </div>
@@ -409,10 +375,10 @@ export default function AboutUs() {
 
             {/* Middle Right Badge (White) */}
             <div className="relative md:absolute md:top-1/2 md:-translate-y-1/2 md:right-0 w-full md:w-[280px] z-20 animate-float delay-300 group/card">
-              <div className="bg-white text-[#1a1410] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:shadow-[0_30px_60px_rgba(237,123,34,0.15)] hover:scale-[1.03] transition-all duration-500 rounded-sm border border-[#8c8278]/10 hover:border-[#ed7b22]/40 cursor-default">
-                <Wand2 className="w-8 h-8 text-[#ed7b22] mb-4 transition-transform duration-500 group-hover/card:scale-125 group-hover/card:rotate-12" />
-                <h4 className="text-[14px] font-bold uppercase tracking-widest mb-2 font-['Outfit',sans-serif] transition-colors duration-300 group-hover/card:text-[#ed7b22]">The Solution</h4>
-                <p className="text-[13px] font-['Inter',sans-serif] text-[#5c544d] leading-relaxed">
+              <div className="bg-white text-[#1a1410] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:shadow-[0_30px_60px_rgba(237,123,34,0.15)] hover:scale-[1.03] transition-all duration-500 rounded-sm border border-[#8c8278]/10 hover:border-accent/40 cursor-default">
+                <Wand2 className="w-8 h-8 text-accent mb-4 transition-transform duration-500 group-hover/card:scale-125 group-hover/card:rotate-12" />
+                <h4 className="text-[14px] font-bold uppercase tracking-widest mb-2 font-sans transition-colors duration-300 group-hover/card:text-accent">The Solution</h4>
+                <p className="text-[13px] font-sans text-[#5c544d] leading-relaxed">
                   Instant digital draping bypasses physical photo studios completely, reducing time-to-market by 90%.
                 </p>
               </div>
@@ -420,11 +386,11 @@ export default function AboutUs() {
 
             {/* Bottom Center Badge (Orange) */}
             <div className="relative md:absolute md:bottom-8 md:left-16 w-full md:w-[280px] z-30 animate-float delay-500 group/card">
-              <div className="bg-[#ed7b22] text-white p-8 shadow-[0_20px_50px_rgba(237,123,34,0.3)] hover:shadow-[0_30px_60px_rgba(237,123,34,0.6)] hover:scale-[1.03] transition-all duration-500 rounded-sm border border-transparent hover:border-white/50 cursor-default">
+              <div className="bg-accent text-white p-8 shadow-[0_20px_50px_rgba(237,123,34,0.3)] hover:shadow-[0_30px_60px_rgba(237,123,34,0.6)] hover:scale-[1.03] transition-all duration-500 rounded-sm border border-transparent hover:border-white/50 cursor-default">
                 <MonitorPlay className="w-8 h-8 text-white mb-4 transition-transform duration-500 group-hover/card:scale-125 group-hover/card:-rotate-12" />
-                <h4 className="text-[14px] font-bold uppercase tracking-widest mb-2 font-['Outfit',sans-serif] transition-colors duration-300 group-hover/card:text-white/80">The Result</h4>
-                <p className="text-[13px] font-['Inter',sans-serif] font-medium leading-relaxed">
-                  Zero photography costs. 100% photorealistic, studio-grade results in seconds.
+                <h4 className="text-[14px] font-bold uppercase tracking-widest mb-2 font-sans transition-colors duration-300 group-hover/card:text-white/80">The Result</h4>
+                <p className="text-[13px] font-sans font-medium leading-relaxed">
+                  Zero photography costs. Photorealistic, studio-grade results, usually in under a minute.
                 </p>
               </div>
             </div>
@@ -432,11 +398,11 @@ export default function AboutUs() {
           
           <div>
             <RevealOnScroll delay={200}>
-              <h2 className="font-['EB_Garamond',serif] text-4xl md:text-5xl mb-8 leading-tight">
+              <h2 className="font-serif text-4xl md:text-5xl mb-8 leading-tight">
                 The Evolution of <br/>Fashion E-Commerce.
               </h2>
             </RevealOnScroll>
-            <div className="space-y-6 text-[#5c544d] font-['Inter',sans-serif] text-[15px] leading-relaxed">
+            <div className="space-y-6 text-[#5c544d] font-sans text-[15px] leading-relaxed">
               <RevealOnScroll delay={300}>
                 <p>
                   For decades, fashion boutiques and brands have relied on expensive, time-consuming photoshoots to showcase their new collections. Hiring models, renting studios, and waiting for post-production editing drains resources and slows down your time-to-market.
@@ -451,7 +417,7 @@ export default function AboutUs() {
                 <RevealOnScroll delay={500}>
                   <li className="flex items-start gap-4">
                     <div className="mt-1 bg-[#faf7f2] border border-[#8c8278]/20 p-1.5 rounded-full shrink-0">
-                      <CameraOff className="w-4 h-4 text-[#ed7b22]" />
+                      <CameraOff className="w-4 h-4 text-accent" />
                     </div>
                     <div>
                       <strong className="text-[#1a1410] font-bold block mb-1">Vendor-Side Digital Draping</strong>
@@ -462,7 +428,7 @@ export default function AboutUs() {
                 <RevealOnScroll delay={600}>
                   <li className="flex items-start gap-4">
                     <div className="mt-1 bg-[#faf7f2] border border-[#8c8278]/20 p-1.5 rounded-full shrink-0">
-                      <Users2 className="w-4 h-4 text-[#ed7b22]" />
+                      <Users2 className="w-4 h-4 text-accent" />
                     </div>
                     <div>
                       <strong className="text-[#1a1410] font-bold block mb-1">Customer-Side Virtual Try-On</strong>
@@ -480,7 +446,7 @@ export default function AboutUs() {
       <section className="py-24 bg-[#1a1410] text-white overflow-hidden">
         <div className="max-w-[1400px] mx-auto px-6 md:px-12 text-center">
           <RevealOnScroll>
-            <h2 className="font-['EB_Garamond',serif] text-4xl md:text-5xl mb-16">Our Core Pillars</h2>
+            <h2 className="font-serif text-4xl md:text-5xl mb-16">Our Core Pillars</h2>
           </RevealOnScroll>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
@@ -488,7 +454,7 @@ export default function AboutUs() {
               <div className="bg-[#2a2420] p-10 hover:-translate-y-2 transition-transform duration-300 h-full">
                 <MonitorPlay className="w-10 h-10 text-[#d4af37] mx-auto mb-6" />
                 <h3 className="text-[16px] uppercase font-bold tracking-widest mb-4">Innovation First</h3>
-                <p className="text-[#a69c92] font-['Inter',sans-serif] text-[14px] leading-relaxed">
+                <p className="text-[#a69c92] font-sans text-[14px] leading-relaxed">
                   We continuously push the boundaries of generative AI to ensure our virtual try-ons are indistinguishable from real photography.
                 </p>
               </div>
@@ -498,7 +464,7 @@ export default function AboutUs() {
               <div className="bg-[#2a2420] p-10 hover:-translate-y-2 transition-transform duration-300 h-full">
                 <ShieldCheck className="w-10 h-10 text-[#d4af37] mx-auto mb-6" />
                 <h3 className="text-[16px] uppercase font-bold tracking-widest mb-4">Uncompromising Quality</h3>
-                <p className="text-[#a69c92] font-['Inter',sans-serif] text-[14px] leading-relaxed">
+                <p className="text-[#a69c92] font-sans text-[14px] leading-relaxed">
                   We believe that digital assets must match the luxury and craftsmanship of the physical garments they represent.
                 </p>
               </div>
@@ -508,7 +474,7 @@ export default function AboutUs() {
               <div className="bg-[#2a2420] p-10 hover:-translate-y-2 transition-transform duration-300 h-full">
                 <Users2 className="w-10 h-10 text-[#d4af37] mx-auto mb-6" />
                 <h3 className="text-[16px] uppercase font-bold tracking-widest mb-4">Empowering Brands</h3>
-                <p className="text-[#a69c92] font-['Inter',sans-serif] text-[14px] leading-relaxed">
+                <p className="text-[#a69c92] font-sans text-[14px] leading-relaxed">
                   Our mission is to arm boutique owners and independent designers with enterprise-grade technology to compete globally.
                 </p>
               </div>
@@ -522,35 +488,35 @@ export default function AboutUs() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-24 items-center">
           <div className="order-2 lg:order-1">
             <RevealOnScroll>
-              <h2 className="font-['EB_Garamond',serif] text-4xl md:text-5xl mb-8 leading-tight">
+              <h2 className="font-serif text-4xl md:text-5xl mb-8 leading-tight">
                 Driven by <br/>Advanced AI.
               </h2>
             </RevealOnScroll>
             <div className="space-y-8">
               <RevealOnScroll delay={200}>
                 <div className="flex gap-4">
-                  <div className="w-10 h-10 shrink-0 bg-[#faf7f2] border border-[#8c8278]/20 rounded-full flex items-center justify-center font-['EB_Garamond',serif] text-xl font-bold text-[#ed7b22]">1</div>
+                  <div className="w-10 h-10 shrink-0 bg-[#faf7f2] border border-[#8c8278]/20 rounded-full flex items-center justify-center font-serif text-xl font-bold text-accent">1</div>
                   <div>
                     <h4 className="font-bold text-[15px] mb-2 uppercase tracking-wide">Identity Lock Technology</h4>
-                    <p className="text-[#5c544d] font-['Inter',sans-serif] text-[14px] leading-relaxed">Our proprietary AI strictly preserves the customer's face, body type, and skin tone, ensuring an authentic and ethical try-on experience.</p>
+                    <p className="text-[#5c544d] font-sans text-[14px] leading-relaxed">Our proprietary AI strictly preserves the customer's face, body type, and skin tone, ensuring an authentic and ethical try-on experience.</p>
                   </div>
                 </div>
               </RevealOnScroll>
               <RevealOnScroll delay={400}>
                 <div className="flex gap-4">
-                  <div className="w-10 h-10 shrink-0 bg-[#faf7f2] border border-[#8c8278]/20 rounded-full flex items-center justify-center font-['EB_Garamond',serif] text-xl font-bold text-[#ed7b22]">2</div>
+                  <div className="w-10 h-10 shrink-0 bg-[#faf7f2] border border-[#8c8278]/20 rounded-full flex items-center justify-center font-serif text-xl font-bold text-accent">2</div>
                   <div>
                     <h4 className="font-bold text-[15px] mb-2 uppercase tracking-wide">Dynamic Draping Physics</h4>
-                    <p className="text-[#5c544d] font-['Inter',sans-serif] text-[14px] leading-relaxed">Unlike simple overlays, our system understands fabric weight, pleats, and gravity to drape garments exactly as they would fall in reality.</p>
+                    <p className="text-[#5c544d] font-sans text-[14px] leading-relaxed">Unlike simple overlays, our system understands fabric weight, pleats, and gravity to drape garments exactly as they would fall in reality.</p>
                   </div>
                 </div>
               </RevealOnScroll>
               <RevealOnScroll delay={600}>
                 <div className="flex gap-4">
-                  <div className="w-10 h-10 shrink-0 bg-[#faf7f2] border border-[#8c8278]/20 rounded-full flex items-center justify-center font-['EB_Garamond',serif] text-xl font-bold text-[#ed7b22]">3</div>
+                  <div className="w-10 h-10 shrink-0 bg-[#faf7f2] border border-[#8c8278]/20 rounded-full flex items-center justify-center font-serif text-xl font-bold text-accent">3</div>
                   <div>
                     <h4 className="font-bold text-[15px] mb-2 uppercase tracking-wide">Studio Lighting Emulation</h4>
-                    <p className="text-[#5c544d] font-['Inter',sans-serif] text-[14px] leading-relaxed">Automatically matches ambient lighting and generates realistic drop shadows to composite subjects seamlessly into any luxury environment.</p>
+                    <p className="text-[#5c544d] font-sans text-[14px] leading-relaxed">Automatically matches ambient lighting and generates realistic drop shadows to composite subjects seamlessly into any luxury environment.</p>
                   </div>
                 </div>
               </RevealOnScroll>
@@ -582,21 +548,21 @@ export default function AboutUs() {
         
         <div className="max-w-3xl mx-auto px-6 relative z-10">
           <RevealOnScroll>
-            <Heart className="w-8 h-8 text-[#ed7b22] mx-auto mb-6" />
+            <Heart className="w-8 h-8 text-accent mx-auto mb-6" />
           </RevealOnScroll>
           <RevealOnScroll delay={100}>
-            <h2 className="font-['EB_Garamond',serif] text-4xl md:text-5xl mb-6 text-[#1a1410]">
+            <h2 className="font-serif text-4xl md:text-5xl mb-6 text-[#1a1410]">
               Join the Revolution.
             </h2>
           </RevealOnScroll>
           <RevealOnScroll delay={200}>
-            <p className="text-[#5c544d] font-['Inter',sans-serif] text-[16px] leading-relaxed mb-10 max-w-xl mx-auto">
+            <p className="text-[#5c544d] font-sans text-[16px] leading-relaxed mb-10 max-w-xl mx-auto">
               Ready to transform how your customers experience your fashion catalog? Start your journey with TryOn2Buy today.
             </p>
           </RevealOnScroll>
           <RevealOnScroll delay={300}>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link to="/login" className="inline-flex justify-center items-center gap-3 bg-[#ed7b22] text-white px-10 py-5 text-[12px] uppercase tracking-[3px] font-bold hover:bg-[#1a1410] transition-colors shadow-xl hover:-translate-y-1 transform duration-200 font-['Merriweather',serif]">
+              <Link to="/login" className="inline-flex justify-center items-center gap-3 bg-accent text-white px-10 py-5 text-[12px] uppercase tracking-[3px] font-bold hover:bg-[#1a1410] transition-colors shadow-xl hover:-translate-y-1 transform duration-200 font-sans">
                 Become a Merchant <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -610,7 +576,7 @@ export default function AboutUs() {
           <div className="flex flex-col md:flex-row items-center gap-8">
             <img src="/assets/footer_logo.png" alt="TryOn2Buy Logo" className="h-12 object-contain" />
             <span className="hidden md:block w-px h-8 bg-[#3a3430]"></span>
-            <p className="text-[12px] uppercase tracking-[2px] text-[#8c8278] text-center md:text-left">
+            <p className="text-[12px] uppercase tracking-[2px] text-[#a69c92] text-center md:text-left">
               &copy; {new Date().getFullYear()} Tryon2Buy Technology. All rights reserved.
             </p>
           </div>
@@ -621,21 +587,21 @@ export default function AboutUs() {
             </div>
             {/* Social Icons */}
             <div className="flex gap-4 flex-wrap justify-center">
-              <a href="https://www.instagram.com/tryon2buy/?hl=en" aria-label="TryOn2Buy on Instagram" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://www.instagram.com/tryon2buy/?hl=en" aria-label="TryOn2Buy on Instagram" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-accent hover:border-accent transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
               </a>
-              <a href="https://x.com/Tryon2buy" aria-label="TryOn2Buy on X" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://x.com/Tryon2buy" aria-label="TryOn2Buy on X" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-accent hover:border-accent transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               </a>
-              <a href="https://in.pinterest.com/tryon2buy/" aria-label="TryOn2Buy on Pinterest" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://in.pinterest.com/tryon2buy/" aria-label="TryOn2Buy on Pinterest" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-accent hover:border-accent transition-colors">
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.951-7.252 4.168 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.625 0 12.017 0z"/>
                 </svg>
               </a>
-              <a href="https://www.youtube.com/@Tryon2buy" aria-label="TryOn2Buy on YouTube" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://www.youtube.com/@Tryon2buy" aria-label="TryOn2Buy on YouTube" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-accent hover:border-accent transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
               </a>
-              <a href="https://www.linkedin.com/company/132194315/" aria-label="TryOn2Buy on LinkedIn" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://www.linkedin.com/company/132194315/" aria-label="TryOn2Buy on LinkedIn" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-accent hover:border-accent transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
               </a>
             </div>
@@ -668,16 +634,16 @@ export default function AboutUs() {
               <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-10 object-contain" />
             </div>
             
-            <h3 className="text-3xl font-['EB_Garamond',serif] font-bold mb-4">Book a Demo</h3>
+            <h3 className="text-3xl font-serif font-bold mb-4">Book a Demo</h3>
             <p className="text-[#5c544d] leading-relaxed mb-8">
               Ready to see our Proprietary Dupatta Drape Matrix in action? Contact our enterprise team to schedule a live technical demonstration tailored to your catalog.
             </p>
 
             <div className="bg-[#faf7f2] p-6 rounded-2xl border border-[#1a1410]/10 flex flex-col items-center justify-center text-center">
-              <span className="text-[10px] uppercase tracking-widest font-bold text-[#8c8278] mb-2">Email us at</span>
+              <span className="text-[11px] uppercase tracking-widest font-bold text-muted mb-2">Email us at</span>
               <a 
                 href="mailto:info@tryon2buy.com" 
-                className="text-xl md:text-2xl font-bold text-[#1a1410] hover:text-[#ed7b22] transition-colors"
+                className="text-xl md:text-2xl font-bold text-[#1a1410] hover:text-accent transition-colors"
               >
                 info@tryon2buy.com
               </a>

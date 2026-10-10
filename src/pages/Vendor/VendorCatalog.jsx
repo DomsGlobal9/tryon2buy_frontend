@@ -113,7 +113,7 @@ const VendorCatalog = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#faf7f2] font-['Space_Grotesk',sans-serif]">
+    <div className="min-h-screen bg-[#faf7f2] font-sans">
       {/* Header */}
       <header className="bg-white border-b border-[#e5e0d8] px-4 md:px-8 py-3 md:py-4 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -136,7 +136,7 @@ const VendorCatalog = () => {
           <div className="flex items-center gap-2 md:gap-4">
             <button 
               onClick={() => navigate('/vendor/upload')}
-              className="bg-[#7F5700] hover:bg-[#664600] text-white px-3 py-2 md:px-6 md:py-3 rounded-xl font-bold tracking-widest uppercase text-[10px] md:text-xs flex items-center gap-1.5 md:gap-2 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
+              className="bg-accent hover:bg-accent-dark text-white px-3 py-2 md:px-6 md:py-3 rounded-xl font-bold tracking-widest uppercase text-[11px] md:text-xs flex items-center gap-1.5 md:gap-2 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
             >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Digitize New Product</span>
@@ -147,7 +147,7 @@ const VendorCatalog = () => {
             
             <button 
               onClick={() => setIsProfileModalOpen(true)}
-              className="flex items-center justify-center bg-[#faf7f2] hover:bg-white border border-[#e5e0d8] hover:border-[#7F5700] text-[#5c544d] hover:text-[#7F5700] w-8 h-8 md:w-10 md:h-10 rounded-xl transition-all shadow-sm flex-shrink-0"
+              className="flex items-center justify-center bg-[#faf7f2] hover:bg-white border border-[#e5e0d8] hover:border-accent text-[#5c544d] hover:text-accent w-8 h-8 md:w-10 md:h-10 rounded-xl transition-all shadow-sm flex-shrink-0"
               title="Business Profile"
             >
               <User className="w-4 h-4 md:w-5 md:h-5" />
@@ -155,7 +155,7 @@ const VendorCatalog = () => {
 
             <button 
               onClick={handleLogout}
-              className="flex items-center gap-1.5 md:gap-2 bg-[#faf7f2] hover:bg-red-50 border border-[#e5e0d8] hover:border-red-200 text-[#5c544d] hover:text-red-600 px-3 py-2 md:px-4 md:py-2.5 rounded-xl font-bold uppercase tracking-widest text-[9px] md:text-[10px] transition-all shadow-sm flex-shrink-0"
+              className="flex items-center gap-1.5 md:gap-2 bg-[#faf7f2] hover:bg-red-50 border border-[#e5e0d8] hover:border-red-200 text-[#5c544d] hover:text-red-600 px-3 py-2 md:px-4 md:py-2.5 rounded-xl font-bold uppercase tracking-widest text-[11px] md:text-[11px] transition-all shadow-sm flex-shrink-0"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Logout</span>
@@ -177,7 +177,7 @@ const VendorCatalog = () => {
               placeholder="Search by Product Name or ID (e.g. PRD-A1B2)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="block w-full pl-11 pr-4 py-3 bg-white border border-[#e5e0d8] rounded-xl text-sm placeholder-gray-400 focus:outline-none focus:border-[#7F5700] focus:ring-1 focus:ring-[#7F5700] transition-all shadow-sm"
+              className="block w-full pl-11 pr-4 py-3 bg-white border border-[#e5e0d8] rounded-xl text-sm placeholder-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all shadow-sm"
             />
           </div>
           
@@ -185,14 +185,14 @@ const VendorCatalog = () => {
             <div className="relative">
               <button 
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
-                className={`h-11 md:h-12 bg-white border ${isFilterOpen ? 'border-[#7F5700] text-[#7F5700]' : 'border-[#e5e0d8] text-[#5c544d] hover:border-[#7F5700] hover:text-[#7F5700]'} rounded-xl px-4 flex items-center justify-center shadow-sm gap-2 transition-all`}
+                className={`h-11 md:h-12 bg-white border ${isFilterOpen ? 'border-accent text-accent' : 'border-[#e5e0d8] text-[#5c544d] hover:border-accent hover:text-accent'} rounded-xl px-4 flex items-center justify-center shadow-sm gap-2 transition-all`}
               >
                 <Filter className="w-4 h-4 md:w-5 md:h-5" />
-                <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase hidden sm:inline">
+                <span className="text-[11px] md:text-xs font-bold tracking-widest uppercase hidden sm:inline">
                   {selectedCategory === 'ALL' ? 'Filter' : selectedCategory}
                 </span>
                 {selectedCategory !== 'ALL' && (
-                  <div className="w-2 h-2 rounded-full bg-[#7F5700] sm:hidden" />
+                  <div className="w-2 h-2 rounded-full bg-accent sm:hidden" />
                 )}
               </button>
 
@@ -208,12 +208,12 @@ const VendorCatalog = () => {
                       className="absolute right-0 top-full mt-2 w-48 bg-white border border-[#e5e0d8] rounded-2xl shadow-xl z-50 overflow-hidden"
                     >
                       <div className="p-3 border-b border-[#e5e0d8] bg-[#faf7f2]">
-                        <h4 className="text-[9px] font-bold text-gray-500 uppercase tracking-widest px-1">Filter by Category</h4>
+                        <h4 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest px-1">Filter by Category</h4>
                       </div>
                       <div className="p-1.5 max-h-60 overflow-y-auto">
                         <button
                           onClick={() => { setSelectedCategory('ALL'); setIsFilterOpen(false); }}
-                          className={`w-full text-left px-3 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl transition-colors ${selectedCategory === 'ALL' ? 'bg-[#7F5700]/10 text-[#7F5700]' : 'text-[#1A1410] hover:bg-[#faf7f2]'}`}
+                          className={`w-full text-left px-3 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl transition-colors ${selectedCategory === 'ALL' ? 'bg-accent/10 text-accent' : 'text-[#1A1410] hover:bg-[#faf7f2]'}`}
                         >
                           All Categories
                         </button>
@@ -221,7 +221,7 @@ const VendorCatalog = () => {
                           <button
                             key={cat}
                             onClick={() => { setSelectedCategory(cat); setIsFilterOpen(false); }}
-                            className={`w-full text-left px-3 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl transition-colors mt-0.5 ${selectedCategory === cat ? 'bg-[#7F5700]/10 text-[#7F5700]' : 'text-[#1A1410] hover:bg-[#faf7f2]'}`}
+                            className={`w-full text-left px-3 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl transition-colors mt-0.5 ${selectedCategory === cat ? 'bg-accent/10 text-accent' : 'text-[#1A1410] hover:bg-[#faf7f2]'}`}
                           >
                             {categoryLabel(cat)}
                           </button>
@@ -234,7 +234,7 @@ const VendorCatalog = () => {
             </div>
             
             <div className="h-11 md:h-12 bg-white border border-[#e5e0d8] rounded-xl px-4 flex items-center justify-center shadow-sm">
-              <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase">{filteredProducts.length} Products</span>
+              <span className="text-[11px] md:text-xs font-bold tracking-widest uppercase">{filteredProducts.length} Products</span>
             </div>
           </div>
         </div>
@@ -242,13 +242,13 @@ const VendorCatalog = () => {
         {/* Loading State */}
         {loading && (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-4 border-[#7F5700] border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
           </div>
         )}
 
         {!loading && loadFailed && (
           <div role="alert" className="bg-white rounded-2xl border border-[#dcd6cc] p-12 flex flex-col items-center justify-center text-center">
-            <AlertTriangle className="w-8 h-8 text-[#7F5700] mb-4" />
+            <AlertTriangle className="w-8 h-8 text-accent mb-4" />
             <h3 className="text-lg font-bold text-[#1A1410] mb-2">Your catalog could not be loaded</h3>
             <p className="text-gray-500 max-w-md mb-6">Your products are safe. Please check your connection and try again.</p>
             <button
@@ -291,7 +291,7 @@ const VendorCatalog = () => {
             <p className="text-gray-500 max-w-md">We couldn't find any products matching your current category or search filters.</p>
             <button 
               onClick={() => { setSearchQuery(''); setSelectedCategory('ALL'); }}
-              className="mt-6 text-[#7F5700] hover:text-[#1A1410] font-bold text-xs uppercase tracking-widest transition-colors"
+              className="mt-6 text-accent hover:text-[#1A1410] font-bold text-xs uppercase tracking-widest transition-colors"
             >
               Clear All Filters
             </button>
@@ -318,12 +318,12 @@ const VendorCatalog = () => {
                     )}
                     
                     {/* ID/SKU Badge */}
-                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md border border-white/20 shadow-sm text-[9px] font-bold uppercase tracking-wider text-[#1A1410]">
+                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md border border-white/20 shadow-sm text-[11px] font-bold uppercase tracking-wider text-[#1A1410]">
                       {pId}
                     </div>
 
                     {/* Category Badge */}
-                    <div className="absolute top-3 right-3 bg-[#1A1410]/90 backdrop-blur-sm px-2.5 py-1 rounded-md border border-white/10 shadow-sm text-[9px] font-bold uppercase tracking-wider text-white">
+                    <div className="absolute top-3 right-3 bg-[#1A1410]/90 backdrop-blur-sm px-2.5 py-1 rounded-md border border-white/10 shadow-sm text-[11px] font-bold uppercase tracking-wider text-white">
                       {categoryLabel(product.category)}
                     </div>
 
@@ -333,7 +333,7 @@ const VendorCatalog = () => {
                         e.stopPropagation();
                         setPreviewProduct(product);
                       }}
-                      className="absolute bottom-3 right-12 bg-white/90 hover:bg-[#faf7f2] hover:text-[#7F5700] text-gray-500 backdrop-blur-sm p-1.5 rounded-full shadow-sm transition-all md:opacity-0 md:group-hover:opacity-100 border border-white/20"
+                      className="absolute bottom-3 right-12 bg-white/90 hover:bg-[#faf7f2] hover:text-accent text-gray-500 backdrop-blur-sm p-1.5 rounded-full shadow-sm transition-all md:opacity-0 md:group-hover:opacity-100 border border-white/20"
                       title="Preview Product"
                     >
                       <Eye className="w-4 h-4" />
@@ -356,13 +356,13 @@ const VendorCatalog = () => {
                   <div className="p-3 md:p-4 flex-1 flex flex-col">
                     <h3 className="text-sm md:text-base font-bold text-[#1A1410] mb-1 line-clamp-1" title={product.title}>{product.title}</h3>
                     {product.description && (
-                      <p className="hidden md:block text-[10px] md:text-xs text-gray-500 line-clamp-2 leading-relaxed mb-3">{product.description}</p>
+                      <p className="hidden md:block text-[11px] md:text-xs text-gray-500 line-clamp-2 leading-relaxed mb-3">{product.description}</p>
                     )}
                     
                     <div className="mt-auto pt-3 flex gap-2">
                       <button 
                         onClick={() => handleTryOn(product)}
-                        className="flex-1 bg-[#1A1410] hover:bg-black text-white py-2 md:py-2.5 rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-widest transition-colors"
+                        className="flex-1 bg-[#1A1410] hover:bg-black text-white py-2 md:py-2.5 rounded-lg text-[11px] md:text-xs font-bold uppercase tracking-widest transition-colors"
                       >
                         Try It On
                       </button>

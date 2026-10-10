@@ -43,7 +43,7 @@ export default function ThumbWithFallback({ src, alt, label = 'Not available', i
         {/* Only when the picture was expected and did not arrive. An empty slot is not a
             failure and does not need explaining. */}
         {src && failed && (
-          <span className="text-[8px] leading-tight text-center text-[#a0aec0] font-sans">{label}</span>
+          <span className="text-[11px] leading-tight text-center text-muted font-sans">{label}</span>
         )}
       </div>
     );

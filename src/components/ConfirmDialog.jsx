@@ -71,13 +71,13 @@ export default function ConfirmDialog({
       >
         <div className="flex items-start gap-3 p-5 pb-3">
           <div className="w-9 h-9 rounded-full bg-[#fffaf0] flex items-center justify-center flex-shrink-0">
-            <AlertTriangle className="w-4 h-4 text-[#dd6b20]" />
+            <AlertTriangle className="w-4 h-4 text-accent" />
           </div>
           <h3 className="flex-1 text-[15px] font-bold text-[#1a202c] leading-snug pt-1.5">{title}</h3>
           <button
             onClick={onCancel}
             aria-label="Close"
-            className="text-[#a0aec0] hover:text-[#1a202c] transition-colors p-1 -mt-0.5"
+            className="text-muted hover:text-[#1a202c] transition-colors p-1 -mt-0.5"
           >
             <X className="w-4 h-4" />
           </button>
@@ -99,7 +99,7 @@ export default function ConfirmDialog({
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 py-2.5 text-[11px] font-bold uppercase tracking-widest text-white bg-[#dd6b20] rounded-lg hover:bg-[#c05621] transition-colors"
+            className="flex-1 py-2.5 text-[11px] font-bold uppercase tracking-widest text-white bg-accent rounded-lg hover:bg-accent-dark transition-colors"
           >
             {confirmLabel}
           </button>

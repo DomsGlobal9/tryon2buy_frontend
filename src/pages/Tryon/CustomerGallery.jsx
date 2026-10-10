@@ -22,23 +22,6 @@ export default function CustomerGallery() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  useEffect(() => {
-    // Inject fonts
-    const linkGaramond = document.createElement('link');
-    linkGaramond.href = 'https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap';
-    linkGaramond.rel = 'stylesheet';
-    document.head.appendChild(linkGaramond);
-
-    const linkCourier = document.createElement('link');
-    linkCourier.href = 'https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap';
-    linkCourier.rel = 'stylesheet';
-    document.head.appendChild(linkCourier);
-
-    return () => {
-      document.head.removeChild(linkGaramond);
-      document.head.removeChild(linkCourier);
-    };
-  }, []);
 
   useEffect(() => {
     fetch(`${API_URL}/api/tryon/vendor/${vendorId}/gallery`)
@@ -61,8 +44,8 @@ export default function CustomerGallery() {
 
   if (loading) {
     return (
-      <div className="bg-[#faf7f2] min-h-screen flex items-center justify-center font-['Courier_Prime',monospace]">
-        <p className="text-[12px] uppercase tracking-widest text-[#8c8278] animate-pulse">
+      <div className="bg-[#faf7f2] min-h-screen flex items-center justify-center font-sans">
+        <p className="text-[12px] uppercase tracking-widest text-muted animate-pulse">
           Loading Collection...
         </p>
       </div>
@@ -74,7 +57,7 @@ export default function CustomerGallery() {
   }
 
   return (
-    <div className="bg-[#faf7f2] min-h-screen font-['Courier_Prime',monospace] text-[#1a1410] flex flex-col">
+    <div className="bg-[#faf7f2] min-h-screen font-sans text-[#1a1410] flex flex-col">
 
       {/* Header */}
       <header className="bg-[#faf7f2] border-b border-[rgba(26,20,16,0.1)] h-[60px] flex items-center justify-between px-4 md:px-[64px] shrink-0 relative">
@@ -82,7 +65,7 @@ export default function CustomerGallery() {
           <button
             // Opened straight from a shared link there is nothing to go back to.
             onClick={() => (window.history.state?.idx > 0 ? navigate(-1) : navigate('/'))}
-            className="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:text-[#1a1410] transition-colors"
+            className="inline-flex items-center gap-1.5 text-[11px] uppercase font-bold tracking-[1.5px] text-accent hover:text-[#1a1410] transition-colors"
           >
             <ChevronLeft className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>Back</span>
@@ -92,7 +75,7 @@ export default function CustomerGallery() {
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center">
           <div className="flex items-center">
             <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-8 md:h-10 object-contain mr-2" />
-            <span className="font-['EB_Garamond',serif] font-normal text-[#1a1410] text-[18px] md:text-[22px] tracking-tight flex items-center"><span className="opacity-40 px-2">|</span> COLLECTION</span>
+            <span className="hidden sm:flex font-serif font-normal text-[#1a1410] text-[18px] md:text-[22px] tracking-tight items-center"><span className="opacity-40 px-2">|</span> COLLECTION</span>
           </div>
         </div>
         
@@ -102,18 +85,18 @@ export default function CustomerGallery() {
       {/* Page Title */}
       <div className="flex flex-col items-center py-12 px-6">
         <div className="w-full max-w-[1040px] mb-10">
-          <h1 className="font-['EB_Garamond',serif] text-3xl md:text-[36px] font-normal leading-tight text-[#1a1410]">
+          <h1 className="font-serif text-3xl md:text-[36px] font-normal leading-tight text-[#1a1410]">
             Curated Collection
           </h1>
-          <p className="text-[11px] tracking-[1.5px] uppercase font-bold text-[#8c8278] mt-2">
+          <p className="text-[11px] tracking-[1.5px] uppercase font-bold text-muted mt-2">
             Select a piece you love and see how it looks on you — virtually.
           </p>
         </div>
 
         {generations.length === 0 ? (
           <div className="flex flex-col items-center justify-center mt-20 opacity-60">
-            <ShoppingBag className="w-12 h-12 mb-4 text-[#8c8278]" />
-            <p className="text-[12px] uppercase tracking-widest text-[#8c8278]">
+            <ShoppingBag className="w-12 h-12 mb-4 text-muted" />
+            <p className="text-[12px] uppercase tracking-widest text-muted">
               No items in this collection yet.
             </p>
           </div>
@@ -122,7 +105,7 @@ export default function CustomerGallery() {
             {generations.map((gen) => (
               <div
                 key={gen.id}
-                className="bg-white border border-[rgba(26,20,16,0.1)] p-3 flex flex-col gap-3 group hover:border-[#7f5700] transition-all hover:shadow-lg"
+                className="bg-white border border-[rgba(26,20,16,0.1)] p-3 flex flex-col gap-3 group hover:border-accent transition-all hover:shadow-lg"
               >
                 {/* Image */}
                 <div className="aspect-[3/4] bg-[#ede8df] overflow-hidden relative">
@@ -135,14 +118,14 @@ export default function CustomerGallery() {
 
                 {/* Details */}
                 <div className="flex flex-col gap-2">
-                  <span className="text-[9px] font-bold uppercase tracking-widest text-[#1a1410] truncate">
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-[#1a1410] truncate">
                     {categoryLabel(gen.category) || 'Garment'}
                   </span>
 
                   <div className="flex gap-1.5">
                     <button
                       onClick={() => navigate(`/tryon/${gen.id}`, { state: { fromGallery: true } })}
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#1a1410] text-[#faf7f2] text-[9px] font-bold uppercase tracking-widest hover:bg-[#7f5700] transition-colors"
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#1a1410] text-[#faf7f2] text-[11px] font-bold uppercase tracking-widest hover:bg-accent transition-colors"
                     >
                       <Sparkles className="w-3 h-3" />
                       <span>Try This On</span>

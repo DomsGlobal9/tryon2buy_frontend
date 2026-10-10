@@ -4,7 +4,7 @@ import CategoryLayout from '../CategoryLayout';
 export default function ShararaTryOn() {
   return (
     <CategoryLayout 
-      title={<>AI Sharara Try-On <br/><span className="italic text-[#8c8278]">Trouser Volume and Layering.</span></>}
+      title={<>AI Sharara Try-On <br/><span className="italic text-muted">Trouser Volume and Layering.</span></>}
       subtitle="A sharara's signature is its dramatic flare from the knee down."
       description="TryOn2Buy renders sharara sets with accurate fit and volume. Shoppers see how the multi-layered trouser will actually move and drape. Brands see return rates drop."
       heroImage="/ChatGPT%20Image%20Aug%204,%202026,%2002_51_46%20PM.png"
@@ -16,11 +16,6 @@ export default function ShararaTryOn() {
         { title: "Multi-Piece Ensemble Rendering", desc: "We accurately layer the short kurti over the flared trousers, maintaining the correct proportions." },
         { title: "Fabric-Specific Drape", desc: "Whether it's heavy brocade or light georgette, the AI renders the flare according to the fabric's actual physical properties." },
         { title: "No Photoshoot Required", desc: "Generate full-ensemble try-ons from simple flat lays of the individual pieces." }
-      ]}
-      impact={[
-        { metric: "-25%", desc: "Reduction in return rates for Sharara sets" },
-        { metric: "+15%", desc: "AOV lift on festive and bridal wear" },
-        { metric: "+45%", desc: "Increase in product page engagement" }
       ]}
     />
   );

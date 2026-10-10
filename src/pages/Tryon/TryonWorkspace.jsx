@@ -272,29 +272,6 @@ export default function TryonWorkspace({ onExit }) {
   // A picked file that is not a readable picture (a PDF, a renamed file, a HEIC outside Safari).
   const [uploadError, setUploadError] = useState('');
 
-  useEffect(() => {
-    // Inject fonts
-    const linkGaramond = document.createElement('link');
-    linkGaramond.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap';
-    linkGaramond.rel = 'stylesheet';
-    document.head.appendChild(linkGaramond);
-
-    const linkCourier = document.createElement('link');
-    linkCourier.href = 'https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap';
-    linkCourier.rel = 'stylesheet';
-    document.head.appendChild(linkCourier);
-
-    const linkInter = document.createElement('link');
-    linkInter.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
-    linkInter.rel = 'stylesheet';
-    document.head.appendChild(linkInter);
-
-    return () => {
-      document.head.removeChild(linkGaramond);
-      document.head.removeChild(linkCourier);
-      document.head.removeChild(linkInter);
-    };
-  }, []);
 
   // Fetch dynamic data (Default Models based on category)
   useEffect(() => {
@@ -560,7 +537,7 @@ export default function TryonWorkspace({ onExit }) {
 
   // 3. MAIN ATELIER / WORKSPACE FLOW
   return (
-    <div className="bg-[#FAF7F2] min-h-screen flex flex-col font-['Courier_Prime',monospace] text-[#1A1410] antialiased select-none select-text relative">
+    <div className="bg-[#FAF7F2] min-h-screen flex flex-col font-sans text-[#1A1410] antialiased select-none select-text relative">
 
       <style dangerouslySetInnerHTML={{
         __html: `
@@ -591,14 +568,14 @@ export default function TryonWorkspace({ onExit }) {
             className="h-10 md:h-12 object-contain cursor-pointer hover:opacity-80 transition-opacity"
           />
           <nav className="hidden md:flex gap-[32px] text-[12px] tracking-[1.6px] uppercase font-bold">
-            <span className="text-[#7f5700] border-[#7f5700] border-b border-solid pb-[2px] leading-[24px] cursor-pointer">VIRTUAL TRY-ON</span>
+            <span className="text-accent border-accent border-b border-solid pb-[2px] leading-[24px] cursor-pointer">VIRTUAL TRY-ON</span>
           </nav>
         </div>
 
         <div className="flex items-center gap-3 md:gap-[24px]">
           <button
             onClick={() => navigate(isGuestMode ? '/shop/demo' : '/gallery')}
-            className="text-[9px] md:text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 transition-all text-[#1A1410] bg-white border border-[#1A1410]/20 px-3 py-1.5 md:px-4 md:py-2 rounded-full hover:border-[#1A1410] hover:bg-[#1A1410] hover:text-white shadow-sm whitespace-nowrap"
+            className="text-[11px] md:text-[11px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 transition-all text-[#1A1410] bg-white border border-[#1A1410]/20 px-3 py-1.5 md:px-4 md:py-2 rounded-full hover:border-[#1A1410] hover:bg-[#1A1410] hover:text-white shadow-sm whitespace-nowrap"
           >
             <Image className="w-3 h-3 md:w-3.5 md:h-3.5" />
             <span className="hidden sm:inline">MY TRYON GALLERY</span>
@@ -610,7 +587,7 @@ export default function TryonWorkspace({ onExit }) {
           <button
             onClick={handleLogout}
             aria-label={isGuestMode ? 'Exit guest mode' : 'Log out'}
-            className="text-[9px] md:text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 transition-colors text-[#1A1410] hover:text-red-600 whitespace-nowrap"
+            className="text-[11px] md:text-[11px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 transition-colors text-[#1A1410] hover:text-red-600 whitespace-nowrap"
           >
             <LogOut className="w-3 h-3 md:w-3.5 md:h-3.5" />
             <span className="hidden sm:inline">{isGuestMode ? 'Exit Guest Mode' : 'Logout'}</span>
@@ -629,7 +606,7 @@ export default function TryonWorkspace({ onExit }) {
 
           {/* Workspace Header */}
           <div className="space-y-0.5">
-            <h2 className="font-['Playfair_Display',serif] text-[18px] font-normal leading-tight text-[#1A1410]">
+            <h2 className="font-serif text-[18px] font-normal leading-tight text-[#1A1410]">
               Virtual Fitting Room
             </h2>
           </div>
@@ -637,11 +614,11 @@ export default function TryonWorkspace({ onExit }) {
           {/* Step 1: SELECT CATEGORY */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="bg-[#1a1410] text-[#faf7f2] size-5 flex items-center justify-center text-[10px] font-bold">1</div>
+              <div className="bg-[#1a1410] text-[#faf7f2] size-5 flex items-center justify-center text-[11px] font-bold">1</div>
               <h3 className="text-[11px] tracking-[1.5px] uppercase font-bold text-[#1A1410]">SELECT CATEGORY</h3>
             </div>
 
-            <div className="grid grid-cols-5 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               {[
                 { key: "SAREE", icon: Wind },
                 { key: "LEHANGA", icon: Sparkles },
@@ -655,11 +632,11 @@ export default function TryonWorkspace({ onExit }) {
                     key={cat.key}
                     onClick={() => handleCategorySelect(cat.key)}
                     className={`group h-[48px] flex items-center justify-center px-2 border transition-all duration-300 ${isActive
-                      ? 'bg-[#FFFFFF] border-[#7f5700] ring-[1px] ring-[#7f5700]'
-                      : 'bg-white border-[rgba(26,20,16,0.08)] hover:border-[#7F5700] hover:shadow-[0_4px_15px_rgb(127,87,0,0.1)] hover:scale-[1.01]'
+                      ? 'bg-[#FFFFFF] border-accent ring-[1px] ring-accent'
+                      : 'bg-white border-[rgba(26,20,16,0.08)] hover:border-accent hover:shadow-[0_4px_15px_rgb(194,65,12,0.1)] hover:scale-[1.01]'
                       }`}
                   >
-                    <span className={`text-[10px] font-bold tracking-[1px] uppercase whitespace-nowrap transition-colors ${isActive ? 'text-[#7f5700]' : 'text-[#8c8278] group-hover:text-[#1A1410]'}`}>
+                    <span className={`text-[11px] font-bold tracking-[1px] uppercase whitespace-nowrap transition-colors ${isActive ? 'text-accent' : 'text-muted group-hover:text-[#1A1410]'}`}>
                       {categoryLabel(cat.key)}
                     </span>
                   </button>
@@ -671,17 +648,17 @@ export default function TryonWorkspace({ onExit }) {
           {/* Step 2: UPLOAD GARMENT */}
           <div className="space-y-5">
             <div className="flex items-center gap-2">
-              <div className="bg-[#1a1410] text-[#faf7f2] size-4 flex items-center justify-center text-[9px] font-bold">2</div>
-              <h3 className="text-[10px] tracking-[1px] uppercase font-bold text-[#1A1410]">UPLOAD GARMENT</h3>
+              <div className="bg-[#1a1410] text-[#faf7f2] size-4 flex items-center justify-center text-[11px] font-bold">2</div>
+              <h3 className="text-[11px] tracking-[1px] uppercase font-bold text-[#1A1410]">UPLOAD GARMENT</h3>
             </div>
 
             {category === 'SAREE' ? (
-              <div className="bg-yellow-50/80 px-4 py-3 border border-yellow-200 rounded-md shadow-sm text-[11px] text-yellow-800 font-['Inter',sans-serif] leading-relaxed -mt-2">
-                <span className="font-bold text-yellow-900">Note:</span> Upload the saree as a flat lay or draped on a mannequin. Blouse is optional — if not uploaded, the blouse from the saree image will be used.
+              <div className="bg-[#f2efe9] px-4 py-3 border-l-2 border-accent rounded-sm text-[12px] text-[#3d342c] font-sans leading-relaxed -mt-2">
+                <span className="font-bold text-[#1a1410]">Note:</span> Upload the saree as a flat lay or draped on a mannequin. Blouse is optional — if not uploaded, the blouse from the saree image will be used.
               </div>
             ) : (
-              <div className="bg-yellow-50/80 px-4 py-3 border border-yellow-200 rounded-md shadow-sm text-[11px] text-yellow-800 font-['Inter',sans-serif] leading-relaxed -mt-2">
-                <span className="font-bold text-yellow-900">Note:</span> Please upload flat lay or mannequin photos of the actual stitched {categoryLabel(category).toLowerCase()}. Do not upload unstitched fabric pieces. Ensure each specific garment part is uploaded into its corresponding slot below for optimal draping.
+              <div className="bg-[#f2efe9] px-4 py-3 border-l-2 border-accent rounded-sm text-[12px] text-[#3d342c] font-sans leading-relaxed -mt-2">
+                <span className="font-bold text-[#1a1410]">Note:</span> Please upload flat lay or mannequin photos of the actual stitched {categoryLabel(category).toLowerCase()}. Do not upload unstitched fabric pieces. Ensure each specific garment part is uploaded into its corresponding slot below for optimal draping.
               </div>
             )}
             {(() => {
@@ -693,14 +670,14 @@ export default function TryonWorkspace({ onExit }) {
                     key={slot.id}
                     onDrop={(e) => handleGarmentDrop(slot.id, e)}
                     onDragOver={handleDragOver}
-                    className="relative border border-dashed border-[#dcd6cc] bg-[#fdfcf9] rounded-xl overflow-hidden flex flex-col items-center justify-center min-h-[140px] group hover:border-[#7F5700] hover:bg-white hover:shadow-sm transition-all duration-300"
+                    className="relative border border-dashed border-[#dcd6cc] bg-[#fdfcf9] rounded-xl overflow-hidden flex flex-col items-center justify-center min-h-[140px] group hover:border-accent hover:bg-white hover:shadow-sm transition-all duration-300"
                   >
                     <input id={`file-${slot.id}`} type="file" accept="image/*" onChange={(e) => handleGarmentSlotChange(slot.id, e)} className="hidden" />
                     <input id={`camera-${slot.id}`} type="file" accept="image/*" capture="environment" onChange={(e) => handleGarmentSlotChange(slot.id, e)} className="hidden" />
 
                     <div className="absolute top-3 left-0 right-0 text-center pointer-events-none z-10">
-                      <span className="text-[9px] uppercase font-bold tracking-widest text-[#1A1410] bg-[#fdfcf9] group-hover:bg-white px-2 transition-colors">
-                        {slot.label} {slot.required && <span className="text-red-500">*</span>}
+                      <span className="text-[11px] uppercase font-bold tracking-widest text-[#1A1410] bg-[#fdfcf9] group-hover:bg-white px-2 transition-colors">
+                        {slot.label} {slot.required && <span className="text-red-700">*</span>}
                       </span>
                     </div>
 
@@ -723,7 +700,7 @@ export default function TryonWorkspace({ onExit }) {
                           <button
                             type="button"
                             onClick={(e) => handleRemoveGarmentSlot(slot.id, e)}
-                            className="bg-white text-red-500 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-full text-[9px] font-bold tracking-[1px] uppercase transition-all duration-300 shadow-[0_4px_10px_rgba(0,0,0,0.1)] flex items-center gap-1.5 transform translate-y-2 group-hover:translate-y-0"
+                            className="bg-white text-red-500 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-full text-[11px] font-bold tracking-[1px] uppercase transition-all duration-300 shadow-[0_4px_10px_rgba(0,0,0,0.1)] flex items-center gap-1.5 transform translate-y-2 group-hover:translate-y-0"
                           >
                             <X className="w-3 h-3" />
                             Remove
@@ -736,21 +713,21 @@ export default function TryonWorkspace({ onExit }) {
                           {/* Upload from Gallery / Main Upload */}
                           <label htmlFor={`file-${slot.id}`} className="flex flex-col items-center gap-1.5 md:gap-2 cursor-pointer group/upload">
                             <div className="bg-[#f2efe9] p-2.5 md:p-3 rounded-full group-hover/upload:bg-[#ede8df] group-hover/upload:scale-110 group-hover/upload:shadow-sm transition-all duration-300">
-                              <Upload className="h-4 w-4 text-[#7f5700]" />
+                              <Upload className="h-4 w-4 text-accent" />
                             </div>
-                            <span className="text-[8px] font-bold text-[#1A1410] uppercase tracking-widest md:hidden">Gallery</span>
-                            <span className="hidden md:block text-[10px] font-bold text-[#1A1410] uppercase tracking-widest whitespace-nowrap">Upload</span>
+                            <span className="text-[11px] font-bold text-[#1A1410] uppercase tracking-widest md:hidden">Gallery</span>
+                            <span className="hidden md:block text-[11px] font-bold text-[#1A1410] uppercase tracking-widest whitespace-nowrap">Upload</span>
                           </label>
 
                           {/* Take Photo (Mobile Only) */}
                           <label htmlFor={`camera-${slot.id}`} className="flex flex-col items-center gap-1.5 cursor-pointer group/camera md:hidden">
                             <div className="bg-[#f2efe9] p-2.5 rounded-full group-hover/camera:bg-[#ede8df] group-hover/camera:scale-110 group-hover/camera:shadow-sm transition-all duration-300">
-                              <Camera className="h-4 w-4 text-[#7f5700]" />
+                              <Camera className="h-4 w-4 text-accent" />
                             </div>
-                            <span className="text-[8px] font-bold text-[#1A1410] uppercase tracking-widest">Camera</span>
+                            <span className="text-[11px] font-bold text-[#1A1410] uppercase tracking-widest">Camera</span>
                           </label>
                         </div>
-                        <div className="text-[8px] text-[#8c8278] font-sans mt-0.5">JPG or PNG photo</div>
+                        <div className="text-[11px] text-muted font-sans mt-0.5">JPG or PNG photo</div>
                       </div>
                     )}
                   </div>
@@ -766,7 +743,7 @@ export default function TryonWorkspace({ onExit }) {
                   <div>
                     <div className="flex items-center gap-3 mb-3">
                       <div className="h-px bg-[#e5e0d8] flex-1"></div>
-                      <span className="text-[9px] uppercase font-bold tracking-[2px] text-[#1A1410]">Full Garment</span>
+                      <span className="text-[11px] uppercase font-bold tracking-[2px] text-[#1A1410]">Full Garment</span>
                       <div className="h-px bg-[#e5e0d8] flex-1"></div>
                     </div>
                     {renderSlot(activeSlots.find(s => s.id === 'full'))}
@@ -774,7 +751,7 @@ export default function TryonWorkspace({ onExit }) {
                   <div>
                     <div className="flex items-center gap-3 mb-3">
                       <div className="h-px bg-[#e5e0d8] flex-1"></div>
-                      <span className="text-[9px] uppercase font-bold tracking-[2px] text-[#1A1410]">
+                      <span className="text-[11px] uppercase font-bold tracking-[2px] text-[#1A1410]">
                         Garment Parts {category === 'LEHANGA' ? '& Dupatta Style (Optional)' : ''}
                       </span>
                       <div className="h-px bg-[#e5e0d8] flex-1"></div>
@@ -792,16 +769,16 @@ export default function TryonWorkspace({ onExit }) {
                           <button
                             key={style.id}
                             onClick={() => setSelectedDupattaStyle(selectedDupattaStyle === style.url ? null : style.url)}
-                            className={`relative group rounded-xl overflow-hidden border-2 transition-all min-h-[140px] ${selectedDupattaStyle === style.url ? 'border-[#7F5700] ring-4 ring-[#7F5700]/20' : 'border-[#e5e0d8] hover:border-[#7F5700]/50'}`}
+                            className={`relative group rounded-xl overflow-hidden border-2 transition-all min-h-[140px] ${selectedDupattaStyle === style.url ? 'border-accent ring-4 ring-accent/20' : 'border-[#e5e0d8] hover:border-accent/50'}`}
                           >
                             <div className="w-full h-full bg-[#faf7f2]">
                               <img src={style.url} alt={style.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                             </div>
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-2.5">
-                              <span className="text-white text-[8px] md:text-[9px] font-bold uppercase tracking-wider text-left drop-shadow-md">{style.name}</span>
+                              <span className="text-white text-[11px] md:text-[11px] font-bold uppercase tracking-wider text-left drop-shadow-md">{style.name}</span>
                             </div>
                             {selectedDupattaStyle === style.url && (
-                              <div className="absolute top-2 right-2 bg-[#7F5700] text-white p-1 rounded-full shadow-lg">
+                              <div className="absolute top-2 right-2 bg-accent text-white p-1 rounded-full shadow-lg">
                                 <Check className="w-3 h-3" />
                               </div>
                             )}
@@ -815,14 +792,14 @@ export default function TryonWorkspace({ onExit }) {
             })()}
 
             {uploadError && (
-              <p role="alert" className="text-[11px] text-red-700 font-['Inter',sans-serif] -mt-2">{uploadError}</p>
+              <p role="alert" className="text-[11px] text-red-700 font-sans -mt-2">{uploadError}</p>
             )}
 
             {/* Try Sample Materials Button */}
             <div className="mt-3 flex justify-center">
               <button
                 onClick={() => setShowSampleModal(true)}
-                className="text-[10px] border border-[#dcd6cc] bg-[#fdfcf9] hover:bg-[#ede8df] hover:border-[#7f5700] text-[#5c544d] px-6 py-2 rounded-full transition-colors flex items-center gap-2 uppercase tracking-[1.5px] font-bold shadow-sm"
+                className="text-[11px] border border-[#dcd6cc] bg-[#fdfcf9] hover:bg-[#ede8df] hover:border-accent text-[#5c544d] px-6 py-2 rounded-full transition-colors flex items-center gap-2 uppercase tracking-[1.5px] font-bold shadow-sm"
               >
                 <Image className="w-3.5 h-3.5" /> Sample Materials
               </button>
@@ -832,8 +809,8 @@ export default function TryonWorkspace({ onExit }) {
           {/* Step 3: SELECT MODEL */}
           <div className="space-y-5">
             <div className="flex items-center gap-2">
-              <div className="bg-[#1a1410] text-[#faf7f2] size-4 flex items-center justify-center text-[9px] font-bold">3</div>
-              <h3 className="text-[10px] tracking-[1px] uppercase font-bold text-[#1A1410]">SELECT MODEL</h3>
+              <div className="bg-[#1a1410] text-[#faf7f2] size-4 flex items-center justify-center text-[11px] font-bold">3</div>
+              <h3 className="text-[11px] tracking-[1px] uppercase font-bold text-[#1A1410]">SELECT MODEL</h3>
             </div>
 
             <div className="grid grid-cols-4 gap-3 w-full">
@@ -850,13 +827,13 @@ export default function TryonWorkspace({ onExit }) {
                       setResultImageUrl(null);
                       setTryonState('initial');
                     }}
-                    className={`w-full border p-0.5 relative flex flex-col transition-all duration-300 ${isSelected ? 'border-[#7f5700]' : 'border-[rgba(0,0,0,0)] opacity-75 hover:opacity-100'
+                    className={`w-full border p-0.5 relative flex flex-col transition-all duration-300 ${isSelected ? 'border-accent' : 'border-[rgba(0,0,0,0)] opacity-75 hover:opacity-100'
                       }`}
                   >
                     <div className="aspect-[3/4] w-full overflow-hidden relative">
                       <img src={model.img} alt={model.name} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
                       <div className="absolute bottom-0 left-0 right-0 bg-[rgba(26,20,16,0.8)] p-1.5 flex items-center justify-between">
-                        <span className="text-[7px] font-bold tracking-[0.5px] text-[#faf7f2] uppercase truncate max-w-[80%]">{model.name}</span>
+                        <span className="text-[11px] font-semibold text-[#faf7f2] whitespace-nowrap">{model.name}</span>
                         {isSelected && <Check className="size-[8px] text-[#faf7f2] shrink-0" strokeWidth={4} aria-label="selected" />}
                       </div>
                     </div>
@@ -870,7 +847,7 @@ export default function TryonWorkspace({ onExit }) {
           <button
             onClick={startGeneration}
             disabled={tryonState === 'generating' || !isGarmentUploadValid() || !selectedModel}
-            className={`w-full py-4 mt-8 text-[12px] font-bold tracking-[3px] uppercase flex items-center justify-center gap-2 transition-all shrink-0 ${tryonState !== 'generating' && isGarmentUploadValid() && selectedModel ? 'bg-[#1A1410] hover:bg-black text-[#FAF7F2] cursor-pointer shadow-md active:scale-[0.99]' : 'bg-[rgba(26,20,16,0.2)] text-[#8c8278] cursor-not-allowed'}`}
+            className={`w-full py-4 mt-8 text-[12px] font-bold tracking-[3px] uppercase flex items-center justify-center gap-2 transition-all shrink-0 ${tryonState !== 'generating' && isGarmentUploadValid() && selectedModel ? 'bg-[#1A1410] hover:bg-black text-[#FAF7F2] cursor-pointer shadow-md active:scale-[0.99]' : 'bg-[rgba(26,20,16,0.2)] text-muted cursor-not-allowed'}`}
           >
             <Sparkles className="h-3 w-3 shrink-0" aria-hidden="true" />
             <span>GENERATE TRY-ON</span>
@@ -901,14 +878,9 @@ export default function TryonWorkspace({ onExit }) {
                   className="w-full h-full object-cover transition-all duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col items-center justify-end pb-12 pointer-events-none">
-                  <h4 className="font-['Playfair_Display',serif] text-[18px] tracking-[2px] uppercase text-white drop-shadow-lg font-bold mb-2">
+                  <h4 className="font-serif text-[18px] tracking-[2px] uppercase text-white drop-shadow-lg font-bold mb-2">
                     SELECTED MODEL
                   </h4>
-                  <div className="flex items-center gap-1.5 justify-center">
-                    <div className="bg-white/90 rounded-full size-1.5 shadow-sm" />
-                    <div className="bg-white/90 rounded-full size-1.5 shadow-sm" />
-                    <div className="bg-white/90 rounded-full size-1.5 shadow-sm" />
-                  </div>
                 </div>
               </div>
             )}
@@ -926,34 +898,34 @@ export default function TryonWorkspace({ onExit }) {
                 </div>
 
                 {/* Features Banner */}
-                <div className="hidden md:flex mt-auto mb-4 border border-[#e5e0d8] rounded-2xl items-stretch divide-x divide-[#e5e0d8] bg-white w-full max-w-[560px] shadow-sm overflow-hidden shrink-0 font-['Inter',sans-serif] tracking-normal">
+                <div className="hidden md:flex mt-auto mb-4 border border-[#e5e0d8] rounded-2xl items-stretch divide-x divide-[#e5e0d8] bg-white w-full max-w-[560px] shadow-sm overflow-hidden shrink-0 font-sans tracking-normal">
                   <div className="flex-1 flex flex-col items-center justify-start text-center p-4 py-5">
                     <div className="w-8 h-8 rounded-full bg-[#faf7f2] flex items-center justify-center mb-3">
-                      <Sparkles className="w-4 h-4 text-[#7F5700]" />
+                      <Sparkles className="w-4 h-4 text-accent" />
                     </div>
-                    <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none tracking-wide">Realistic Try-On</h6>
-                    <p className="text-[8px] text-[#5c544d] leading-[1.5] max-w-[90px] font-medium">Advanced AI for realistic results</p>
+                    <h6 className="text-[11px] font-bold text-[#1A1410] mb-1.5 leading-none tracking-wide">Realistic Try-On</h6>
+                    <p className="text-[11px] text-[#5c544d] leading-[1.5] max-w-[90px] font-medium">Advanced AI for realistic results</p>
                   </div>
                   <div className="flex-1 flex flex-col items-center justify-start text-center p-4 py-5">
                     <div className="w-8 h-8 rounded-full bg-[#faf7f2] flex items-center justify-center mb-3">
-                      <ShieldCheck className="w-4 h-4 text-[#7F5700]" />
+                      <ShieldCheck className="w-4 h-4 text-accent" />
                     </div>
-                    <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none tracking-wide">Secure & Private</h6>
-                    <p className="text-[8px] text-[#5c544d] leading-[1.5] max-w-[90px] font-medium">Your images are safe and never shared</p>
+                    <h6 className="text-[11px] font-bold text-[#1A1410] mb-1.5 leading-none tracking-wide">Secure & Private</h6>
+                    <p className="text-[11px] text-[#5c544d] leading-[1.5] max-w-[90px] font-medium">Your images are safe and never shared</p>
                   </div>
                   <div className="flex-1 flex flex-col items-center justify-start text-center p-4 py-5">
                     <div className="w-8 h-8 rounded-full bg-[#faf7f2] flex items-center justify-center mb-3">
-                      <Image className="w-4 h-4 text-[#7F5700]" />
+                      <Image className="w-4 h-4 text-accent" />
                     </div>
-                    <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none tracking-wide">High Quality</h6>
-                    <p className="text-[8px] text-[#5c544d] leading-[1.5] max-w-[90px] font-medium">HD results with perfect fit</p>
+                    <h6 className="text-[11px] font-bold text-[#1A1410] mb-1.5 leading-none tracking-wide">High Quality</h6>
+                    <p className="text-[11px] text-[#5c544d] leading-[1.5] max-w-[90px] font-medium">HD results with perfect fit</p>
                   </div>
                   <div className="flex-1 flex flex-col items-center justify-start text-center p-4 py-5">
                     <div className="w-8 h-8 rounded-full bg-[#faf7f2] flex items-center justify-center mb-3">
-                      <Timer className="w-4 h-4 text-[#7F5700]" />
+                      <Timer className="w-4 h-4 text-accent" />
                     </div>
-                    <h6 className="text-[10px] font-bold text-[#1A1410] mb-1.5 leading-none tracking-wide">Easy & Fast</h6>
-                    <p className="text-[8px] text-[#5c544d] leading-[1.5] max-w-[90px] font-medium">Get results in just seconds</p>
+                    <h6 className="text-[11px] font-bold text-[#1A1410] mb-1.5 leading-none tracking-wide">Easy & Fast</h6>
+                    <p className="text-[11px] text-[#5c544d] leading-[1.5] max-w-[90px] font-medium">Usually ready in under a minute</p>
                   </div>
                 </div>
               </div>
@@ -979,7 +951,7 @@ export default function TryonWorkspace({ onExit }) {
 
                 {/* Metadata label bottom-left */}
                 <div className="absolute bottom-4 left-4 backdrop-blur-[6px] bg-white/85 border border-[rgba(26,20,16,0.08)] px-3 py-1.5 shadow-sm">
-                  <span className="text-[10px] font-bold text-[#1A1410]">
+                  <span className="text-[11px] font-bold text-[#1A1410]">
                     {workspaceMode === 'with_garment'
                       ? `${selectedModel} — ${selectedBackdrop.name}`
                       : `${selectedCatalogDress?.name} — Personal Portrait — ${selectedBackdrop.name}`
@@ -1003,7 +975,7 @@ export default function TryonWorkspace({ onExit }) {
               onClick={() => {
                 startGeneration();
               }}
-              className="border border-[#1a1410] hover:bg-[#1a1410]/5 py-3.5 text-[9px] font-bold tracking-[1.5px] uppercase text-[#1A1410] transition-colors flex items-center justify-center gap-1.5"
+              className="border border-[#1a1410] hover:bg-[#1a1410]/5 py-3.5 text-[11px] font-bold tracking-[1.5px] uppercase text-[#1A1410] transition-colors flex items-center justify-center gap-1.5"
             >
               <RefreshCw className="w-3 h-3" />
               <span>REGENERATE</span>
@@ -1036,7 +1008,7 @@ export default function TryonWorkspace({ onExit }) {
                 }
               }}
               disabled={isSaving || isSaved || !currentGenerationId || !resultImageUrl || resultImageUrl === FALLBACK_SAREE_ICON}
-              className="bg-[#1a1410] hover:bg-black text-[#faf7f2] py-3.5 text-[9px] font-bold tracking-[1.5px] uppercase transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[#1a1410] hover:bg-black text-[#faf7f2] py-3.5 text-[11px] font-bold tracking-[1.5px] uppercase transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSaving ? <RefreshCw className="w-3 h-3 animate-spin" /> : isSaved ? <Check className="w-3 h-3" /> : <Check className="w-3 h-3" />}
               <span>{isSaving ? 'SAVING...' : isSaved ? 'SAVED TO LIBRARY' : 'SAVE TO LIBRARY'}</span>
@@ -1063,11 +1035,11 @@ export default function TryonWorkspace({ onExit }) {
           <div className="bg-[#FAF7F2] border border-[#1a1410] max-w-md w-full p-8 relative shadow-2xl text-center rounded-2xl">
             <button
               onClick={() => setShowGuestSaveModal(false)}
-              className="absolute top-4 right-4 text-[#1A1410] hover:text-[#7f5700] transition-colors"
+              className="absolute top-4 right-4 text-[#1A1410] hover:text-accent transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
-            <h2 className="font-['Playfair_Display',serif] text-3xl text-[#1A1410] mb-3 mt-4">
+            <h2 className="font-serif text-3xl text-[#1A1410] mb-3 mt-4">
               Save to Library
             </h2>
             <p className="text-[12px] text-[#5c544d] font-sans leading-relaxed mb-6">
@@ -1084,7 +1056,7 @@ export default function TryonWorkspace({ onExit }) {
                   // and it used to land on the login form.
                   navigate('/login', { state: { isLogin: false, returnTo: '/workspace' } });
                 }}
-                className="w-full bg-[#1a1410] hover:bg-[#7f5700] text-white py-3.5 text-[11px] font-bold tracking-[2px] uppercase transition-colors rounded-xl"
+                className="w-full bg-[#1a1410] hover:bg-accent text-white py-3.5 text-[11px] font-bold tracking-[2px] uppercase transition-colors rounded-xl"
               >
                 Create Account
               </button>

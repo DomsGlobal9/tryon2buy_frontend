@@ -48,7 +48,7 @@ export default function VendorLimitModal({ isOpen, onClose, userType = 'guest', 
         <button
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-6 right-6 text-[#1a1410] hover:text-[#7f5700] transition-colors"
+          className="absolute top-6 right-6 text-[#1a1410] hover:text-accent transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
@@ -56,7 +56,7 @@ export default function VendorLimitModal({ isOpen, onClose, userType = 'guest', 
           <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-10 object-contain" />
         </div>
 
-        <h2 className="font-['EB_Garamond',serif] text-3xl text-[#1a1410] mb-3">
+        <h2 className="font-serif text-3xl text-[#1a1410] mb-3">
           {title}
         </h2>
 
@@ -77,7 +77,7 @@ export default function VendorLimitModal({ isOpen, onClose, userType = 'guest', 
               goToLogin();
             }
           }}
-          className="w-full bg-[#1a1410] hover:bg-[#7f5700] text-white py-4 text-[11px] font-bold tracking-[2px] uppercase transition-colors rounded-xl"
+          className="w-full bg-[#1a1410] hover:bg-accent text-white py-4 text-[11px] font-bold tracking-[2px] uppercase transition-colors rounded-xl"
         >
           {userType === 'vendor' ? 'Contact Us' : userType === 'expired' ? 'Log In Again' : isShopper ? 'OK' : 'Login as Vendor'}
         </button>

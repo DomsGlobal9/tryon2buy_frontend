@@ -84,10 +84,10 @@ export default function PublicNavbar() {
                         to={item.path}
                         className="block p-3 rounded-xl hover:bg-[#ede8df]/30 transition-colors group"
                       >
-                        <div className="text-sm font-bold text-[#1A1410] group-hover:text-[#7F5700] transition-colors">
+                        <div className="text-sm font-bold text-[#1A1410] group-hover:text-accent transition-colors">
                           {item.name}
                         </div>
-                        <div className="text-xs text-[#8c8278] mt-0.5">{item.desc}</div>
+                        <div className="text-xs text-muted mt-0.5">{item.desc}</div>
                       </Link>
                     ))}
                   </motion.div>
@@ -103,7 +103,7 @@ export default function PublicNavbar() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-4">
-            <Link to="/login" className="text-sm font-medium text-[#1A1410] hover:text-[#7F5700] transition-colors">
+            <Link to="/login" className="text-sm font-medium text-[#1A1410] hover:text-accent transition-colors">
               Sign In
             </Link>
             <button 
@@ -140,7 +140,7 @@ export default function PublicNavbar() {
           >
             <div className="px-4 py-6 space-y-6">
               <div>
-                <h4 className="text-[10px] font-bold uppercase tracking-wider text-[#8c8278] mb-3">Solutions</h4>
+                <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted mb-3">Solutions</h4>
                 <div className="grid grid-cols-1 gap-2 pt-2">
                   {SOLUTIONS.map(s => (
                     <Link 
@@ -208,16 +208,16 @@ export default function PublicNavbar() {
                 <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-10 object-contain" />
               </div>
               
-              <h3 className="text-3xl font-['EB_Garamond',serif] font-bold mb-4">Book a Demo</h3>
+              <h3 className="text-3xl font-serif font-bold mb-4">Book a Demo</h3>
               <p className="text-[#5c544d] leading-relaxed mb-8">
                 Ready to see our Proprietary Dupatta Drape Matrix in action? Contact our enterprise team to schedule a live technical demonstration tailored to your catalog.
               </p>
 
               <div className="bg-[#faf7f2] p-6 rounded-2xl border border-[#1a1410]/10 flex flex-col items-center justify-center text-center">
-                <span className="text-[10px] uppercase tracking-widest font-bold text-[#8c8278] mb-2">Email us at</span>
+                <span className="text-[11px] uppercase tracking-widest font-bold text-muted mb-2">Email us at</span>
                 <a 
                   href="mailto:info@tryon2buy.com" 
-                  className="text-xl md:text-2xl font-bold text-[#1a1410] hover:text-[#7F5700] transition-colors"
+                  className="text-xl md:text-2xl font-bold text-[#1a1410] hover:text-accent transition-colors"
                 >
                   info@tryon2buy.com
                 </a>

@@ -32,21 +32,8 @@ export default function ClientAuth() {
       }
     }
 
-    // Inject fonts
-    const linkGaramond = document.createElement('link');
-    linkGaramond.href = 'https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap';
-    linkGaramond.rel = 'stylesheet';
-    document.head.appendChild(linkGaramond);
 
-    const linkSpace = document.createElement('link');
-    linkSpace.href = 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap';
-    linkSpace.rel = 'stylesheet';
-    document.head.appendChild(linkSpace);
 
-    return () => {
-      document.head.removeChild(linkGaramond);
-      document.head.removeChild(linkSpace);
-    };
   }, [navigate]);
 
   const handleSubmit = async (e) => {
@@ -85,15 +72,15 @@ export default function ClientAuth() {
   };
 
   return (
-    <div className="bg-[#1A1410] min-h-screen font-['Space_Grotesk',sans-serif] text-white flex flex-col items-center justify-center p-6 relative select-none">
+    <div className="bg-[#1A1410] min-h-screen font-sans text-white flex flex-col items-center justify-center p-6 relative select-none">
       
       {/* Background patterns for premium B2B look */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#7F5700]/10 rounded-full filter blur-[100px]" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#c4933f]/10 rounded-full filter blur-[100px]" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/10 rounded-full filter blur-[100px]" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent/10 rounded-full filter blur-[100px]" />
 
       <button 
         onClick={() => navigate('/')}
-        className="absolute top-6 left-6 md:top-10 md:left-10 inline-flex items-center gap-1.5 text-xs uppercase font-bold tracking-widest text-[#c4933f] hover:text-white transition-colors z-20"
+        className="absolute top-6 left-6 md:top-10 md:left-10 inline-flex items-center gap-1.5 text-xs uppercase font-bold tracking-widest text-[#f6ad55] hover:text-white transition-colors z-20"
       >
         <ChevronLeft className="w-4 h-4" />
         <span>Back to Home</span>
@@ -106,7 +93,7 @@ export default function ClientAuth() {
           <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity focus:outline-none">
             <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-10 md:h-12 object-contain invert brightness-0 pb-1" />
           </button>
-          <span className="text-[10px] uppercase tracking-[3px] text-[#8c8278] font-bold block mt-4">
+          <span className="text-[11px] uppercase tracking-[3px] text-[#a69c92] font-bold block mt-4">
             B2B Client Portal
           </span>
         </div>
@@ -132,38 +119,38 @@ export default function ClientAuth() {
 
           {/* Email */}
           <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Business Email</label>
+            <label className="text-[11px] font-bold uppercase tracking-widest text-gray-400">Business Email</label>
             <div className="relative">
-              <Mail className="absolute left-4 top-3.5 w-4 h-4 text-gray-500" />
+              <Mail className="absolute left-4 top-3.5 w-4 h-4 text-gray-400" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="client@brand.com"
-                className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-[#c4933f] transition-all placeholder-gray-600"
+                className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-accent transition-all placeholder-gray-600"
               />
             </div>
           </div>
 
           {/* Password */}
           <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Password</label>
+            <label className="text-[11px] font-bold uppercase tracking-widest text-gray-400">Password</label>
             <div className="relative">
-              <Lock className="absolute left-4 top-3.5 w-4 h-4 text-gray-500" />
+              <Lock className="absolute left-4 top-3.5 w-4 h-4 text-gray-400" />
               <input
                 type={showPassword ? "text" : "password"}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-12 pr-12 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-[#c4933f] transition-all placeholder-gray-600"
+                className="w-full pl-12 pr-12 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-accent transition-all placeholder-gray-600"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className="absolute right-4 top-3.5 text-gray-500 hover:text-white transition-colors focus:outline-none"
+                className="absolute right-4 top-3.5 text-gray-400 hover:text-white transition-colors focus:outline-none"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -174,10 +161,10 @@ export default function ClientAuth() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#c4933f] hover:bg-[#a67c33] text-[#1A1410] text-[11px] font-bold uppercase tracking-widest py-4 rounded-xl mt-2 transition-all flex items-center justify-center gap-3 relative shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-75 disabled:cursor-not-allowed"
+            className="w-full bg-accent hover:bg-accent-dark text-white text-[11px] font-bold uppercase tracking-widest py-4 rounded-xl mt-2 transition-all flex items-center justify-center gap-3 relative shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-75 disabled:cursor-not-allowed"
           >
             {loading ? (
-              <span className="w-5 h-5 border-2 border-[#1A1410]/20 border-t-[#1A1410] rounded-full animate-spin" />
+              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
               <>
                 <span>Access Portal</span>
@@ -188,11 +175,11 @@ export default function ClientAuth() {
 
           {/* Link back to Merchant Portal */}
           <div className="mt-4 text-center border-t border-white/10 pt-6 flex flex-col gap-2">
-            <span className="text-[10px] uppercase tracking-widest font-bold text-[#8c8278]">Are you a Merchant?</span>
+            <span className="text-[11px] uppercase tracking-widest font-bold text-[#a69c92]">Are you a Merchant?</span>
             <button
               type="button"
               onClick={() => navigate('/login')}
-              className="text-[10px] font-bold uppercase tracking-widest text-[#c4933f] hover:text-white transition-colors flex items-center justify-center gap-1.5"
+              className="text-[11px] font-bold uppercase tracking-widest text-[#f6ad55] hover:text-white transition-colors flex items-center justify-center gap-1.5"
             >
               Go to Studio Portal <ArrowRight className="w-3 h-3" />
             </button>

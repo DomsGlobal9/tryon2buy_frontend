@@ -467,10 +467,10 @@ export default function ClientTryon() {
     // Branded rather than bare. This is the first thing after a camera closes, and an
     // unbranded grey screen at that moment reads as "the code did not work".
     return (
-      <div className="min-h-screen bg-[#faf7f2] flex flex-col items-center justify-center gap-5 px-6 font-['Courier_Prime',monospace]">
+      <div className="min-h-screen bg-[#faf7f2] flex flex-col items-center justify-center gap-5 px-6 font-sans">
         <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy" className="h-9 object-contain opacity-90" />
-        <div className="w-8 h-8 rounded-full border-2 border-[rgba(26,20,16,0.15)] border-t-[#dd6b20] animate-spin" />
-        <p className="text-[11px] uppercase tracking-[2px] text-[#8c8278]">Finding your garment</p>
+        <div className="w-8 h-8 rounded-full border-2 border-[rgba(26,20,16,0.15)] border-t-accent animate-spin" />
+        <p className="text-[11px] uppercase tracking-[2px] text-muted">Finding your garment</p>
       </div>
     );
   }
@@ -481,18 +481,18 @@ export default function ClientTryon() {
     // red text on an empty page -- no branding, no explanation, and nothing to do next. A
     // shopper standing in a shop deserves to know it is not their fault and where to go.
     return (
-      <div className="min-h-screen bg-[#faf7f2] flex flex-col items-center justify-center px-6 text-center font-['Courier_Prime',monospace]">
+      <div className="min-h-screen bg-[#faf7f2] flex flex-col items-center justify-center px-6 text-center font-sans">
         <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy" className="h-9 object-contain mb-8 opacity-90" />
-        <h1 className="font-['EB_Garamond',serif] text-[26px] text-[#1a1410] mb-3">Nothing to try on</h1>
-        <p className="text-[12px] leading-relaxed text-[#8c8278] max-w-[320px] mb-8 font-sans">
+        <h1 className="font-serif text-[26px] text-[#1a1410] mb-3">Nothing to try on</h1>
+        <p className="text-[12px] leading-relaxed text-muted max-w-[320px] mb-8 font-sans">
           {error || 'That code does not match anything available to try on.'}
         </p>
-        <p className="text-[10px] uppercase tracking-[1.5px] text-[#a0aec0] max-w-[320px] mb-6 font-sans">
+        <p className="text-[11px] uppercase tracking-[1.5px] text-muted max-w-[320px] mb-6 font-sans">
           Ask in the shop, or scan a different tag.
         </p>
         <button
           onClick={() => navigate('/')}
-          className="px-7 py-3 rounded-full bg-[#dd6b20] hover:bg-[#c05621] text-white text-[10px] font-bold uppercase tracking-[2px] transition-colors"
+          className="px-7 py-3 rounded-full bg-accent hover:bg-accent-dark text-white text-[11px] font-bold uppercase tracking-[2px] transition-colors"
         >
           About TryOn2Buy
         </button>
@@ -528,7 +528,7 @@ export default function ClientTryon() {
   };
 
   return (
-    <div className="bg-[#faf7f2] min-h-screen flex flex-col font-['Courier_Prime',monospace] text-[#1a1410] antialiased select-none">
+    <div className="bg-[#faf7f2] min-h-screen flex flex-col font-sans text-[#1a1410] antialiased select-none">
 
       <style dangerouslySetInnerHTML={{
         __html: `
@@ -558,7 +558,7 @@ export default function ClientTryon() {
           {backTarget && (
             <button aria-label="Back"
               onClick={handleBack}
-              className="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:text-[#1a1410] transition-colors"
+              className="inline-flex items-center gap-1.5 text-[11px] uppercase font-bold tracking-[1.5px] text-accent hover:text-[#1a1410] transition-colors"
             >
               <ChevronLeft className="w-3.5 h-3.5 stroke-[2.5]" />
               <span className="hidden md:inline">Back</span>
@@ -577,7 +577,7 @@ export default function ClientTryon() {
             {/* Names the garment that was scanned rather than the feature. Someone who has
                 just pointed a phone at a tag needs to know the code found the right thing
                 before they do anything else. */}
-            <span className="hidden md:flex font-['EB_Garamond',serif] font-normal text-[#1a1410] text-[18px] md:text-[22px] tracking-tight items-center max-w-[420px]">
+            <span className="hidden md:flex font-serif font-normal text-[#1a1410] text-[18px] md:text-[22px] tracking-tight items-center max-w-[420px]">
               <span className="opacity-40 px-2">|</span>
               <span className="truncate">{sourceGeneration?.dressName || 'PERSONAL FITTING'}</span>
             </span>
@@ -626,7 +626,7 @@ export default function ClientTryon() {
             <div className="px-4 pt-4 pb-3 sm:px-5 sm:pt-5 shrink-0">
               {/* The grab handle a sheet is expected to have. Decorative, hence aria-hidden. */}
               <div aria-hidden className="sm:hidden mx-auto mb-3 h-1 w-10 rounded-full bg-[rgba(26,20,16,0.18)]" />
-              <h2 className="font-['EB_Garamond',serif] text-[20px] sm:text-[22px] leading-tight text-[#1a1410]">
+              <h2 className="font-serif text-[20px] sm:text-[22px] leading-tight text-[#1a1410]">
                 Which one are you holding?
               </h2>
               <p className="text-[13px] leading-snug text-[#4a5568] mt-1">
@@ -704,7 +704,7 @@ export default function ClientTryon() {
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
 
           <div className="flex flex-col animate-fade-in w-full">
-            <h2 className={`font-['EB_Garamond',serif] text-[24px] font-normal leading-tight text-[#1a1410] ${tryonState === 'generated' ? 'mb-4 mt-4' : 'mb-0 hidden'}`}>
+            <h2 className={`font-serif text-[24px] font-normal leading-tight text-[#1a1410] ${tryonState === 'generated' ? 'mb-4 mt-4' : 'mb-0 hidden'}`}>
               Try On This Look
             </h2>
           </div>
@@ -727,11 +727,11 @@ export default function ClientTryon() {
                   />
                 )}
                 <div className="min-w-0">
-                  <p className="text-[9px] uppercase tracking-[1.2px] text-[#a0aec0] font-sans font-bold mb-0.5">You scanned</p>
+                  <p className="text-[11px] uppercase tracking-[1.2px] text-muted font-sans font-bold mb-0.5">You scanned</p>
                   <p className="text-[#1a202c] text-[13px] font-bold font-sans leading-snug truncate">
                     {sourceGeneration?.dressName || 'This garment'}
                   </p>
-                  <p className="text-[#718096] text-[10px] font-sans mt-0.5">Add a photo and see it on you.</p>
+                  <p className="text-muted text-[11px] font-sans mt-0.5">Add a photo and see it on you.</p>
                 </div>
               </div>
 
@@ -740,7 +740,7 @@ export default function ClientTryon() {
                 <h2 className="text-[#1a202c] text-[18px] md:text-[20px] font-bold flex items-center justify-center gap-1.5 mb-1 font-sans">
                   Upload Your Photo
                 </h2>
-                <p className="text-[#718096] text-[10px] md:text-[11px] font-sans leading-tight">
+                <p className="text-muted text-[11px] md:text-[11px] font-sans leading-tight">
                   For the best try-on experience, please follow the guidelines below.
                 </p>
               </div>
@@ -758,8 +758,8 @@ export default function ClientTryon() {
                   />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[#1a202c] font-bold text-[10px] font-sans">Pose like this</p>
-                  <p className="text-[#718096] text-[9px] font-sans leading-relaxed">
+                  <p className="text-[#1a202c] font-bold text-[11px] font-sans">Pose like this</p>
+                  <p className="text-muted text-[11px] font-sans leading-relaxed">
                     An example of framing — not the garment you scanned.
                   </p>
                 </div>
@@ -768,9 +768,9 @@ export default function ClientTryon() {
               {/* Tip Box -> Note Box */}
               <div className="bg-[#fffaf0] rounded-lg p-3 flex items-center gap-3 mb-3 border border-[#fefcbf]">
                 <div className="bg-[#feebc8] rounded-full p-1.5 shrink-0">
-                  <Lightbulb className="w-4 h-4 text-[#dd6b20]" />
+                  <Lightbulb className="w-4 h-4 text-accent" />
                 </div>
-                <p className="text-[#4a5568] text-[10px] font-sans leading-relaxed">
+                <p className="text-[#4a5568] text-[11px] font-sans leading-relaxed">
                   <span className="font-bold text-[#1a202c]">Note:</span> For the best fit visualization, please upload a clear, front-facing full-body photo. Ensure your posture and hand placement closely match the product model.
                 </p>
               </div>
@@ -781,14 +781,14 @@ export default function ClientTryon() {
                 onDragOver={handleDragOver}
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
-                className={`border-2 border-dashed rounded-xl p-3 flex flex-col items-center justify-center text-center bg-white transition-all relative group mb-3 min-h-[160px] ${isDragging ? 'border-[#dd6b20] bg-[#fffaf0] scale-[1.02] shadow-md' : 'border-[#f6ad55]'}`}
+                className={`border-2 border-dashed rounded-xl p-3 flex flex-col items-center justify-center text-center bg-white transition-all relative group mb-3 min-h-[160px] ${isDragging ? 'border-accent bg-[#fffaf0] scale-[1.02] shadow-md' : 'border-[#f6ad55]'}`}
               >
 
                 {selectedImage ? (
                   <div className="w-full h-full flex flex-col items-center justify-center group">
                     <div className="bg-[#fffaf0] w-full rounded-md p-2 flex items-center justify-center gap-1.5 mb-2 border border-[#fefcbf]">
-                      <Check className="w-3.5 h-3.5 text-[#dd6b20]" />
-                      <span className="text-[#4a5568] text-[9px] font-sans font-bold">Photo saved for all try-ons (Expires 20m)</span>
+                      <Check className="w-3.5 h-3.5 text-accent" />
+                      <span className="text-[#4a5568] text-[11px] font-sans font-bold">Photo saved for all try-ons (Expires 20m)</span>
                     </div>
                     
                     <div className="relative mb-3">
@@ -798,13 +798,13 @@ export default function ClientTryon() {
                     <div className="flex items-center gap-2 z-10 justify-center w-full max-w-[200px]">
                       <button 
                         onClick={triggerFileBrowser} 
-                        className="flex-1 border border-[rgba(26,20,16,0.2)] text-[#4a5568] bg-white rounded-md px-3 py-1.5 flex items-center justify-center gap-1.5 font-bold text-[9px] uppercase tracking-wider font-sans hover:border-[#1a1410] hover:text-[#1a1410] transition-colors"
+                        className="flex-1 border border-[rgba(26,20,16,0.2)] text-[#4a5568] bg-white rounded-md px-3 py-1.5 flex items-center justify-center gap-1.5 font-bold text-[11px] uppercase tracking-wider font-sans hover:border-[#1a1410] hover:text-[#1a1410] transition-colors"
                       >
                         <RefreshCw className="w-3 h-3" /> Replace
                       </button>
                       <button 
                         onClick={clearImage}
-                        className="flex-1 border border-red-200 text-red-600 bg-red-50 rounded-md px-3 py-1.5 flex items-center justify-center gap-1.5 font-bold text-[9px] uppercase tracking-wider font-sans hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
+                        className="flex-1 border border-red-200 text-red-600 bg-red-50 rounded-md px-3 py-1.5 flex items-center justify-center gap-1.5 font-bold text-[11px] uppercase tracking-wider font-sans hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
                       >
                         <X className="w-3 h-3" /> Remove
                       </button>
@@ -813,32 +813,32 @@ export default function ClientTryon() {
                 ) : (
                   <>
                     <div className="bg-[#fffaf0] rounded-full p-2 mb-2 group-hover:scale-110 transition-transform">
-                      <CloudUpload className="w-6 h-6 text-[#dd6b20]" />
+                      <CloudUpload className="w-6 h-6 text-accent" />
                     </div>
                     <h3 className="text-[#1a202c] text-[13px] font-bold mb-2 font-sans">Drag & drop your image here</h3>
 
                     <div className="flex items-center justify-center w-full max-w-[160px] mb-2">
                       <div className="flex-1 h-[1px] bg-[#e2e8f0]"></div>
-                      <span className="px-2 text-[#a0aec0] text-[10px] font-sans">or</span>
+                      <span className="px-2 text-muted text-[11px] font-sans">or</span>
                       <div className="flex-1 h-[1px] bg-[#e2e8f0]"></div>
                     </div>
 
                     <div className="flex items-center gap-2 mb-2 z-10">
                       <button
                         onClick={triggerCamera}
-                        className="lg:hidden border border-[#dd6b20] text-[#dd6b20] bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[10px] font-sans hover:bg-[#dd6b20] hover:text-white transition-colors"
+                        className="lg:hidden border border-accent text-accent bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[11px] font-sans hover:bg-accent hover:text-white transition-colors"
                       >
                         <Camera className="w-3.5 h-3.5" /> Take Photo
                       </button>
                       <button
                         onClick={triggerFileBrowser}
-                        className="border border-[#dd6b20] text-[#dd6b20] bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[10px] font-sans hover:bg-[#dd6b20] hover:text-white transition-colors"
+                        className="border border-accent text-accent bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[11px] font-sans hover:bg-accent hover:text-white transition-colors"
                       >
                         <FolderOpen className="w-3.5 h-3.5" /> Browse Files
                       </button>
                     </div>
 
-                    <p className="text-[#a0aec0] text-[9px] font-sans">PNG or JPG · Any size</p>
+                    <p className="text-muted text-[11px] font-sans">PNG or JPG · Any size</p>
                   </>
                 )}
               </div>
@@ -846,12 +846,12 @@ export default function ClientTryon() {
               {/* Note Box */}
               <div className="bg-white rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.04)] border border-[#e2e8f0] p-3 mb-4">
                 <div className="flex items-start gap-2 mb-2">
-                  <Lock className="w-3 h-3 text-[#dd6b20] shrink-0 mt-0.5" />
-                  <span className="text-[#4a5568] text-[10px] font-medium font-sans leading-relaxed">Uploaded images will be used solely to generate virtual try-on previews.</span>
+                  <Lock className="w-3 h-3 text-accent shrink-0 mt-0.5" />
+                  <span className="text-[#4a5568] text-[11px] font-medium font-sans leading-relaxed">Uploaded images will be used solely to generate virtual try-on previews.</span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <Heart className="w-3 h-3 text-[#dd6b20] shrink-0 mt-0.5" />
-                  <span className="text-[#4a5568] text-[10px] font-medium font-sans leading-relaxed">Your privacy is important to us. We do not share your images with anyone.</span>
+                  <Heart className="w-3 h-3 text-accent shrink-0 mt-0.5" />
+                  <span className="text-[#4a5568] text-[11px] font-medium font-sans leading-relaxed">Your privacy is important to us. We do not share your images with anyone.</span>
                 </div>
               </div>
 
@@ -865,20 +865,20 @@ export default function ClientTryon() {
                 onDragOver={handleDragOver}
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
-                className={`bg-white border-2 flex flex-col items-center justify-center text-center relative overflow-hidden group p-2 min-h-[140px] rounded-xl mb-3 transition-all ${isDragging ? 'border-[#dd6b20] border-dashed bg-[#fffaf0] scale-[1.02] shadow-md' : 'border-[#f6ad55]'}`}
+                className={`bg-white border-2 flex flex-col items-center justify-center text-center relative overflow-hidden group p-2 min-h-[140px] rounded-xl mb-3 transition-all ${isDragging ? 'border-accent border-dashed bg-[#fffaf0] scale-[1.02] shadow-md' : 'border-[#f6ad55]'}`}
               >
                 <img ref={activeImageRef} src={selectedImage} alt="Your Portrait" className="h-[120px] w-auto object-contain shadow-sm rounded-lg pointer-events-none" />
               </div>
               <div className="flex items-center gap-2 z-10 justify-center w-full">
                 <button 
                   onClick={triggerFileBrowser} 
-                  className="flex-1 border border-[rgba(26,20,16,0.2)] text-[#4a5568] bg-white rounded-md px-3 py-2 flex items-center justify-center gap-1.5 font-bold text-[9px] uppercase tracking-wider font-sans hover:border-[#1a1410] hover:text-[#1a1410] transition-colors"
+                  className="flex-1 border border-[rgba(26,20,16,0.2)] text-[#4a5568] bg-white rounded-md px-3 py-2 flex items-center justify-center gap-1.5 font-bold text-[11px] uppercase tracking-wider font-sans hover:border-[#1a1410] hover:text-[#1a1410] transition-colors"
                 >
                   <RefreshCw className="w-3 h-3" /> Replace
                 </button>
                 <button 
                   onClick={clearImage}
-                  className="flex-1 border border-red-200 text-red-600 bg-red-50 rounded-md px-3 py-2 flex items-center justify-center gap-1.5 font-bold text-[9px] uppercase tracking-wider font-sans hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
+                  className="flex-1 border border-red-200 text-red-600 bg-red-50 rounded-md px-3 py-2 flex items-center justify-center gap-1.5 font-bold text-[11px] uppercase tracking-wider font-sans hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
                 >
                   <X className="w-3 h-3" /> Remove
                 </button>
@@ -906,8 +906,8 @@ export default function ClientTryon() {
             onClick={startGeneration}
             disabled={!selectedImage || tryonState === 'generating'}
             className={`w-full py-4 text-[11px] font-bold tracking-[2px] uppercase flex items-center justify-center gap-2 transition-all shadow-lg rounded-full ${selectedImage && tryonState !== 'generating'
-                ? 'bg-[#dd6b20] hover:bg-[#c05621] text-white cursor-pointer hover:shadow-xl active:scale-[0.99]'
-                : 'bg-[rgba(26,20,16,0.1)] text-[#8c8278] cursor-not-allowed shadow-none'
+                ? 'bg-accent hover:bg-accent-dark text-white cursor-pointer hover:shadow-xl active:scale-[0.99]'
+                : 'bg-[rgba(26,20,16,0.1)] text-muted cursor-not-allowed shadow-none'
               } ${tryonState === 'generated' ? 'hidden' : ''}`}
           >
             <span>{tryonState === 'generating' ? 'FITTING IN PROGRESS...' : 'SEE MYSELF IN THIS'}</span>
@@ -967,7 +967,7 @@ export default function ClientTryon() {
 
             {tryonState === 'initial' && (
               <div className="absolute bottom-4 left-0 right-0 flex justify-center pointer-events-none">
-                <div className="bg-black/80 backdrop-blur-sm text-white text-[9px] font-bold uppercase tracking-widest px-4 py-2 shadow-lg">
+                <div className="bg-black/80 backdrop-blur-sm text-white text-[11px] font-bold uppercase tracking-widest px-4 py-2 shadow-lg">
                   THE GARMENT YOU WILL TRY ON
                 </div>
               </div>
@@ -983,7 +983,7 @@ export default function ClientTryon() {
                         have done, and every thumbnail showed the same outfit photograph -- so trying
                         one dress three times gave three identical thumbnails and no way to tell them
                         apart. Your own results all look different, which is what makes it a carousel. */}
-                    <img src={res.resultImageUrl} alt={`Try-on ${idx + 1}`} className={`w-10 h-14 object-cover rounded-md transition-all duration-300 ${currentSlideIndex === idx ? 'border-[1.5px] border-[#dd6b20] opacity-100 scale-105 shadow-sm' : 'border border-[rgba(255,255,255,0.2)] opacity-50 hover:opacity-100'}`} />
+                    <img src={res.resultImageUrl} alt={`Try-on ${idx + 1}`} className={`w-10 h-14 object-cover rounded-md transition-all duration-300 ${currentSlideIndex === idx ? 'border-[1.5px] border-accent opacity-100 scale-105 shadow-sm' : 'border border-[rgba(255,255,255,0.2)] opacity-50 hover:opacity-100'}`} />
                     {/* Delete button */}
                     <button onClick={(e) => handleCarouselDelete(e, res.id)} aria-label="Delete this try-on" className="absolute -top-1.5 -right-1.5 bg-red-500/90 hover:bg-red-500 text-white p-0.5 rounded-full md:opacity-0 md:group-hover/thumb:opacity-100 transition-opacity shadow-md">
                       <X className="w-3 h-3 stroke-[3]" />

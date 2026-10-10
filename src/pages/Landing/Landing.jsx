@@ -14,41 +14,6 @@ export default function Landing() {
     navigate('/workspace');
   };
 
-  useEffect(() => {
-    // Inject fonts
-    const linkGaramond = document.createElement('link');
-    linkGaramond.href = 'https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap';
-    linkGaramond.rel = 'stylesheet';
-    document.head.appendChild(linkGaramond);
-
-    const linkCourier = document.createElement('link');
-    linkCourier.href = 'https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap';
-    linkCourier.rel = 'stylesheet';
-    document.head.appendChild(linkCourier);
-
-    const linkOutfit = document.createElement('link');
-    linkOutfit.href = 'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap';
-    linkOutfit.rel = 'stylesheet';
-    document.head.appendChild(linkOutfit);
-
-    const linkMontserrat = document.createElement('link');
-    linkMontserrat.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap';
-    linkMontserrat.rel = 'stylesheet';
-    document.head.appendChild(linkMontserrat);
-
-    const linkMerriweather = document.createElement('link');
-    linkMerriweather.href = 'https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&display=swap';
-    linkMerriweather.rel = 'stylesheet';
-    document.head.appendChild(linkMerriweather);
-
-    return () => {
-      document.head.removeChild(linkGaramond);
-      document.head.removeChild(linkCourier);
-      document.head.removeChild(linkOutfit);
-      document.head.removeChild(linkMontserrat);
-      document.head.removeChild(linkMerriweather);
-    };
-  }, []);
 
   const marqueeImages = [
     "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=500&h=500&q=80",
@@ -62,7 +27,7 @@ export default function Landing() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#faf7f2] font-['Montserrat',sans-serif] text-[#1a1410] selection:bg-[#ed7b22] selection:text-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#faf7f2] font-sans text-[#1a1410] selection:bg-accent selection:text-white overflow-x-hidden">
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes scrollMarquee {
           0% { transform: translateX(0); }
@@ -113,7 +78,7 @@ export default function Landing() {
         .menu__icon.open span { background-color: #faf7f2; }
         .menu__icon.open span:nth-child(1) { animation: ease .8s menu-icon-top forwards; }
         .menu__icon.open span:nth-child(2) { animation: ease .8s menu-icon-scaled forwards; }
-        .menu__icon.open span:nth-child(3) { animation: ease .8s menu-icon-bottom forwards; background-color: #ed7b22; }
+        .menu__icon.open span:nth-child(3) { animation: ease .8s menu-icon-bottom forwards; background-color: #c2410c; }
 
         @keyframes menu-icon-top { 0% { top: 0; transform: rotate(0); } 50% { top: .5rem; transform: rotate(0); } 100% { top: .5rem; transform: rotate(45deg); } }
         @keyframes menu-icon-top-2 { 0% { top: .5rem; transform: rotate(45deg); } 50% { top: .5rem; transform: rotate(0); } 100% { top: 0; transform: rotate(0); } }
@@ -131,50 +96,50 @@ export default function Landing() {
         
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-8">
-          <Link to="/about" className="text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors font-['Merriweather',serif]">
+          <Link to="/about" className="text-[11px] uppercase tracking-widest font-bold hover:text-accent transition-colors font-sans">
             ABOUT US
           </Link>
           <div className="group relative">
-            <span className="text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors font-['Merriweather',serif] cursor-pointer flex items-center gap-1 py-4">
+            <span className="text-[11px] uppercase tracking-widest font-bold hover:text-accent transition-colors font-sans cursor-pointer flex items-center gap-1 py-4">
               SOLUTIONS
               <svg className="w-3 h-3 transition-transform duration-200 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
             </span>
             <div className="absolute top-[80%] left-1/2 -translate-x-1/2 mt-2 w-[280px] bg-white/95 backdrop-blur-xl border border-[#8c8278]/10 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col p-2 rounded-2xl z-[120] transform group-hover:translate-y-1">
               
               <Link to="/saree" className="flex flex-col px-4 py-3 hover:bg-[#faf7f2] rounded-xl transition-colors group/item">
-                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-[#ed7b22] font-['Merriweather',serif] mb-1">Saree Try-On</span>
-                <span className="text-[10px] text-[#8c8278] font-['Inter',sans-serif] capitalize">Nivi, Bengali & Regional drapes</span>
+                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-accent font-sans mb-1">Saree Try-On</span>
+                <span className="text-[11px] text-muted font-sans capitalize">Nivi, Bengali & Regional drapes</span>
               </Link>
               
               <Link to="/lehenga" className="flex flex-col px-4 py-3 hover:bg-[#faf7f2] rounded-xl transition-colors group/item">
-                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-[#ed7b22] font-['Merriweather',serif] mb-1">Lehenga Try-On</span>
-                <span className="text-[10px] text-[#8c8278] font-['Inter',sans-serif] capitalize">Accurate flare & volume physics</span>
+                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-accent font-sans mb-1">Lehenga Try-On</span>
+                <span className="text-[11px] text-muted font-sans capitalize">Accurate flare & volume physics</span>
               </Link>
               
               <Link to="/anarkali" className="flex flex-col px-4 py-3 hover:bg-[#faf7f2] rounded-xl transition-colors group/item">
-                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-[#ed7b22] font-['Merriweather',serif] mb-1">Anarkali Try-On</span>
-                <span className="text-[10px] text-[#8c8278] font-['Inter',sans-serif] capitalize">Floor-length flow & fit</span>
+                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-accent font-sans mb-1">Anarkali Try-On</span>
+                <span className="text-[11px] text-muted font-sans capitalize">Floor-length flow & fit</span>
               </Link>
               
               <Link to="/sharara" className="flex flex-col px-4 py-3 hover:bg-[#faf7f2] rounded-xl transition-colors group/item">
-                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-[#ed7b22] font-['Merriweather',serif] mb-1">Sharara Try-On</span>
-                <span className="text-[10px] text-[#8c8278] font-['Inter',sans-serif] capitalize">Trouser volume & layering</span>
+                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-accent font-sans mb-1">Sharara Try-On</span>
+                <span className="text-[11px] text-muted font-sans capitalize">Trouser volume & layering</span>
               </Link>
 
               <Link to="/kurti" className="flex flex-col px-4 py-3 hover:bg-[#faf7f2] rounded-xl transition-colors group/item">
-                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-[#ed7b22] font-['Merriweather',serif] mb-1">Kurti Try-On</span>
-                <span className="text-[10px] text-[#8c8278] font-['Inter',sans-serif] capitalize">Regional tailoring conventions</span>
+                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1410] group-hover/item:text-accent font-sans mb-1">Kurti Try-On</span>
+                <span className="text-[11px] text-muted font-sans capitalize">Regional tailoring conventions</span>
               </Link>
 
             </div>
           </div>
-          <Link to="/blog" className="text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors font-['Merriweather',serif]">
+          <Link to="/blog" className="text-[11px] uppercase tracking-widest font-bold hover:text-accent transition-colors font-sans">
             JOURNAL
           </Link>
-          <Link to="/login" state={{ isLogin: false }} className="text-[11px] uppercase tracking-widest font-bold hover:text-[#ed7b22] transition-colors font-['Merriweather',serif]">
+          <Link to="/login" state={{ isLogin: false }} className="text-[11px] uppercase tracking-widest font-bold hover:text-accent transition-colors font-sans">
             SIGNUP
           </Link>
-          <Link to="/login" state={{ isLogin: true }} className="bg-[#1a1410] text-white px-6 py-2.5 text-[11px] uppercase tracking-widest font-bold hover:bg-[#ed7b22] transition-colors flex items-center gap-2 font-['Merriweather',serif]">
+          <Link to="/login" state={{ isLogin: true }} className="bg-[#1a1410] text-white px-6 py-2.5 text-[11px] uppercase tracking-widest font-bold hover:bg-accent transition-colors flex items-center gap-2 font-sans">
             LOGIN <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -197,8 +162,8 @@ export default function Landing() {
           
           {/* Background Decorative Marquee */}
           <div className="absolute top-1/2 left-0 -translate-y-1/2 w-full overflow-hidden opacity-5 pointer-events-none flex whitespace-nowrap -z-10">
-            <span className="text-[120px] font-['EB_Garamond',serif] italic font-bold">TRYON2BUY STUDIO&nbsp;</span>
-            <span className="text-[120px] font-['EB_Garamond',serif] italic font-bold">TRYON2BUY STUDIO&nbsp;</span>
+            <span className="text-[120px] font-serif italic font-bold">TRYON2BUY STUDIO&nbsp;</span>
+            <span className="text-[120px] font-serif italic font-bold">TRYON2BUY STUDIO&nbsp;</span>
           </div>
 
           <div className="flex-1 flex flex-col justify-center px-8 relative z-10">
@@ -207,8 +172,8 @@ export default function Landing() {
               onClick={() => setIsMobileMenuOpen(false)}
               className="group flex items-end gap-6 py-6 border-b border-white/10 animate-fade-up delay-100"
             >
-              <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">01</span>
-              <span className="font-['EB_Garamond',serif] text-4xl tracking-wide text-white group-hover:text-[#ed7b22] group-hover:italic transition-all duration-300">About Us</span>
+              <span className="text-[12px] font-sans font-light text-muted mb-2">01</span>
+              <span className="font-serif text-4xl tracking-wide text-white group-hover:text-accent group-hover:italic transition-all duration-300">About Us</span>
             </Link>
 
             <Link 
@@ -216,8 +181,8 @@ export default function Landing() {
               onClick={() => setIsMobileMenuOpen(false)}
               className="group flex items-end gap-6 py-6 border-b border-white/10 animate-fade-up delay-150"
             >
-              <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">02</span>
-              <span className="font-['EB_Garamond',serif] text-4xl tracking-wide text-white group-hover:text-[#ed7b22] group-hover:italic transition-all duration-300">Solutions</span>
+              <span className="text-[12px] font-sans font-light text-muted mb-2">02</span>
+              <span className="font-serif text-4xl tracking-wide text-white group-hover:text-accent group-hover:italic transition-all duration-300">Solutions</span>
             </Link>
 
             <Link 
@@ -225,8 +190,8 @@ export default function Landing() {
               onClick={() => setIsMobileMenuOpen(false)}
               className="group flex items-end gap-6 py-6 border-b border-white/10 animate-fade-up delay-200"
             >
-              <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">03</span>
-              <span className="font-['EB_Garamond',serif] text-4xl tracking-wide text-white group-hover:text-[#ed7b22] group-hover:italic transition-all duration-300">Journal</span>
+              <span className="text-[12px] font-sans font-light text-muted mb-2">03</span>
+              <span className="font-serif text-4xl tracking-wide text-white group-hover:text-accent group-hover:italic transition-all duration-300">Journal</span>
             </Link>
             
             <Link 
@@ -235,8 +200,8 @@ export default function Landing() {
               onClick={() => setIsMobileMenuOpen(false)}
               className="group flex items-end gap-6 py-6 border-b border-white/10 animate-fade-up delay-300"
             >
-              <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">04</span>
-              <span className="font-['EB_Garamond',serif] text-4xl tracking-wide text-white group-hover:text-[#ed7b22] group-hover:italic transition-all duration-300">Sign Up</span>
+              <span className="text-[12px] font-sans font-light text-muted mb-2">04</span>
+              <span className="font-serif text-4xl tracking-wide text-white group-hover:text-accent group-hover:italic transition-all duration-300">Sign Up</span>
             </Link>
 
             <Link 
@@ -245,32 +210,32 @@ export default function Landing() {
               onClick={() => setIsMobileMenuOpen(false)}
               className="group flex items-end gap-6 py-8 border-b border-white/10 animate-fade-up delay-300"
             >
-              <span className="text-[12px] font-['Outfit',sans-serif] font-light text-[#8c8278] mb-2">05</span>
-              <span className="font-['EB_Garamond',serif] text-4xl tracking-wide text-[#ed7b22] group-hover:text-white transition-all duration-300">Login</span>
+              <span className="text-[12px] font-sans font-light text-muted mb-2">05</span>
+              <span className="font-serif text-4xl tracking-wide text-accent group-hover:text-white transition-all duration-300">Login</span>
             </Link>
           </div>
 
           <div className="px-8 pb-12 animate-fade-up delay-400 relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#8c8278] font-bold leading-loose">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-muted font-bold leading-loose">
               Tryon2Buy Technology <br/>
               © {new Date().getFullYear()} All Rights Reserved
             </p>
             <div className="flex gap-2 md:gap-3 flex-wrap">
-              <a href="https://www.instagram.com/tryon2buy/?hl=en" aria-label="TryOn2Buy on Instagram" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://www.instagram.com/tryon2buy/?hl=en" aria-label="TryOn2Buy on Instagram" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-accent hover:border-accent transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
               </a>
-              <a href="https://x.com/Tryon2buy" aria-label="TryOn2Buy on X" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://x.com/Tryon2buy" aria-label="TryOn2Buy on X" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-accent hover:border-accent transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               </a>
-              <a href="https://in.pinterest.com/tryon2buy/" aria-label="TryOn2Buy on Pinterest" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://in.pinterest.com/tryon2buy/" aria-label="TryOn2Buy on Pinterest" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-accent hover:border-accent transition-colors">
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.951-7.252 4.168 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.625 0 12.017 0z"/>
                 </svg>
               </a>
-              <a href="https://www.youtube.com/@Tryon2buy" aria-label="TryOn2Buy on YouTube" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://www.youtube.com/@Tryon2buy" aria-label="TryOn2Buy on YouTube" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-accent hover:border-accent transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
               </a>
-              <a href="https://www.linkedin.com/company/132194315/" aria-label="TryOn2Buy on LinkedIn" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://www.linkedin.com/company/132194315/" aria-label="TryOn2Buy on LinkedIn" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-accent hover:border-accent transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
               </a>
             </div>
@@ -283,38 +248,44 @@ export default function Landing() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-20 items-center">
           
           <div className="relative z-10">
-            <h1 className="font-['EB_Garamond',serif] text-5xl md:text-[5.5rem] leading-[1.05] mb-6 md:mb-8 font-normal tracking-tight text-[#1a1410]">
+            <h1 className="font-serif text-5xl md:text-[5.5rem] leading-[1.05] mb-6 md:mb-8 font-normal tracking-tight text-[#1a1410]">
               The Ultimate <br/>Virtual Try-On.
             </h1>
             
-            <p className="text-[15px] md:text-[17px] leading-relaxed text-[#5c544d] mb-10 md:mb-12 font-['Inter',sans-serif] max-w-lg">
+            <p className="text-[15px] md:text-[17px] leading-relaxed text-[#5c544d] mb-10 md:mb-12 font-sans max-w-lg">
               Elevate your boutique's catalog with studio-quality digital draping. 
-              Transform flat garment photos into stunning editorial model shots instantly, 
+              Transform flat garment photos into stunning editorial model shots, 
               and allow your customers to try on your fashion collection from anywhere.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 mb-10 max-w-md mx-auto xl:mx-0">
-              <button onClick={handleGuestWorkspace} className="bg-[#1a1410] text-white px-8 py-4 text-[11px] md:text-[12px] uppercase tracking-widest font-bold hover:bg-[#ed7b22] transition-colors flex items-center justify-center gap-2 font-['Merriweather',serif]">
-                Continue as Guest <ArrowRight className="w-4 h-4" />
+            {/* Shops are the customers, so signing one up is the main action; trying it as a
+                guest is the second. It used to be the guest button alone, with sign-up only at
+                the very bottom of the page. */}
+            <div className="flex flex-col sm:flex-row gap-3 mb-10 max-w-xl mx-auto xl:mx-0">
+              <Link to="/login" state={{ isLogin: false }} className="bg-[#1a1410] text-white px-7 py-4 text-[12px] uppercase tracking-widest font-bold hover:bg-accent transition-colors flex items-center justify-center gap-2 font-sans">
+                Create Merchant Account <ArrowRight className="w-4 h-4" />
+              </Link>
+              <button onClick={handleGuestWorkspace} className="border border-[#1a1410] text-[#1a1410] px-7 py-4 text-[12px] uppercase tracking-widest font-bold hover:bg-[#1a1410] hover:text-white transition-colors flex items-center justify-center font-sans">
+                Try It as a Guest
               </button>
             </div>
 
             <div className="mt-12 md:mt-16 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-4 h-4 text-[#ed7b22] shrink-0" />
-                <span className="text-[12px] uppercase tracking-[0.08em] font-bold font-['Outfit',sans-serif]">Zero Photoshoot Costs</span>
+                <CheckCircle2 className="w-4 h-4 text-accent shrink-0" />
+                <span className="text-[12px] uppercase tracking-[0.08em] font-bold font-sans">Zero Photoshoot Costs</span>
               </div>
               <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-4 h-4 text-[#ed7b22] shrink-0" />
-                <span className="text-[12px] uppercase tracking-[0.08em] font-bold font-['Outfit',sans-serif]">Immersive Try-On</span>
+                <CheckCircle2 className="w-4 h-4 text-accent shrink-0" />
+                <span className="text-[12px] uppercase tracking-[0.08em] font-bold font-sans">Immersive Try-On</span>
               </div>
               <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-4 h-4 text-[#ed7b22] shrink-0" />
-                <span className="text-[12px] uppercase tracking-[0.08em] font-bold font-['Outfit',sans-serif]">Studio-Grade Quality</span>
+                <CheckCircle2 className="w-4 h-4 text-accent shrink-0" />
+                <span className="text-[12px] uppercase tracking-[0.08em] font-bold font-sans">Studio-Grade Quality</span>
               </div>
               <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-4 h-4 text-[#ed7b22] shrink-0" />
-                <span className="text-[12px] uppercase tracking-[0.08em] font-bold font-['Outfit',sans-serif]">Multi-Category Support</span>
+                <CheckCircle2 className="w-4 h-4 text-accent shrink-0" />
+                <span className="text-[12px] uppercase tracking-[0.08em] font-bold font-sans">Multi-Category Support</span>
               </div>
             </div>
           </div>
@@ -374,20 +345,20 @@ export default function Landing() {
       <section className="border-y border-[#8c8278]/10 bg-white/40 py-12">
         <div className="max-w-[1400px] mx-auto px-6 md:px-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           <div>
-            <div className="font-['EB_Garamond',serif] text-4xl md:text-5xl text-[#ed7b22] mb-2">10x</div>
-            <div className="text-[10px] uppercase tracking-widest font-bold text-[#8c8278]">Faster Cataloging</div>
+            <div className="font-serif text-4xl md:text-5xl text-accent mb-2">5</div>
+            <div className="text-[11px] uppercase tracking-widest font-bold text-muted">Garment Categories</div>
           </div>
           <div>
-            <div className="font-['EB_Garamond',serif] text-4xl md:text-5xl text-[#ed7b22] mb-2">100%</div>
-            <div className="text-[10px] uppercase tracking-widest font-bold text-[#8c8278]">Digital Workflow</div>
+            <div className="font-serif text-4xl md:text-5xl text-accent mb-2">14</div>
+            <div className="text-[11px] uppercase tracking-widest font-bold text-muted">Backgrounds</div>
           </div>
           <div>
-            <div className="font-['EB_Garamond',serif] text-4xl md:text-5xl text-[#ed7b22] mb-2">40%</div>
-            <div className="text-[10px] uppercase tracking-widest font-bold text-[#8c8278]">Conversion Increase</div>
+            <div className="font-serif text-4xl md:text-5xl text-accent mb-2">0</div>
+            <div className="text-[11px] uppercase tracking-widest font-bold text-muted">Photoshoots Needed</div>
           </div>
           <div>
-            <div className="font-['EB_Garamond',serif] text-4xl md:text-5xl text-[#ed7b22] mb-2">24/7</div>
-            <div className="text-[10px] uppercase tracking-widest font-bold text-[#8c8278]">Virtual Fitting Room</div>
+            <div className="font-serif text-4xl md:text-5xl text-accent mb-2">24/7</div>
+            <div className="text-[11px] uppercase tracking-widest font-bold text-muted">Virtual Fitting Room</div>
           </div>
         </div>
       </section>
@@ -395,8 +366,8 @@ export default function Landing() {
       {/* How It Works */}
       <section className="py-24 md:py-32 max-w-[1400px] mx-auto px-6 md:px-12">
         <div className="text-center max-w-2xl mx-auto mb-16 md:mb-24">
-          <h2 className="font-['EB_Garamond',serif] text-4xl md:text-5xl mb-6">Redefining the Fashion Studio</h2>
-          <p className="text-[#5c544d] font-['Inter',sans-serif] text-[15px] leading-relaxed">
+          <h2 className="font-serif text-4xl md:text-5xl mb-6">Redefining the Fashion Studio</h2>
+          <p className="text-[#5c544d] font-sans text-[15px] leading-relaxed">
             Replace expensive, time-consuming model photoshoots with our advanced digital draping technology. A completely seamless workflow for modern fashion brands.
           </p>
         </div>
@@ -406,46 +377,46 @@ export default function Landing() {
           <div className="hidden md:block absolute top-12 left-1/6 right-1/6 h-[1px] bg-[#8c8278]/20 z-0"></div>
 
           {/* Step 1 */}
-          <div className="relative z-10 bg-[#faf7f2] p-8 text-center border border-[#8c8278]/10 hover:border-[#ed7b22]/30 transition-colors shadow-sm">
+          <div className="relative z-10 bg-[#faf7f2] p-8 text-center border border-[#8c8278]/10 hover:border-accent/30 transition-colors shadow-sm">
             <div className="w-16 h-16 mx-auto bg-[#1a1410] text-white flex items-center justify-center rounded-full mb-6 shadow-xl">
               <CameraOff className="w-6 h-6" />
             </div>
             <h3 className="text-[14px] uppercase font-bold tracking-widest mb-4">1. Upload Flat Lays</h3>
-            <p className="text-[#5c544d] font-['Inter',sans-serif] text-[14px] leading-relaxed">
+            <p className="text-[#5c544d] font-sans text-[14px] leading-relaxed">
               No models needed. Simply upload a flat photo of your saree, lehenga, or kurti directly from your inventory.
             </p>
           </div>
 
           {/* Step 2 */}
-          <div className="relative z-10 bg-[#faf7f2] p-8 text-center border border-[#8c8278]/10 hover:border-[#ed7b22]/30 transition-colors shadow-sm">
-            <div className="w-16 h-16 mx-auto bg-[#ed7b22] text-white flex items-center justify-center rounded-full mb-6 shadow-xl">
+          <div className="relative z-10 bg-[#faf7f2] p-8 text-center border border-[#8c8278]/10 hover:border-accent/30 transition-colors shadow-sm">
+            <div className="w-16 h-16 mx-auto bg-accent text-white flex items-center justify-center rounded-full mb-6 shadow-xl">
               <Zap className="w-6 h-6" />
             </div>
             <h3 className="text-[14px] uppercase font-bold tracking-widest mb-4">2. Digital Draping</h3>
-            <p className="text-[#5c544d] font-['Inter',sans-serif] text-[14px] leading-relaxed">
-              Our proprietary technology instantly drapes your garment onto professional virtual models with perfect lighting and folds.
+            <p className="text-[#5c544d] font-sans text-[14px] leading-relaxed">
+              Our technology drapes your garment onto professional virtual models with perfect lighting and folds.
             </p>
           </div>
 
           {/* Step 3 */}
-          <div className="relative z-10 bg-[#faf7f2] p-8 text-center border border-[#8c8278]/10 hover:border-[#ed7b22]/30 transition-colors shadow-sm">
+          <div className="relative z-10 bg-[#faf7f2] p-8 text-center border border-[#8c8278]/10 hover:border-accent/30 transition-colors shadow-sm">
             <div className="w-16 h-16 mx-auto bg-[#1a1410] text-white flex items-center justify-center rounded-full mb-6 shadow-xl">
               <LayoutGrid className="w-6 h-6" />
             </div>
             <h3 className="text-[14px] uppercase font-bold tracking-widest mb-4">3. Publish & Sell</h3>
-            <p className="text-[#5c544d] font-['Inter',sans-serif] text-[14px] leading-relaxed">
+            <p className="text-[#5c544d] font-sans text-[14px] leading-relaxed">
               Export stunning, high-resolution catalog images directly to your store and enable interactive virtual try-ons for your customers.
             </p>
           </div>
 
           {/* Step 4 */}
-          <div className="relative z-10 bg-[#faf7f2] p-8 text-center border border-[#8c8278]/10 hover:border-[#ed7b22]/30 transition-colors shadow-sm">
-            <div className="w-16 h-16 mx-auto bg-[#ed7b22] text-white flex items-center justify-center rounded-full mb-6 shadow-xl">
+          <div className="relative z-10 bg-[#faf7f2] p-8 text-center border border-[#8c8278]/10 hover:border-accent/30 transition-colors shadow-sm">
+            <div className="w-16 h-16 mx-auto bg-accent text-white flex items-center justify-center rounded-full mb-6 shadow-xl">
               <User className="w-6 h-6" />
             </div>
             <h3 className="text-[14px] uppercase font-bold tracking-widest mb-4">4. Customer Try-On</h3>
-            <p className="text-[#5c544d] font-['Inter',sans-serif] text-[14px] leading-relaxed">
-              Shoppers can upload their own photos to try on your garments, instantly customizing blouse styles and backgrounds.
+            <p className="text-[#5c544d] font-sans text-[14px] leading-relaxed">
+              Shoppers can upload their own photos to try on your garments, customizing blouse styles and backgrounds.
             </p>
           </div>
         </div>
@@ -461,14 +432,14 @@ export default function Landing() {
                 alt="Virtual Dressing Room" 
                 className="w-full h-auto object-cover rounded-sm opacity-90 shadow-2xl"
               />
-              <div className="absolute -bottom-8 -right-8 w-48 h-48 bg-[#ed7b22] -z-10 hidden md:block"></div>
+              <div className="absolute -bottom-8 -right-8 w-48 h-48 bg-accent -z-10 hidden md:block"></div>
             </div>
             
             <div className="order-1 lg:order-2">
-              <h2 className="font-['EB_Garamond',serif] text-4xl md:text-5xl mb-8 leading-tight">
+              <h2 className="font-serif text-4xl md:text-5xl mb-8 leading-tight">
                 An Immersive Fitting Room,<br/> Built for Conversion.
               </h2>
-              <p className="text-[#a69c92] font-['Inter',sans-serif] text-[16px] leading-relaxed mb-10">
+              <p className="text-[#a69c92] font-sans text-[16px] leading-relaxed mb-10">
                 Give your customers the ultimate confidence to purchase. By allowing them to see exactly how your luxury garments drape on their unique body type, you drastically reduce return rates and increase brand loyalty.
               </p>
               
@@ -479,7 +450,7 @@ export default function Landing() {
                   </div>
                   <div>
                     <h4 className="text-[12px] uppercase font-bold tracking-widest mb-1 text-white">Privacy First</h4>
-                    <p className="text-[#a69c92] font-['Inter',sans-serif] text-[14px]">Secure, enterprise-grade architecture protects your catalog and your customers' data.</p>
+                    <p className="text-[#a69c92] font-sans text-[14px]">Shopper photos are used only for the try-on they ask for, and never sold.</p>
                   </div>
                 </li>
                 <li className="flex items-start gap-4">
@@ -487,8 +458,8 @@ export default function Landing() {
                     <Clock className="w-4 h-4 text-[#d4af37]" />
                   </div>
                   <div>
-                    <h4 className="text-[12px] uppercase font-bold tracking-widest mb-1 text-white">Instant Results</h4>
-                    <p className="text-[#a69c92] font-['Inter',sans-serif] text-[14px]">Lightning-fast rendering delivers high-fidelity try-ons in seconds, not minutes.</p>
+                    <h4 className="text-[12px] uppercase font-bold tracking-widest mb-1 text-white">Quick Results</h4>
+                    <p className="text-[#a69c92] font-sans text-[14px]">Try-ons are usually ready in under a minute.</p>
                   </div>
                 </li>
               </ul>
@@ -503,13 +474,13 @@ export default function Landing() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[500px] bg-gradient-to-b from-transparent via-[#faf7f2]/80 to-[#faf7f2] -z-10"></div>
         
         <div className="max-w-3xl mx-auto px-6 relative z-10">
-          <h2 className="font-['EB_Garamond',serif] text-5xl md:text-6xl mb-6 text-[#1a1410]">
+          <h2 className="font-serif text-5xl md:text-6xl mb-6 text-[#1a1410]">
             Ready to Elevate Your Catalog?
           </h2>
-          <p className="text-[#5c544d] font-['Inter',sans-serif] text-[16px] leading-relaxed mb-10 max-w-xl mx-auto">
+          <p className="text-[#5c544d] font-sans text-[16px] leading-relaxed mb-10 max-w-xl mx-auto">
             Join the modern fashion boutiques using TryOn2Buy to digitize their draping process and deliver unparalleled shopping experiences.
           </p>
-          <Link to="/login" className="inline-flex items-center gap-3 bg-[#ed7b22] text-white px-10 py-5 text-[12px] uppercase tracking-[3px] font-bold hover:bg-[#1a1410] transition-colors shadow-xl hover:shadow-2xl hover:-translate-y-1 transform duration-200 font-['Merriweather',serif]">
+          <Link to="/login" className="inline-flex items-center gap-3 bg-accent text-white px-10 py-5 text-[12px] uppercase tracking-[3px] font-bold hover:bg-[#1a1410] transition-colors shadow-xl hover:shadow-2xl hover:-translate-y-1 transform duration-200 font-sans">
             Create Your Merchant Account <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -522,32 +493,32 @@ export default function Landing() {
             <div className="mb-6">
               <img src="/assets/footer_logo.png" alt="TryOn2Buy Logo" className="h-8 md:h-10 object-contain" />
             </div>
-            <p className="text-[#a69c92] font-['Inter',sans-serif] text-[14px] max-w-sm leading-relaxed mb-8">
+            <p className="text-[#a69c92] font-sans text-[14px] max-w-sm leading-relaxed mb-8">
               The premier digital draping and virtual fitting room technology for modern luxury fashion e-commerce.
             </p>
             {/* Social Icons */}
             <div className="flex gap-4 flex-wrap">
-              <a href="https://www.instagram.com/tryon2buy/?hl=en" aria-label="TryOn2Buy on Instagram" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://www.instagram.com/tryon2buy/?hl=en" aria-label="TryOn2Buy on Instagram" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-accent hover:border-accent transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
               </a>
-              <a href="https://x.com/Tryon2buy" aria-label="TryOn2Buy on X" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://x.com/Tryon2buy" aria-label="TryOn2Buy on X" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-accent hover:border-accent transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               </a>
-              <a href="https://in.pinterest.com/tryon2buy/" aria-label="TryOn2Buy on Pinterest" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://in.pinterest.com/tryon2buy/" aria-label="TryOn2Buy on Pinterest" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-accent hover:border-accent transition-colors">
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.951-7.252 4.168 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.625 0 12.017 0z"/>
                 </svg>
               </a>
-              <a href="https://www.youtube.com/@Tryon2buy" aria-label="TryOn2Buy on YouTube" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://www.youtube.com/@Tryon2buy" aria-label="TryOn2Buy on YouTube" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-accent hover:border-accent transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
               </a>
-              <a href="https://www.linkedin.com/company/132194315/" aria-label="TryOn2Buy on LinkedIn" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://www.linkedin.com/company/132194315/" aria-label="TryOn2Buy on LinkedIn" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-accent hover:border-accent transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
               </a>
             </div>
           </div>
           <div>
-            <h4 className="text-[11px] uppercase tracking-[2px] font-bold mb-6 text-[#8c8278]">Platform</h4>
+            <h4 className="text-[11px] uppercase tracking-[2px] font-bold mb-6 text-[#a69c92]">Platform</h4>
             <ul className="space-y-4">
               <li><Link to="/login" className="text-[13px] text-[#a69c92] hover:text-white transition-colors">Merchant Login</Link></li>
               <li><Link to="/login" className="text-[13px] text-[#a69c92] hover:text-white transition-colors">Create Account</Link></li>
@@ -555,7 +526,7 @@ export default function Landing() {
             </ul>
           </div>
           <div>
-            <h4 className="text-[11px] uppercase tracking-[2px] font-bold mb-6 text-[#8c8278]">Contact & Legal</h4>
+            <h4 className="text-[11px] uppercase tracking-[2px] font-bold mb-6 text-[#a69c92]">Contact & Legal</h4>
             <ul className="space-y-4">
               <li>
                 <a href="mailto:info@tryon2buy.com" className="text-[13px] text-[#a69c92] hover:text-white transition-colors">
@@ -568,14 +539,14 @@ export default function Landing() {
           </div>
         </div>
         
-        <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-[#8c8278]">
+        <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-[#a69c92]">
           <p className="text-[11px] uppercase tracking-[2px]">
             &copy; {new Date().getFullYear()} Tryon2Buy Technology. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <span className="text-[11px] uppercase tracking-widest font-bold">Studio Grade</span>
             <span className="w-1 h-1 bg-[#8c8278] rounded-full"></span>
-            <span className="text-[11px] uppercase tracking-widest font-bold">Enterprise Ready</span>
+            <span className="text-[11px] uppercase tracking-widest font-bold">Made for Ethnic Wear</span>
           </div>
         </div>
       </footer>

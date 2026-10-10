@@ -4,7 +4,7 @@ import CategoryLayout from '../CategoryLayout';
 export default function LehengaTryOn() {
   return (
     <CategoryLayout 
-      title={<>AI Lehenga Try-On <br/><span className="italic text-[#8c8278]">Flare, Volume, and Movement.</span></>}
+      title={<>AI Lehenga Try-On <br/><span className="italic text-muted">Flare, Volume, and Movement.</span></>}
       subtitle="A lehenga is not one garment; it's three — skirt, choli, dupatta."
       description="TryOn2Buy is trained on lehenga physics: skirt flare, fabric weight, how the choli sits, and exactly how the dupatta falls. With our proprietary Dupatta Drape Matrix, shoppers can visualize specific draping styles flawlessly. Brands see return rates drop."
       heroImage="/content%20(4).png"
@@ -16,11 +16,6 @@ export default function LehengaTryOn() {
         { title: "Multi-Piece Rendering", desc: "Lehenga is skirt + choli + dupatta. We render all three together, showing how they interact, layer, and drape on a body." },
         { title: "Fabric Weight & Volume", desc: "Heavy silks behave differently than georgettes. Our AI models fabric-specific behavior so the skirt flare looks authentic." },
         { title: "No Photoshoot Required", desc: "Start with a flat lay. We reconstruct the skirt volume, fit the choli, and apply the exact dupatta drape style automatically." }
-      ]}
-      impact={[
-        { metric: "-35%", desc: "Reduction in return rates for try-on-enabled SKUs" },
-        { metric: "+20%", desc: "AOV lift on bridal and festive categories" },
-        { metric: "+50%", desc: "Increase in product page engagement" }
       ]}
     />
   );

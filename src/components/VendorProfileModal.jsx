@@ -90,7 +90,7 @@ export default function VendorProfileModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#1a1410]/40 backdrop-blur-sm font-['Space_Grotesk',sans-serif]">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#1a1410]/40 backdrop-blur-sm font-sans">
       <div 
         className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
@@ -106,13 +106,13 @@ export default function VendorProfileModal({ isOpen, onClose }) {
           <div className="p-6 sm:p-8">
             {loading ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-[#7f5700] mb-4" />
+              <Loader2 className="w-8 h-8 animate-spin text-accent mb-4" />
               <p className="text-xs font-medium text-gray-500 uppercase tracking-widest">Loading Profile...</p>
             </div>
           ) : (
             <>
               <div className="flex flex-col items-center mb-6">
-                <div className="w-16 h-16 bg-[#faf7f2] rounded-full flex items-center justify-center mb-3 border border-[#e5e0d8] text-[#7f5700]">
+                <div className="w-16 h-16 bg-[#faf7f2] rounded-full flex items-center justify-center mb-3 border border-[#e5e0d8] text-accent">
                   <User className="w-8 h-8 stroke-[1.5]" />
                 </div>
                 <h2 className="text-xl font-bold text-[#1a1410] mb-1">Business Profile</h2>
@@ -122,7 +122,7 @@ export default function VendorProfileModal({ isOpen, onClose }) {
                 
                 {/* Email Address (Read-Only) */}
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-gray-500 ml-1">Email Address (Login)</label>
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-gray-500 ml-1">Email Address (Login)</label>
                   <div className="relative">
                     <Mail className="absolute left-3.5 top-3 w-4 h-4 text-gray-400" />
                     <input
@@ -134,69 +134,69 @@ export default function VendorProfileModal({ isOpen, onClose }) {
                     />
                   </div>
                   <div className="flex items-center gap-1.5 ml-1 mt-1">
-                    <Info className="w-3 h-3 text-[#7f5700]" />
-                    <p className="text-[9px] font-medium text-gray-400">Read only. Contact administrator to edit.</p>
+                    <Info className="w-3 h-3 text-accent" />
+                    <p className="text-[11px] font-medium text-gray-400">Read only. Contact administrator to edit.</p>
                   </div>
                 </div>
 
                 {/* Company Name */}
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-[#8c8278] ml-1">Company Name</label>
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-muted ml-1">Company Name</label>
                   <div className="relative">
-                    <Building2 className="absolute left-3.5 top-3 w-4 h-4 text-[#8c8278]" />
+                    <Building2 className="absolute left-3.5 top-3 w-4 h-4 text-muted" />
                     <input
                       type="text"
                       name="companyName"
                       value={profile.companyName}
                       onChange={handleChange}
                       placeholder="e.g. Sirimalle Silks"
-                      className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#e5e0d8] rounded-xl text-[#1a1410] text-sm focus:outline-none focus:border-[#7f5700] focus:ring-1 focus:ring-[#7f5700] transition-all shadow-sm"
+                      className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#e5e0d8] rounded-xl text-[#1a1410] text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all shadow-sm"
                     />
                   </div>
                 </div>
 
                 {/* Business Type */}
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-[#8c8278] ml-1">Business Type</label>
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-muted ml-1">Business Type</label>
                   <div className="relative">
-                    <Briefcase className="absolute left-3.5 top-3 w-4 h-4 text-[#8c8278]" />
+                    <Briefcase className="absolute left-3.5 top-3 w-4 h-4 text-muted" />
                     <input
                       type="text"
                       name="businessType"
                       value={profile.businessType}
                       onChange={handleChange}
                       placeholder="e.g. Retail Boutique"
-                      className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#e5e0d8] rounded-xl text-[#1a1410] text-sm focus:outline-none focus:border-[#7f5700] focus:ring-1 focus:ring-[#7f5700] transition-all shadow-sm"
+                      className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#e5e0d8] rounded-xl text-[#1a1410] text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all shadow-sm"
                     />
                   </div>
                 </div>
 
                 {/* Mobile Number */}
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-[#8c8278] ml-1">Mobile Number</label>
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-muted ml-1">Mobile Number</label>
                   <div className="relative">
-                    <Phone className="absolute left-3.5 top-3 w-4 h-4 text-[#8c8278]" />
+                    <Phone className="absolute left-3.5 top-3 w-4 h-4 text-muted" />
                     <input
                       type="tel"
                       name="mobileNumber"
                       value={profile.mobileNumber}
                       onChange={handleChange}
                       placeholder="+91 9876543210"
-                      className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#e5e0d8] rounded-xl text-[#1a1410] text-sm focus:outline-none focus:border-[#7f5700] focus:ring-1 focus:ring-[#7f5700] transition-all shadow-sm"
+                      className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#e5e0d8] rounded-xl text-[#1a1410] text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all shadow-sm"
                     />
                   </div>
                 </div>
 
                 <div className="pt-4 mt-2">
                   {message?.type === 'error' && (
-                    <div className="mb-3 text-center text-[10px] font-bold text-red-600 uppercase tracking-widest">
+                    <div className="mb-3 text-center text-[11px] font-bold text-red-600 uppercase tracking-widest">
                       {message.text}
                     </div>
                   )}
                   <button
                     type="submit"
                     disabled={saving || message?.type === 'success'}
-                    className={`w-full text-white py-3 rounded-xl text-[10px] font-bold tracking-widest uppercase transition-all shadow-md flex items-center justify-center gap-2 ${
+                    className={`w-full text-white py-3 rounded-xl text-[11px] font-bold tracking-widest uppercase transition-all shadow-md flex items-center justify-center gap-2 ${
                       message?.type === 'success' ? 'bg-green-600' : 'bg-[#1a1410] hover:bg-black disabled:opacity-70'
                     }`}
                   >

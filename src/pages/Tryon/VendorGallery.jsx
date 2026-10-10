@@ -155,7 +155,7 @@ export default function VendorGallery() {
   };
 
   return (
-    <div className="bg-[#faf7f2] min-h-screen font-['Courier_Prime',monospace] text-[#1a1410] flex flex-col items-center py-12 px-6 relative">
+    <div className="bg-[#faf7f2] min-h-screen font-sans text-[#1a1410] flex flex-col items-center py-12 px-6 relative">
 
       <ConfirmDialog
         open={!!confirmState}
@@ -174,17 +174,17 @@ export default function VendorGallery() {
       )}
       
       <div className="w-full max-w-[1000px] mb-8">
-        <Link to="/workspace" className="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:text-[#1a1410] transition-colors mb-4">
+        <Link to="/workspace" className="inline-flex items-center gap-1.5 text-[11px] uppercase font-bold tracking-[1.5px] text-accent hover:text-[#1a1410] transition-colors mb-4">
           <ChevronLeft className="w-3.5 h-3.5 stroke-[2.5]" />
           <span>Back to Workspace</span>
         </Link>
 
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>
-            <h2 className="font-['EB_Garamond',serif] text-3xl md:text-[36px] font-normal leading-tight text-[#1a1410]">
+            <h2 className="font-serif text-3xl md:text-[36px] font-normal leading-tight text-[#1a1410]">
               Vendor Gallery
             </h2>
-            <p className="text-[11px] tracking-[1.5px] uppercase font-bold text-[#8c8278] mt-2">
+            <p className="text-[11px] tracking-[1.5px] uppercase font-bold text-muted mt-2">
               Your beautifully draped catalog ready to be shared with customers.
             </p>
           </div>
@@ -192,7 +192,7 @@ export default function VendorGallery() {
           {/* Share Full Gallery Button */}
           <button
             onClick={copyGalleryLink}
-            className={`flex items-center gap-2 px-5 py-3 text-[9px] font-bold uppercase tracking-widest transition-colors shrink-0 ${
+            className={`flex items-center gap-2 px-5 py-3 text-[11px] font-bold uppercase tracking-widest transition-colors shrink-0 ${
               galleryCopied
                 ? 'bg-[#1a1410] text-[#faf7f2]'
                 : 'border border-[#1a1410] text-[#1a1410] hover:bg-[#1a1410] hover:text-[#faf7f2]'
@@ -208,28 +208,28 @@ export default function VendorGallery() {
       </div>
 
       {loading ? (
-        <div className="text-[12px] uppercase tracking-widest text-[#8c8278] mt-20 animate-pulse">
+        <div className="text-[12px] uppercase tracking-widest text-muted mt-20 animate-pulse">
           Loading your gallery...
         </div>
       ) : loadFailed ? (
         <div className="flex flex-col items-center justify-center mt-20 opacity-70 text-center">
-          <p className="text-[12px] uppercase tracking-widest text-[#8c8278]">We couldn't load your gallery.</p>
+          <p className="text-[12px] uppercase tracking-widest text-muted">We couldn't load your gallery.</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 px-5 py-2.5 text-[9px] font-bold uppercase tracking-widest border border-[#1a1410] text-[#1a1410] hover:bg-[#1a1410] hover:text-[#faf7f2] transition-colors"
+            className="mt-4 px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest border border-[#1a1410] text-[#1a1410] hover:bg-[#1a1410] hover:text-[#faf7f2] transition-colors"
           >
             Try again
           </button>
         </div>
       ) : generations.length === 0 ? (
         <div className="flex flex-col items-center justify-center mt-20 opacity-60">
-          <Share2 className="w-12 h-12 mb-4 text-[#8c8278]" />
-          <p className="text-[12px] uppercase tracking-widest text-[#8c8278]">No draped garments yet.</p>
+          <Share2 className="w-12 h-12 mb-4 text-muted" />
+          <p className="text-[12px] uppercase tracking-widest text-muted">No draped garments yet.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full max-w-[1000px]">
           {generations.map((gen) => (
-            <div key={gen.id} className="bg-white border border-[rgba(26,20,16,0.1)] p-3 flex flex-col gap-3 group hover:border-[#7f5700] transition-all hover:shadow-lg">
+            <div key={gen.id} className="bg-white border border-[rgba(26,20,16,0.1)] p-3 flex flex-col gap-3 group hover:border-accent transition-all hover:shadow-lg">
               <div className="aspect-[3/4] bg-[#ede8df] overflow-hidden relative group/img">
                 <img 
                   src={gen.resultImageUrl || gen.garmentImageUrl} 
@@ -257,7 +257,7 @@ export default function VendorGallery() {
                 </div>
               </div>
               <div className="flex flex-col gap-2">
-                <span className="text-[9px] font-bold uppercase tracking-widest text-[#1a1410] truncate">
+                <span className="text-[11px] font-bold uppercase tracking-widest text-[#1a1410] truncate">
                   {categoryLabel(gen.category) || "Draped Garment"}
                 </span>
 
@@ -267,7 +267,7 @@ export default function VendorGallery() {
                   <button
                     onClick={() => copyLink(gen.id)}
                     title="Copy customer share link"
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-[9px] font-bold uppercase tracking-widest transition-colors ${
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-bold uppercase tracking-widest transition-colors ${
                       copiedId === gen.id
                         ? 'bg-[#1a1410] text-[#faf7f2]'
                         : 'bg-[#faf7f2] border border-[#1a1410] text-[#1a1410] hover:bg-[#1a1410] hover:text-[#faf7f2]'
@@ -301,7 +301,7 @@ export default function VendorGallery() {
                     // workspace for the vendor who opened it -- and for nobody else.
                     onClick={() => navigate(`/tryon/${gen.id}`, { state: { fromVendorGallery: true } })}
                     title="Preview what a customer sees (stays on this device)"
-                    className="flex items-center justify-center px-2.5 py-2 text-[9px] font-bold uppercase tracking-widest bg-[#faf7f2] border border-[#1a1410] text-[#1a1410] hover:bg-[#1a1410] hover:text-[#faf7f2] transition-colors"
+                    className="flex items-center justify-center px-2.5 py-2 text-[11px] font-bold uppercase tracking-widest bg-[#faf7f2] border border-[#1a1410] text-[#1a1410] hover:bg-[#1a1410] hover:text-[#faf7f2] transition-colors"
                   >
                     <Eye className="w-3 h-3" />
                   </button>
@@ -309,7 +309,7 @@ export default function VendorGallery() {
                   <button
                     onClick={() => navigate(`/vendor/preview/${gen.id}`)}
                     title="Try this on — your photos and outfits appear on every device you are signed in on"
-                    className="flex items-center justify-center gap-1.5 px-3 py-2 text-[9px] font-bold uppercase tracking-widest bg-[#7f5700] text-[#faf7f2] hover:bg-[#1a1410] transition-colors"
+                    className="flex items-center justify-center gap-1.5 px-3 py-2 text-[11px] font-bold uppercase tracking-widest bg-accent text-[#faf7f2] hover:bg-[#1a1410] transition-colors"
                   >
                     <ExternalLink className="w-3 h-3" />
                     <span>Tryon</span>
