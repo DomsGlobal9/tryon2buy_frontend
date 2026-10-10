@@ -1,14 +1,17 @@
 import React from 'react';
 import { Star } from 'lucide-react';
+import { useEscape } from '../utils/useEscape';
 
 export default function VendorUpgradeModal({ isOpen, onClose, userType = 'vendor' }) {
+  useEscape(isOpen, onClose);
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
       <div className="bg-[#faf7f2] border border-[#1a1410] max-w-md w-full p-8 md:p-10 relative shadow-2xl text-center rounded-2xl">
         <button 
-          onClick={onClose} 
+          onClick={onClose}
+          aria-label="Close"
           className="absolute top-6 right-6 text-[#1a1410] hover:text-[#7f5700] transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>

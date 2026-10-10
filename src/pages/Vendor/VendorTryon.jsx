@@ -403,19 +403,28 @@ export default function VendorTryon() {
   }, [dock, id]);
 
   useEffect(() => {
+    // Reset for the new outfit: picking one from the dock on the "no longer here" screen
+    // changes the id, and the old error used to stay up over the outfit that had loaded.
+    let stale = false;
+    setError(null);
+    setLoading(true);
     fetch(`${API_URL}/api/tryon/generations/${id}`)
       .then(res => {
         if (!res.ok) throw new Error("Dress not found or link expired");
         return res.json();
       })
       .then(data => {
+        // A slower reply for an outfit flipped past must not overwrite the current one.
+        if (stale) return;
         setSourceGeneration(data);
         setLoading(false);
       })
       .catch(err => {
+        if (stale) return;
         setError(err.message);
         setLoading(false);
       });
+    return () => { stale = true; };
   }, [id]);
 
   // Clean up blob URLs and intervals to prevent massive memory leaks on mobile
@@ -760,6 +769,8 @@ export default function VendorTryon() {
       // dock_photo_id sent above. Only the try-ons are re-read -- the photograph in the slot
       // stays exactly where it is.
       await refreshResults();
+      // The list comes back newest first; without this a vendor on slide 3 saw an old try-on.
+      setCurrentSlideIndex(0);
 
       setTimeout(() => setTryonState('generated'), 400);
 
@@ -881,7 +892,7 @@ export default function VendorTryon() {
       <header className="bg-[#faf7f2] border-b border-[rgba(26,20,16,0.1)] h-[60px] flex items-center justify-between px-4 md:px-[32px] shrink-0 relative">
         {/* Back Button */}
         <div className="flex-1 md:w-[200px] md:flex-none">
-          <button
+          <button aria-label="Back"
             onClick={handleBack}
             className="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:text-[#1a1410] transition-colors"
           >
@@ -1028,7 +1039,7 @@ export default function VendorTryon() {
                       </button>
                     </div>
 
-                    <p className="text-[#a0aec0] text-[9px] font-sans">PNG, JPG, HEIC · Any size</p>
+                    <p className="text-[#a0aec0] text-[9px] font-sans">PNG or JPG · Any size</p>
                   </>
                 )}
               </div>
@@ -1223,12 +1234,12 @@ export default function VendorTryon() {
                 {carouselResults.length > 1 && (
                   <>
                     {currentSlideIndex > 0 && (
-                      <button onClick={prevSlide} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 z-30 transition-all shadow-md backdrop-blur-md border border-white/20">
+                      <button onClick={prevSlide} aria-label="Previous try-on" className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 z-30 transition-all shadow-md backdrop-blur-md border border-white/20">
                         <ChevronLeft className="w-5 h-5 stroke-[3]" />
                       </button>
                     )}
                     {currentSlideIndex < carouselResults.length - 1 && (
-                      <button onClick={nextSlide} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 z-30 transition-all rotate-180 shadow-md backdrop-blur-md border border-white/20">
+                      <button onClick={nextSlide} aria-label="Next try-on" className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 z-30 transition-all rotate-180 shadow-md backdrop-blur-md border border-white/20">
                         <ChevronLeft className="w-5 h-5 stroke-[3]" />
                       </button>
                     )}
@@ -1282,7 +1293,7 @@ export default function VendorTryon() {
                         apart. Your own results all look different, which is what makes it a carousel. */}
                     <img src={res.resultImageUrl} alt={`Try-on ${idx + 1}`} className={`w-10 h-14 object-cover rounded-md transition-all duration-300 ${currentSlideIndex === idx ? 'border-[1.5px] border-[#dd6b20] opacity-100 scale-105 shadow-sm' : 'border border-[rgba(255,255,255,0.2)] opacity-50 hover:opacity-100'}`} />
                     {/* Delete button */}
-                    <button onClick={(e) => handleCarouselDelete(e, res.id)} className="absolute -top-1.5 -right-1.5 bg-red-500/90 hover:bg-red-500 text-white p-0.5 rounded-full opacity-0 group-hover/thumb:opacity-100 transition-opacity shadow-md">
+                    <button onClick={(e) => handleCarouselDelete(e, res.id)} aria-label="Delete this try-on" className="absolute -top-1.5 -right-1.5 bg-red-500/90 hover:bg-red-500 text-white p-0.5 rounded-full md:opacity-0 md:group-hover/thumb:opacity-100 transition-opacity shadow-md">
                       <X className="w-3 h-3 stroke-[3]" />
                     </button>
                   </div>

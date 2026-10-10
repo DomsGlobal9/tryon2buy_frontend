@@ -1,5 +1,6 @@
 import React from 'react';
 import { Check } from 'lucide-react';
+import { useEscape } from '../utils/useEscape';
 
 // Real samples provided by user
 const realSampleSaree1 = "https://gsriztjnocjwgqkaxhhz.supabase.co/storage/v1/object/public/tryon-fits/garments/_DSC0149.jpg";
@@ -44,6 +45,7 @@ const shararaTop2 = "https://res.cloudinary.com/doiezptnn/image/upload/v17854120
 const shararaBottom2 = "https://res.cloudinary.com/doiezptnn/image/upload/v1785411950/29ab400e-a62f-4b76-b23d-bfb055850b6c_jucwky.png";
 
 export default function SampleWorkspaceModal({ isOpen, onClose, category, garmentUploads, setGarmentUploads }) {
+  useEscape(isOpen, onClose);
   if (!isOpen) return null;
 
   return (
@@ -55,8 +57,9 @@ export default function SampleWorkspaceModal({ isOpen, onClose, category, garmen
         className="bg-[#FAF7F2] border border-[#1a1410] max-w-4xl w-full p-5 md:p-6 relative shadow-2xl rounded-2xl max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <button 
-          onClick={onClose} 
+        <button
+          onClick={onClose}
+          aria-label="Close"
           className="absolute top-4 right-4 text-[#1A1410] hover:text-[#7f5700] transition-colors bg-white rounded-full p-1 shadow-sm z-10"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>

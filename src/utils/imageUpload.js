@@ -73,7 +73,14 @@ export async function toUploadableJpeg(source) {
 
   const blobUrl = URL.createObjectURL(source);
   try {
-    const img = await loadImage(blobUrl);
+    const img = await loadImage(blobUrl).catch((err) => {
+      // Only Safari can open HEIC (the iPhone photo format). Elsewhere, choosing the same file
+      // again fails the same way, so say what will actually work.
+      if (/image\/hei[cf]/i.test(source.type || '') || /\.hei[cf]$/i.test(source.name || '')) {
+        throw pickPhotoAgainError('This browser cannot open HEIC photos. Please choose a JPG or PNG, or use the camera button.');
+      }
+      throw err;
+    });
 
     let { width, height } = img;
     if (!width || !height) throw pickPhotoAgainError(RETAKE);

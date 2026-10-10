@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Share2, Copy, Check, Trash2, ExternalLink, Eye, X } from 'lucide-react';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { getVendorToken, clearVendorSession } from '../../utils/auth';
+import { categoryLabel } from '../../utils/categories';
 
 // Must match the hardcoded vendor ID in backend/index.js
 const DEFAULT_VENDOR_ID = 'feb21067-a3ee-4020-b388-16d3a37a29ce';
@@ -237,7 +238,7 @@ export default function VendorGallery() {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 {/* Action Buttons Group */}
-                <div className="absolute top-2 right-2 opacity-0 group-hover/img:opacity-100 transition-opacity flex bg-white/95 rounded-md shadow-sm overflow-hidden border border-[rgba(26,20,16,0.1)]">
+                <div className="absolute top-2 right-2 md:opacity-0 md:group-hover/img:opacity-100 transition-opacity flex bg-white/95 rounded-md shadow-sm overflow-hidden border border-[rgba(26,20,16,0.1)]">
                   <button 
                     onClick={() => setPreviewImage(gen.resultImageUrl || gen.garmentImageUrl)}
                     className={`hover:bg-gray-100 text-[#1a1410] p-2 transition-colors ${isMasterVendor ? 'border-r border-[rgba(26,20,16,0.05)]' : ''}`}
@@ -258,7 +259,7 @@ export default function VendorGallery() {
               </div>
               <div className="flex flex-col gap-2">
                 <span className="text-[9px] font-bold uppercase tracking-widest text-[#1a1410] truncate">
-                  {gen.category || "Draped Garment"}
+                  {categoryLabel(gen.category) || "Draped Garment"}
                 </span>
 
                 {/* Split Buttons: Share Link + Tryon */}

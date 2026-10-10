@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { getVendorToken, isGuestMode } from './utils/auth';
+import { getVendorToken, isGuestMode, loginPath } from './utils/auth';
 import TryonWorkspace from './pages/Tryon/TryonWorkspace';
 import VendorGallery from './pages/Tryon/VendorGallery';
 import CustomerTryon from './pages/Tryon/CustomerTryon';
@@ -35,7 +35,7 @@ import BlogPost from './pages/Landing/BlogPost';
 const VendorRoute = ({ children, allowGuest = false }) => {
   const location = useLocation();
   if (getVendorToken() || (allowGuest && isGuestMode())) return children;
-  return <Navigate to="/login" replace state={{ returnTo: location.pathname + location.search }} />;
+  return <Navigate to={loginPath()} replace state={{ returnTo: location.pathname + location.search }} />;
 };
 
 export default function App() {

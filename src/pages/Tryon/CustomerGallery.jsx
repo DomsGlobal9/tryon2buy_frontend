@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { API_URL } from '../../config';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Sparkles, ShoppingBag, Copy, Check, ChevronLeft } from 'lucide-react';
+import ErrorScreen, { NETWORK_PROBLEM } from '../../components/ErrorScreen';
+import { userFacingError } from '../../utils/generationRecovery';
+import { categoryLabel } from '../../utils/categories';
 
 export default function CustomerGallery() {
   const { vendorId } = useParams();
@@ -40,7 +43,8 @@ export default function CustomerGallery() {
   useEffect(() => {
     fetch(`${API_URL}/api/tryon/vendor/${vendorId}/gallery`)
       .then(res => {
-        if (!res.ok) throw new Error('Collection not found.');
+        if (res.status === 404) throw userFacingError("This shop's collection could not be found. Please check the link.");
+        if (!res.ok) throw new Error(`gallery ${res.status}`);
         return res.json();
       })
       .then(data => {
@@ -49,7 +53,8 @@ export default function CustomerGallery() {
         setLoading(false);
       })
       .catch(err => {
-        setError(err.message);
+        console.error('[CustomerGallery] load failed', err);
+        setError(err.isUserFacing ? err.message : NETWORK_PROBLEM);
         setLoading(false);
       });
   }, [vendorId]);
@@ -65,11 +70,7 @@ export default function CustomerGallery() {
   }
 
   if (error) {
-    return (
-      <div className="bg-[#faf7f2] min-h-screen flex items-center justify-center font-['Courier_Prime',monospace]">
-        <p className="text-[12px] uppercase tracking-widest text-red-700">{error}</p>
-      </div>
-    );
+    return <ErrorScreen message={error} onRetry={error === NETWORK_PROBLEM ? () => window.location.reload() : undefined} />;
   }
 
   return (
@@ -79,7 +80,8 @@ export default function CustomerGallery() {
       <header className="bg-[#faf7f2] border-b border-[rgba(26,20,16,0.1)] h-[60px] flex items-center justify-between px-4 md:px-[64px] shrink-0 relative">
         <div className="w-[150px] md:w-[200px]">
           <button
-            onClick={() => navigate(-1)}
+            // Opened straight from a shared link there is nothing to go back to.
+            onClick={() => (window.history.state?.idx > 0 ? navigate(-1) : navigate('/'))}
             className="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-[1.5px] text-[#7f5700] hover:text-[#1a1410] transition-colors"
           >
             <ChevronLeft className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -126,7 +128,7 @@ export default function CustomerGallery() {
                 <div className="aspect-[3/4] bg-[#ede8df] overflow-hidden relative">
                   <img
                     src={gen.resultImageUrl || gen.garmentImageUrl}
-                    alt={gen.category || 'Garment'}
+                    alt={categoryLabel(gen.category) || 'Garment'}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
@@ -134,7 +136,7 @@ export default function CustomerGallery() {
                 {/* Details */}
                 <div className="flex flex-col gap-2">
                   <span className="text-[9px] font-bold uppercase tracking-widest text-[#1a1410] truncate">
-                    {gen.category || 'Garment'}
+                    {categoryLabel(gen.category) || 'Garment'}
                   </span>
 
                   <div className="flex gap-1.5">

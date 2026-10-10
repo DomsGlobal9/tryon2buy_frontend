@@ -1,12 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { API_URL } from '../../config';
-import { Sparkles, Upload, Check, ChevronLeft, ArrowRight, RefreshCw, LogOut, Shirt, UserCheck, Wind, Star, Layers, Image, X, Camera, ShieldCheck, Timer, Search, ShoppingBag } from 'lucide-react';
+import { Sparkles, Upload, Check, ChevronLeft, ArrowRight, RefreshCw, LogOut, Shirt, UserCheck, Wind, Star, Layers, Image, X, Camera, ShieldCheck, Timer } from 'lucide-react';
+import { newClientRequestId, recoverGeneration, userFacingMessage, userFacingError } from '../../utils/generationRecovery';
+import { toUploadableJpeg, uploadSelfie } from '../../utils/imageUpload';
+
+// Stop holding a socket the network has given up on; the result is then collected by polling.
+const GENERATION_REQUEST_TIMEOUT_MS = 120000;
+
 import { useNavigate } from 'react-router-dom';
 import VendorLimitModal from '../../components/VendorLimitModal';
 import VendorUpgradeModal from '../../components/VendorUpgradeModal';
 import SampleWorkspaceModal from '../../components/SampleWorkspaceModal';
 import { motion } from 'framer-motion';
 import { getVendorToken, clearVendorSession, isGuestMode as readGuestMode, clearGuestMode, getGuestDeviceId } from '../../utils/auth';
+import { categoryLabel } from '../../utils/categories';
 
 /**
  * Every asset here used to point at http://localhost:3845 -- the local asset server of the
@@ -256,6 +263,14 @@ export default function TryonWorkspace({ onExit }) {
   const [selectedBackdrop, setSelectedBackdrop] = useState(BACKDROPS[0]);
 
   const fileInputRef = useRef(null);
+  const previewRef = useRef(null);
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
+  // A picked file that is not a readable picture (a PDF, a renamed file, a HEIC outside Safari).
+  const [uploadError, setUploadError] = useState('');
 
   useEffect(() => {
     // Inject fonts
@@ -330,19 +345,30 @@ export default function TryonWorkspace({ onExit }) {
     }
   };
 
+  // Re-encoded the moment it is picked, so a file that is not a readable picture is refused
+  // here, with a reason, instead of turning the Generate button on and failing after a credit.
+  const acceptGarmentFile = async (slotId, file) => {
+    let prepared;
+    try {
+      prepared = await toUploadableJpeg(file);
+    } catch (err) {
+      setUploadError(userFacingMessage(err));
+      return;
+    }
+    setUploadError('');
+    const url = URL.createObjectURL(prepared);
+    setGarmentUploads(prev => {
+      // Revoke the old object URL if one exists to prevent memory leaks
+      if (prev[slotId]?.url?.startsWith('blob:')) {
+        URL.revokeObjectURL(prev[slotId].url);
+      }
+      return { ...prev, [slotId]: { file: prepared, url } };
+    });
+  };
+
   const handleGarmentSlotChange = (slotId, e) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const url = URL.createObjectURL(file);
-
-      setGarmentUploads(prev => {
-        // Revoke the old object URL if one exists to prevent memory leaks
-        if (prev[slotId]?.url?.startsWith('blob:')) {
-          URL.revokeObjectURL(prev[slotId].url);
-        }
-        return { ...prev, [slotId]: { file, url } };
-      });
-
+      acceptGarmentFile(slotId, e.target.files[0]);
       // Clear the input value so the same file can be uploaded again if removed
       e.target.value = '';
     }
@@ -351,16 +377,7 @@ export default function TryonWorkspace({ onExit }) {
   const handleGarmentDrop = (slotId, e) => {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      const url = URL.createObjectURL(file);
-
-      setGarmentUploads(prev => {
-        // Revoke the old object URL if one exists to prevent memory leaks
-        if (prev[slotId]?.url?.startsWith('blob:')) {
-          URL.revokeObjectURL(prev[slotId].url);
-        }
-        return { ...prev, [slotId]: { file, url } };
-      });
+      acceptGarmentFile(slotId, e.dataTransfer.files[0]);
     }
   };
 
@@ -426,14 +443,26 @@ export default function TryonWorkspace({ onExit }) {
         return bounded;
       });
     }, 300);
+    // On a phone the preview sits above all the controls, so the progress and the result
+    // would otherwise arrive off-screen.
+    if (window.matchMedia('(max-width: 767px)').matches) {
+      previewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
     try {
       const garment_urls = {};
       for (const slot of activeSlots) {
         const slotData = garmentUploads[slot.id];
         if (slotData && slotData.file) {
-          const formData = new FormData(); formData.append('image', slotData.file);
-          const uploadRes = await fetch(`${API_URL}/api/tryon/upload?folder=garments`, { method: 'POST', headers: getUploadHeaders(), body: formData });
-          const uploadData = await uploadRes.json(); garment_urls[slot.id] = uploadData.url;
+          // uploadSelfie checks the reply. A refused upload used to leave the slot undefined,
+          // and the try-on still went out -- charged -- with no garment in it.
+          const uploaded = await uploadSelfie({ apiUrl: API_URL, file: slotData.file, folder: 'garments', headers: getUploadHeaders() });
+          if (uploaded.unauthorized) {
+            clearInterval(interval); setTryonState('initial');
+            clearVendorSession();
+            navigate('/login', { state: { returnTo: '/workspace' } });
+            return;
+          }
+          garment_urls[slot.id] = uploaded.url;
         } else if (slotData && slotData.url) {
           garment_urls[slot.id] = slotData.url;
         }
@@ -453,41 +482,77 @@ export default function TryonWorkspace({ onExit }) {
         }
       }
 
-      const genRes = await fetch(`${API_URL}/api/tryon/generate`, {
-        method: 'POST', headers: getHeaders(),
-        body: JSON.stringify({
-          mode: 'with_garment', garment_image_url, human_image_url, category, target_folder: 'vendor-drapes', dupatta_style_url: selectedDupattaStyle,
-          // Guests are counted per device on the server; a logged-in vendor is charged to their account.
-          ...(getVendorToken() ? {} : { guest_device_id: getGuestDeviceId() })
-        })
-      });
-      if (!genRes.ok) {
-        const errorData = await genRes.json().catch(() => ({})); clearInterval(interval); setTryonState('initial');
-        if (genRes.status === 401 && errorData.error === 'GUEST_LIMIT_REACHED') setShowLimitModal(true);
-        else if (genRes.status === 403 && errorData.error === 'INSUFFICIENT_CREDITS') setShowUpgradeModal(true);
-        else if (genRes.status === 401) {
+      // Named before it is sent, so a result whose reply is lost can still be collected.
+      const clientRequestId = newClientRequestId();
+      let genRes = null;
+      let genData = {};
+      let transportFailure = null;
+      try {
+        genRes = await fetch(`${API_URL}/api/tryon/generate`, {
+          method: 'POST', headers: getHeaders(),
+          body: JSON.stringify({
+            mode: 'with_garment', garment_image_url, human_image_url, category, target_folder: 'vendor-drapes', dupatta_style_url: selectedDupattaStyle,
+            client_request_id: clientRequestId,
+            // Guests are counted per device on the server; a logged-in vendor is charged to their account.
+            ...(getVendorToken() ? {} : { guest_device_id: getGuestDeviceId() })
+          }),
+          signal: AbortSignal.timeout(GENERATION_REQUEST_TIMEOUT_MS)
+        });
+        // Not .catch(() => ({})): a body that will not parse is a truncated reply, which must
+        // trigger recovery below.
+        genData = await genRes.json();
+      } catch (err) {
+        transportFailure = err;
+      }
+
+      // Refusals are decided before any row exists, so they are settled here, never polled for.
+      if (genRes && !transportFailure && !genRes.ok) {
+        if (genRes.status === 401 && genData.error === 'GUEST_LIMIT_REACHED') {
+          clearInterval(interval); setTryonState('initial'); setShowLimitModal(true); return;
+        }
+        if (genRes.status === 403 && genData.error === 'INSUFFICIENT_CREDITS') {
+          clearInterval(interval); setTryonState('initial'); setShowUpgradeModal(true); return;
+        }
+        if (genRes.status === 401) {
           // The login ran out. Log in again and come straight back to the workspace.
+          clearInterval(interval); setTryonState('initial');
           clearVendorSession();
           navigate('/login', { state: { returnTo: '/workspace' } });
+          return;
         }
-        // Detail to the console, never to the person: this used to print the server's own
-        // error text on screen, against the rule every other try-on page follows.
-        else { console.error('[Workspace] generation failed', genRes.status, errorData); alert('Try-on failed. Please try again.'); }
-        return;
       }
-      const genData = await genRes.json();
+
+      let finalUrl = genData?.result_image_url || null;
+      let generationId = genData?.generation_id || null;
+      if (!finalUrl) {
+        // The connection died or the reply had no image. The server is very likely still
+        // finishing a picture that is already paid for, so wait for it.
+        const recovered = await recoverGeneration({
+          apiUrl: API_URL, clientRequestId, headers: getHeaders(), isCancelled: () => !isMountedRef.current
+        });
+        if (recovered?.status === 'COMPLETED') {
+          finalUrl = recovered.result_image_url;
+          generationId = recovered.generation_id;
+        } else if (transportFailure) {
+          throw userFacingError('The connection dropped and the try-on could not be recovered. Please try again.');
+        } else {
+          // Detail to the console, never to the person.
+          throw new Error(`generation failed: ${genRes?.status} ${JSON.stringify(genData)} ${recovered?.status || ''}`);
+        }
+      }
+      if (!isMountedRef.current) return;
 
       clearInterval(interval);
       setProgress(100);
-      setResultImageUrl(genData.result_image_url || FALLBACK_SAREE_ICON);
-      if (genData.generation_id) setCurrentGenerationId(genData.generation_id);
+      setResultImageUrl(finalUrl);
+      if (generationId) setCurrentGenerationId(generationId);
       setTimeout(() => setTryonState('generated'), 400);
 
     } catch (err) {
-      console.error(err);
+      console.error('[Workspace]', err);
       clearInterval(interval);
       setTryonState('initial');
-      alert('Try-on failed. Please try again.');
+      alert(userFacingMessage(err));
     }
   };
 
@@ -531,13 +596,6 @@ export default function TryonWorkspace({ onExit }) {
         </div>
 
         <div className="flex items-center gap-3 md:gap-[24px]">
-          <button className="opacity-80 hover:opacity-100 transition-opacity hidden sm:block">
-            <Search className="h-[16px] w-[16px] text-[#1A1410]" strokeWidth={1.75} aria-label="Search" />
-          </button>
-          <button className="opacity-80 hover:opacity-100 transition-opacity hidden sm:block">
-            <ShoppingBag className="h-[15px] w-[15px] text-[#1A1410]" strokeWidth={1.75} aria-label="Bag" />
-          </button>
-
           <button
             onClick={() => navigate(isGuestMode ? '/shop/demo' : '/gallery')}
             className="text-[9px] md:text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 transition-all text-[#1A1410] bg-white border border-[#1A1410]/20 px-3 py-1.5 md:px-4 md:py-2 rounded-full hover:border-[#1A1410] hover:bg-[#1A1410] hover:text-white shadow-sm whitespace-nowrap"
@@ -551,6 +609,7 @@ export default function TryonWorkspace({ onExit }) {
 
           <button
             onClick={handleLogout}
+            aria-label={isGuestMode ? 'Exit guest mode' : 'Log out'}
             className="text-[9px] md:text-[10px] font-bold tracking-[1px] uppercase flex items-center gap-1.5 transition-colors text-[#1A1410] hover:text-red-600 whitespace-nowrap"
           >
             <LogOut className="w-3 h-3 md:w-3.5 md:h-3.5" />
@@ -601,7 +660,7 @@ export default function TryonWorkspace({ onExit }) {
                       }`}
                   >
                     <span className={`text-[10px] font-bold tracking-[1px] uppercase whitespace-nowrap transition-colors ${isActive ? 'text-[#7f5700]' : 'text-[#8c8278] group-hover:text-[#1A1410]'}`}>
-                      {cat.key}
+                      {categoryLabel(cat.key)}
                     </span>
                   </button>
                 );
@@ -622,7 +681,7 @@ export default function TryonWorkspace({ onExit }) {
               </div>
             ) : (
               <div className="bg-yellow-50/80 px-4 py-3 border border-yellow-200 rounded-md shadow-sm text-[11px] text-yellow-800 font-['Inter',sans-serif] leading-relaxed -mt-2">
-                <span className="font-bold text-yellow-900">Note:</span> Please upload flat lay or mannequin photos of the actual stitched {category.toLowerCase()}. Do not upload unstitched fabric pieces. Ensure each specific garment part is uploaded into its corresponding slot below for optimal draping.
+                <span className="font-bold text-yellow-900">Note:</span> Please upload flat lay or mannequin photos of the actual stitched {categoryLabel(category).toLowerCase()}. Do not upload unstitched fabric pieces. Ensure each specific garment part is uploaded into its corresponding slot below for optimal draping.
               </div>
             )}
             {(() => {
@@ -650,7 +709,17 @@ export default function TryonWorkspace({ onExit }) {
                         <div className="relative w-full h-[100px] flex items-center justify-center p-4 mt-6">
                           <img src={slotData.url} alt={slot.label} className="max-h-full max-w-full object-contain drop-shadow-md group-hover:scale-95 transition-transform duration-500" />
                         </div>
-                        <div className="absolute inset-0 bg-[#1a1410]/40 opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px] flex items-center justify-center rounded-xl z-20">
+                        {/* Phones have no hover: an always-visible remove, instead of an invisible
+                            overlay that caught every tap on the slot. */}
+                        <button
+                          type="button"
+                          onClick={(e) => handleRemoveGarmentSlot(slot.id, e)}
+                          aria-label={`Remove ${slot.label}`}
+                          className="md:hidden absolute top-2 right-2 z-20 bg-white text-red-500 rounded-full p-1.5 shadow"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                        <div className="hidden md:flex absolute inset-0 bg-[#1a1410]/40 opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px] items-center justify-center rounded-xl z-20">
                           <button
                             type="button"
                             onClick={(e) => handleRemoveGarmentSlot(slot.id, e)}
@@ -681,7 +750,7 @@ export default function TryonWorkspace({ onExit }) {
                             <span className="text-[8px] font-bold text-[#1A1410] uppercase tracking-widest">Camera</span>
                           </label>
                         </div>
-                        <div className="text-[8px] text-[#8c8278] font-sans mt-0.5">JPG, PNG • Max 10MB</div>
+                        <div className="text-[8px] text-[#8c8278] font-sans mt-0.5">JPG or PNG photo</div>
                       </div>
                     )}
                   </div>
@@ -745,6 +814,10 @@ export default function TryonWorkspace({ onExit }) {
               );
             })()}
 
+            {uploadError && (
+              <p role="alert" className="text-[11px] text-red-700 font-['Inter',sans-serif] -mt-2">{uploadError}</p>
+            )}
+
             {/* Try Sample Materials Button */}
             <div className="mt-3 flex justify-center">
               <button
@@ -806,7 +879,7 @@ export default function TryonWorkspace({ onExit }) {
         </aside>
 
         {/* Right Side Result Canvas Column */}
-        <main className="flex-1 bg-[#FFFFFF] relative overflow-hidden flex flex-col items-center justify-center p-4 md:p-8 min-h-[600px] md:min-h-0 shrink-0 md:shrink">
+        <main ref={previewRef} className="flex-1 bg-[#FFFFFF] relative overflow-hidden flex flex-col items-center justify-center p-4 md:p-8 min-h-[600px] md:min-h-0 shrink-0 md:shrink">
 
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="absolute border-[rgba(26,20,16,0.2)] border-r border-t right-[-192px] size-[384px] top-[-192px]" />
@@ -923,7 +996,7 @@ export default function TryonWorkspace({ onExit }) {
 
           {/* Action buttons */}
           <div
-            className={`mt-4 grid gap-4 w-full max-w-[500px] transition-all duration-500 grid-cols-2 ${tryonState === 'generated' ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden mt-0'
+            className={`mt-4 grid gap-4 w-full max-w-[500px] transition-all duration-500 grid-cols-2 ${tryonState === 'generated' ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden mt-0 invisible'
               }`}
           >
             <button

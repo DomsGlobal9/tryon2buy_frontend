@@ -121,6 +121,7 @@ export default function PublicNavbar() {
           {/* Mobile Toggle */}
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             className="md:hidden p-2 text-[#1A1410]"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -197,6 +198,7 @@ export default function PublicNavbar() {
               
               <button 
                 onClick={() => setShowDemoModal(false)}
+                aria-label="Close"
                 className="absolute top-6 right-6 text-[#1a1410]/40 hover:text-[#1a1410] transition-colors"
               >
                 <X className="w-6 h-6" />

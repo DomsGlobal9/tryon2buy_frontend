@@ -51,10 +51,35 @@ export function getVendorToken() {
   const token = localStorage.getItem(TOKEN_KEY);
   if (!token) return null;
   if (isExpired(token)) {
-    clearVendorSession();
+    expireVendorSession();
     return null;
   }
   return token;
+}
+
+/**
+ * A login that ran out: the login itself goes, but portal_type stays, so the person is sent
+ * back to THEIR login page. Clearing it too sent every B2B client to the merchant login, which
+ * then refused them with "Access denied".
+ */
+export function expireVendorSession() {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem('vendor_data');
+}
+
+export const LOGIN_UNAVAILABLE = "We couldn't sign you in right now. Please try again in a minute.";
+
+/**
+ * What a login form shows for a refused login. The server's 4xx sentences are written for
+ * people ("Invalid email or password."); a 5xx, or Render's HTML page while it wakes up, is not.
+ */
+export function loginFailureMessage(status, body) {
+  return status < 500 && typeof body?.error === 'string' ? body.error : LOGIN_UNAVAILABLE;
+}
+
+/** The login page for whoever was last signed in on this device. */
+export function loginPath() {
+  return localStorage.getItem('portal_type') === 'b2b' ? '/client-login' : '/login';
 }
 
 /**

@@ -3,7 +3,8 @@ import { API_URL } from '../../config';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Sparkles, ArrowRight, Store, Lock, Mail, User, Eye, EyeOff, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getVendorToken, clearGuestMode, safeReturnPath } from '../../utils/auth';
+import { getVendorToken, clearGuestMode, safeReturnPath, loginFailureMessage, LOGIN_UNAVAILABLE } from '../../utils/auth';
+import { userFacingError } from '../../utils/generationRecovery';
 
 export default function VendorAuth() {
   const navigate = useNavigate();
@@ -121,9 +122,9 @@ export default function VendorAuth() {
         body: JSON.stringify(payload)
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(data.error || 'Authentication failed');
+        throw userFacingError(loginFailureMessage(res.status, data));
       }
 
       // Save token & info
@@ -142,7 +143,8 @@ export default function VendorAuth() {
       // the piece somebody had been in the middle of trying on.
       navigate(safeReturnPath(location.state?.returnTo) || '/workspace');
     } catch (err) {
-      setError(err.message);
+      console.error('[VendorAuth] login failed', err);
+      setError(err.isUserFacing ? err.message : LOGIN_UNAVAILABLE);
     } finally {
       setLoading(false);
     }
@@ -193,7 +195,8 @@ export default function VendorAuth() {
         
         <div className="relative z-10 flex flex-col justify-between p-16 w-full text-white">
           <Link to="/" className="inline-block">
-            <img src="/TRYON2BUY%20LOGO%20(white%20).png" alt="TryOn2Buy Logo" className="h-10 object-contain drop-shadow-lg" onError={(e) => e.target.style.display='none'} />
+            {/* There is no white logo file; the black one turned white, as ClientAuth does. */}
+            <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-10 object-contain drop-shadow-lg invert brightness-0" />
             <h1 className="text-white font-['EB_Garamond',serif] text-3xl tracking-wide drop-shadow-lg mt-2 hidden" id="fallback-logo">TRYON2BUY</h1>
           </Link>
 
@@ -363,6 +366,7 @@ export default function VendorAuth() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8c8278] hover:text-[#1a1410] focus:outline-none p-1"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

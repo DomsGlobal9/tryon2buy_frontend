@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { API_URL } from '../../config';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Sparkles, ArrowRight, Store, Lock, Mail, User, Eye, EyeOff, ChevronLeft } from 'lucide-react';
-import { getVendorToken } from '../../utils/auth';
+import { getVendorToken, safeReturnPath, loginFailureMessage, LOGIN_UNAVAILABLE } from '../../utils/auth';
+import { userFacingError } from '../../utils/generationRecovery';
 
 export default function ClientAuth() {
   const navigate = useNavigate();
@@ -63,9 +64,9 @@ export default function ClientAuth() {
         body: JSON.stringify(payload)
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(data.error || 'Authentication failed');
+        throw userFacingError(loginFailureMessage(res.status, data));
       }
 
       // Save token & info
@@ -73,10 +74,11 @@ export default function ClientAuth() {
       localStorage.setItem('vendor_data', JSON.stringify(data.vendor));
       localStorage.setItem('portal_type', 'b2b');
 
-      // Redirect to digitize product screen
-      navigate('/vendor/upload');
+      // Back to where the expired login was asked for, otherwise the digitise screen.
+      navigate(safeReturnPath(location.state?.returnTo) || '/vendor/upload');
     } catch (err) {
-      setError(err.message);
+      console.error('[ClientAuth] login failed', err);
+      setError(err.isUserFacing ? err.message : LOGIN_UNAVAILABLE);
     } finally {
       setLoading(false);
     }
@@ -160,6 +162,7 @@ export default function ClientAuth() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                 className="absolute right-4 top-3.5 text-gray-500 hover:text-white transition-colors focus:outline-none"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

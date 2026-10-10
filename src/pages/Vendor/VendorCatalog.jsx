@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { API_URL } from '../../config';
 import VendorProfileModal from '../../components/VendorProfileModal';
+import { expireVendorSession, loginPath } from '../../utils/auth';
+import { categoryLabel } from '../../utils/categories';
 
 const VendorCatalog = () => {
   const navigate = useNavigate();
@@ -30,7 +32,17 @@ const VendorCatalog = () => {
     navigate('/');
   };
 
+  // Set when the catalogue could not be loaded. An empty list here used to read as "my
+  // products were deleted" when the login had only expired or the server was down.
+  const [loadFailed, setLoadFailed] = useState(false);
+
+  const sendToLogin = () => {
+    expireVendorSession();
+    navigate(loginPath(), { replace: true, state: { returnTo: '/vendor/catalog' } });
+  };
+
   const fetchData = async () => {
+    setLoadFailed(false);
     try {
       const [productsRes, profileRes] = await Promise.all([
         fetch(`${API_URL}/api/tryon/catalog/products`, {
@@ -40,16 +52,17 @@ const VendorCatalog = () => {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('vendor_token')}` }
         })
       ]);
-      const productsData = await productsRes.json();
-      if (Array.isArray(productsData)) {
-        setProducts(productsData);
-      }
-      const profileData = await profileRes.json();
+      if (productsRes.status === 401) return sendToLogin();
+      const productsData = await productsRes.json().catch(() => null);
+      if (!productsRes.ok || !Array.isArray(productsData)) throw new Error(`catalog ${productsRes.status}`);
+      setProducts(productsData);
+      const profileData = await profileRes.json().catch(() => ({}));
       if (profileData.allowedCategories) {
         setAllowedCategories(profileData.allowedCategories);
       }
     } catch (err) {
       console.error('Failed to fetch catalog or profile', err);
+      setLoadFailed(true);
     } finally {
       setLoading(false);
     }
@@ -84,14 +97,16 @@ const VendorCatalog = () => {
           'Authorization': `Bearer ${localStorage.getItem('vendor_token')}`
         }
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to delete product');
-      
+      if (res.status === 401) return sendToLogin();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `delete ${res.status}`);
+
       setProducts(products.filter(p => p.id !== productToDelete.id));
       setProductToDelete(null);
     } catch (err) {
+      // Detail to the console; the server's own wording is not written for this screen.
       console.error(err);
-      alert(err.message);
+      alert('Could not delete this product. Please try again.');
     } finally {
       setIsDeleting(false);
     }
@@ -208,7 +223,7 @@ const VendorCatalog = () => {
                             onClick={() => { setSelectedCategory(cat); setIsFilterOpen(false); }}
                             className={`w-full text-left px-3 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl transition-colors mt-0.5 ${selectedCategory === cat ? 'bg-[#7F5700]/10 text-[#7F5700]' : 'text-[#1A1410] hover:bg-[#faf7f2]'}`}
                           >
-                            {cat}
+                            {categoryLabel(cat)}
                           </button>
                         ))}
                       </div>
@@ -231,8 +246,22 @@ const VendorCatalog = () => {
           </div>
         )}
 
+        {!loading && loadFailed && (
+          <div role="alert" className="bg-white rounded-2xl border border-[#dcd6cc] p-12 flex flex-col items-center justify-center text-center">
+            <AlertTriangle className="w-8 h-8 text-[#7F5700] mb-4" />
+            <h3 className="text-lg font-bold text-[#1A1410] mb-2">Your catalog could not be loaded</h3>
+            <p className="text-gray-500 max-w-md mb-6">Your products are safe. Please check your connection and try again.</p>
+            <button
+              onClick={() => { setLoading(true); fetchData(); }}
+              className="bg-[#1A1410] hover:bg-black text-white px-8 py-3.5 rounded-xl font-bold tracking-widest uppercase text-xs transition-all shadow-md"
+            >
+              Try again
+            </button>
+          </div>
+        )}
+
         {/* Empty State */}
-        {!loading && products.length === 0 && (
+        {!loading && !loadFailed && products.length === 0 && (
           <div className="bg-white rounded-2xl border border-dashed border-[#dcd6cc] p-16 flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 bg-[#faf7f2] rounded-full flex items-center justify-center mb-6">
               <Box className="w-8 h-8 text-[#dcd6cc]" />
@@ -295,7 +324,7 @@ const VendorCatalog = () => {
 
                     {/* Category Badge */}
                     <div className="absolute top-3 right-3 bg-[#1A1410]/90 backdrop-blur-sm px-2.5 py-1 rounded-md border border-white/10 shadow-sm text-[9px] font-bold uppercase tracking-wider text-white">
-                      {product.category}
+                      {categoryLabel(product.category)}
                     </div>
 
                     {/* Preview Button (Hover Reveal) */}
@@ -304,7 +333,7 @@ const VendorCatalog = () => {
                         e.stopPropagation();
                         setPreviewProduct(product);
                       }}
-                      className="absolute bottom-3 right-12 bg-white/90 hover:bg-[#faf7f2] hover:text-[#7F5700] text-gray-500 backdrop-blur-sm p-1.5 rounded-full shadow-sm transition-all opacity-0 group-hover:opacity-100 border border-white/20"
+                      className="absolute bottom-3 right-12 bg-white/90 hover:bg-[#faf7f2] hover:text-[#7F5700] text-gray-500 backdrop-blur-sm p-1.5 rounded-full shadow-sm transition-all md:opacity-0 md:group-hover:opacity-100 border border-white/20"
                       title="Preview Product"
                     >
                       <Eye className="w-4 h-4" />
@@ -316,7 +345,7 @@ const VendorCatalog = () => {
                         e.stopPropagation();
                         setProductToDelete(product);
                       }}
-                      className="absolute bottom-3 right-3 bg-white/90 hover:bg-red-50 hover:text-red-600 text-gray-500 backdrop-blur-sm p-1.5 rounded-full shadow-sm transition-all opacity-0 group-hover:opacity-100 border border-white/20"
+                      className="absolute bottom-3 right-3 bg-white/90 hover:bg-red-50 hover:text-red-600 text-gray-500 backdrop-blur-sm p-1.5 rounded-full shadow-sm transition-all md:opacity-0 md:group-hover:opacity-100 border border-white/20"
                       title="Delete Product"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -435,7 +464,7 @@ const VendorCatalog = () => {
                 className="mt-4 text-center"
               >
                 <h3 className="text-white text-xl font-bold tracking-wide">{previewProduct.title}</h3>
-                <p className="text-white/70 text-sm mt-1 uppercase tracking-widest">{getProductId(previewProduct)} • {previewProduct.category}</p>
+                <p className="text-white/70 text-sm mt-1 uppercase tracking-widest">{getProductId(previewProduct)} • {categoryLabel(previewProduct.category)}</p>
               </motion.div>
             </motion.div>
           </motion.div>

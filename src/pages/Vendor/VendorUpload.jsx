@@ -3,6 +3,10 @@ import { Home, ArrowLeft, Upload, ChevronRight, Check, Image as ImageIcon, Spark
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../../config';
 import VendorProfileModal from '../../components/VendorProfileModal';
+import { uploadSelfie } from '../../utils/imageUpload';
+import { userFacingMessage } from '../../utils/generationRecovery';
+import { expireVendorSession, loginPath } from '../../utils/auth';
+import { categoryLabel } from '../../utils/categories';
 
 const CATEGORY_SLOTS = {
   SAREE: [
@@ -86,6 +90,11 @@ const VendorUpload = () => {
     }
   };
 
+  const sendToLogin = () => {
+    expireVendorSession();
+    navigate(loginPath(), { replace: true, state: { returnTo: '/vendor/upload' } });
+  };
+
   const handleGarmentSlotChange = async (slotId, e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -93,23 +102,21 @@ const VendorUpload = () => {
     e.target.value = ''; // Reset input so same file can trigger onChange again
 
     setIsUploadingSlot(slotId);
+    setError(null);
     try {
-      const formData = new FormData();
-      formData.append('image', file);
-      const res = await fetch(`${API_URL}/api/tryon/upload?folder=garments`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('vendor_token')}`
-        },
-        body: formData
+      // uploadSelfie re-encodes first (so a PDF or unreadable photo is refused with a reason)
+      // and checks the reply -- a refused upload used to leave the slot empty with no message.
+      const uploaded = await uploadSelfie({
+        apiUrl: API_URL,
+        file,
+        folder: 'garments',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('vendor_token')}` }
       });
-      const data = await res.json();
-      if (data.url) {
-        setGarmentUploads(prev => ({ ...prev, [slotId]: { file, url: data.url } }));
-      }
+      if (uploaded.unauthorized) return sendToLogin();
+      setGarmentUploads(prev => ({ ...prev, [slotId]: { file, url: uploaded.url } }));
     } catch (error) {
       console.error('Upload failed', error);
-      setError('Image upload failed.');
+      setError(error.isUserFacing ? userFacingMessage(error) : 'That image could not be uploaded. Please try again.');
     } finally {
       setIsUploadingSlot(null);
     }
@@ -188,14 +195,17 @@ const VendorUpload = () => {
         body: JSON.stringify({ garment_image_url: garmentPayload, category, dupatta_style_url: selectedDupattaStyle })
       });
       
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
+      if (res.status === 401) return sendToLogin();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.error || !data.result_image_url) throw new Error(data.error || `generate ${res.status}`);
 
       setResultImage(data.result_image_url);
       setGenerationId(data.generation_id);
       setStep(2); // Move to Preview Step
     } catch (err) {
-      setError(err.message || 'Generation failed.');
+      // Detail to the console; the server's wording (or a parser error) is not for this screen.
+      console.error('[VendorUpload] generate failed', err);
+      setError('The drape could not be created. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -220,13 +230,15 @@ const VendorUpload = () => {
         })
       });
       
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
+      if (res.status === 401) return sendToLogin();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.error) throw new Error(data.error || `save ${res.status}`);
 
       // Successfully saved! Redirect to catalog
       navigate('/vendor/catalog');
     } catch (err) {
-      setError(err.message || 'Failed to save to catalog.');
+      console.error('[VendorUpload] save failed', err);
+      setError('Could not save to your catalog. Please try again.');
       setLoading(false);
     }
   };
@@ -440,7 +452,7 @@ const VendorUpload = () => {
                       className="w-full bg-[#fdfcf9] border border-[#dcd6cc] rounded-xl px-4 py-3 text-left focus:outline-none focus:border-[#7F5700] focus:ring-1 focus:ring-[#7F5700] transition-all flex items-center justify-between shadow-sm hover:shadow-md"
                     >
                       <span className={category ? "text-[#1A1410] font-medium" : "text-[#8c8278]"}>
-                        {category ? category.charAt(0) + category.slice(1).toLowerCase() : "Select Category"}
+                        {category ? categoryLabel(category) : "Select Category"}
                       </span>
                       <ChevronDown className={`w-4 h-4 text-[#8c8278] transition-transform duration-200 ${categoryDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
@@ -461,7 +473,7 @@ const VendorUpload = () => {
                                 setCategoryDropdownOpen(false);
                               }}
                             >
-                              <span>{cat.charAt(0) + cat.slice(1).toLowerCase()}</span>
+                              <span>{categoryLabel(cat)}</span>
                               {category === cat && <Check className="w-4 h-4 text-[#7F5700]" />}
                             </button>
                           ))}
@@ -481,7 +493,7 @@ const VendorUpload = () => {
                     <ImageIcon className="w-5 h-5 text-[#7F5700]" />
                     <h2 className="text-lg font-bold text-[#1A1410]">Garment Assets</h2>
                   </div>
-                  <span className="text-xs text-gray-400 font-medium bg-gray-100 px-3 py-1 rounded-full uppercase tracking-wider">{category}</span>
+                  <span className="text-xs text-gray-400 font-medium bg-gray-100 px-3 py-1 rounded-full uppercase tracking-wider">{categoryLabel(category)}</span>
                 </div>
 
                 {category !== 'SAREE' ? (
@@ -579,7 +591,7 @@ const VendorUpload = () => {
                   )}
                   <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20 shadow-sm flex items-center gap-2">
                     <Box className="w-3.5 h-3.5 text-[#7F5700]" />
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#1A1410]">{category}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#1A1410]">{categoryLabel(category)}</span>
                   </div>
                 </div>
               </div>

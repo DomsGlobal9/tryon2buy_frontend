@@ -231,6 +231,7 @@ export default function AboutUs() {
         {/* Mobile Animated Hamburger Toggle */}
         <button 
           className={`md:hidden menu__icon ${isMobileMenuOpen ? 'open' : 'closed'}`}
+          aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           <span></span>
@@ -304,21 +305,21 @@ export default function AboutUs() {
               © {new Date().getFullYear()} All Rights Reserved
             </p>
             <div className="flex gap-2 md:gap-3 flex-wrap">
-              <a href="https://www.instagram.com/tryon2buy/?hl=en" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://www.instagram.com/tryon2buy/?hl=en" aria-label="TryOn2Buy on Instagram" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
               </a>
-              <a href="https://x.com/Tryon2buy" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://x.com/Tryon2buy" aria-label="TryOn2Buy on X" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               </a>
-              <a href="https://in.pinterest.com/tryon2buy/" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://in.pinterest.com/tryon2buy/" aria-label="TryOn2Buy on Pinterest" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.951-7.252 4.168 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.625 0 12.017 0z"/>
                 </svg>
               </a>
-              <a href="https://www.youtube.com/@Tryon2buy" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://www.youtube.com/@Tryon2buy" aria-label="TryOn2Buy on YouTube" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
               </a>
-              <a href="https://www.linkedin.com/company/132194315/admin/dashboard/" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://www.linkedin.com/company/132194315/" aria-label="TryOn2Buy on LinkedIn" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
               </a>
             </div>
@@ -620,21 +621,21 @@ export default function AboutUs() {
             </div>
             {/* Social Icons */}
             <div className="flex gap-4 flex-wrap justify-center">
-              <a href="https://www.instagram.com/tryon2buy/?hl=en" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://www.instagram.com/tryon2buy/?hl=en" aria-label="TryOn2Buy on Instagram" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
               </a>
-              <a href="https://x.com/Tryon2buy" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://x.com/Tryon2buy" aria-label="TryOn2Buy on X" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               </a>
-              <a href="https://in.pinterest.com/tryon2buy/" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://in.pinterest.com/tryon2buy/" aria-label="TryOn2Buy on Pinterest" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.951-7.252 4.168 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.625 0 12.017 0z"/>
                 </svg>
               </a>
-              <a href="https://www.youtube.com/@Tryon2buy" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://www.youtube.com/@Tryon2buy" aria-label="TryOn2Buy on YouTube" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
               </a>
-              <a href="https://www.linkedin.com/company/132194315/admin/dashboard/" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
+              <a href="https://www.linkedin.com/company/132194315/" aria-label="TryOn2Buy on LinkedIn" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-[#3a3430] flex items-center justify-center text-[#a69c92] hover:text-[#ed7b22] hover:border-[#ed7b22] transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
               </a>
             </div>
@@ -657,6 +658,7 @@ export default function AboutUs() {
             
             <button 
               onClick={() => setShowDemoModal(false)}
+              aria-label="Close"
               className="absolute top-6 right-6 text-[#1a1410]/40 hover:text-[#1a1410] transition-colors"
             >
               <X className="w-6 h-6" />
