@@ -48,7 +48,9 @@ export default function GarmentCard({ image, title, subtitle, onOpen, openLabel,
             onClick={actions[0].onClick}
             aria-label={actions[0].label}
             title={actions[0].label}
-            className="col-span-1 flex items-center justify-center border border-[rgba(26,20,16,0.25)] text-[#1a1410] hover:border-[#1a1410] hover:text-accent transition-colors"
+            className={`col-span-1 flex items-center justify-center border transition-colors ${actions[0].danger
+              ? 'border-red-200 text-red-600 hover:bg-red-50 hover:border-red-400'
+              : 'border-[rgba(26,20,16,0.25)] text-[#1a1410] hover:border-[#1a1410] hover:text-accent'}`}
           >
             {actions[0].icon}
           </button>

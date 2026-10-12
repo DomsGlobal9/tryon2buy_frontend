@@ -315,6 +315,8 @@ const VendorCatalog = () => {
                   onOpen={() => setPreviewProduct(product)}
                   openLabel={`View ${product.title} full size`}
                   onTryOn={() => handleTryOn(product)}
+                  // Visible on the card, but never instant: it opens the "Delete Product?" question.
+                  actions={[{ key: 'delete', label: `Delete ${product.title}`, danger: true, icon: <Trash2 className="w-3.5 h-3.5" />, onClick: () => setProductToDelete(product) }]}
                 />
               );
             })}
