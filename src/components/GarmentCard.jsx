@@ -33,12 +33,12 @@ export default function GarmentCard({ image, title, subtitle, onOpen, openLabel,
         {subtitle && <p className="text-[12px] text-muted truncate">{subtitle}</p>}
       </div>
 
-      {/* One extra action sits beside the main one (icon only on narrow phone cards); two or
-          more go on their own line underneath. */}
-      <div className="flex gap-1.5">
+      {/* One extra action sits beside the main one, 75/25, as an icon (no room for words at a
+          quarter of a card); two or more go on their own line underneath. */}
+      <div className={actions.length === 1 ? 'grid grid-cols-4 gap-1.5' : 'flex'}>
         <button
           onClick={onTryOn}
-          className="flex-1 min-w-0 flex items-center justify-center gap-2 py-2.5 bg-[#1a1410] text-white text-[11px] font-bold uppercase tracking-widest hover:bg-accent transition-colors whitespace-nowrap"
+          className={`${actions.length === 1 ? 'col-span-3' : 'flex-1'} min-w-0 flex items-center justify-center gap-2 py-2.5 bg-[#1a1410] text-white text-[11px] font-bold uppercase tracking-widest hover:bg-accent transition-colors whitespace-nowrap`}
         >
           <Sparkles className="w-3 h-3 shrink-0" />
           <span>Try it on</span>
@@ -48,10 +48,9 @@ export default function GarmentCard({ image, title, subtitle, onOpen, openLabel,
             onClick={actions[0].onClick}
             aria-label={actions[0].label}
             title={actions[0].label}
-            className="shrink-0 flex items-center justify-center gap-1.5 px-3 border border-[rgba(26,20,16,0.25)] text-[#1a1410] text-[12px] font-medium whitespace-nowrap hover:border-[#1a1410] hover:text-accent transition-colors"
+            className="col-span-1 flex items-center justify-center border border-[rgba(26,20,16,0.25)] text-[#1a1410] hover:border-[#1a1410] hover:text-accent transition-colors"
           >
             {actions[0].icon}
-            <span className="hidden lg:inline">{actions[0].label}</span>
           </button>
         )}
       </div>
