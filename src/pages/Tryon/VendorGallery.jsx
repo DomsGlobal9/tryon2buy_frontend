@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { API_URL } from '../../config';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Share2, Copy, Check, Trash2, ExternalLink, X } from 'lucide-react';
+import { ChevronLeft, Share2, Copy, Check, Trash2, X } from 'lucide-react';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { getVendorToken, clearVendorSession } from '../../utils/auth';
 import { categoryLabel } from '../../utils/categories';
@@ -236,14 +236,13 @@ export default function VendorGallery() {
               title={categoryLabel(gen.category) || 'Draped garment'}
               onOpen={() => setPreviewGen(gen)}
               openLabel="View full size"
-              // The SHOP's try-on page, with the shared dock: photos and outfits follow the
-              // account across the counter tablet and the stockroom phone.
-              onTryOn={() => navigate(`/vendor/preview/${gen.id}`)}
+              // Merchants try on with the same page their shoppers get (photos stay on this
+              // device). The device-sharing page (/vendor/preview) is for B2B logins only --
+              // the user's call, 12 Oct; "Preview" went with it, as it opened this same page.
+              // fromVendorGallery lets that page send its logo back to the workspace.
+              onTryOn={() => navigate(`/tryon/${gen.id}`, { state: { fromVendorGallery: true } })}
               actions={[
-                { key: 'share', label: copiedId === gen.id ? 'Copied' : 'Share', icon: copiedId === gen.id ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />, onClick: () => copyLink(gen.id) },
-                // What a shopper who follows the share link sees. fromVendorGallery lets that
-                // page send its logo back to the workspace for this vendor, and nobody else.
-                { key: 'preview', label: 'Preview', icon: <ExternalLink className="w-3.5 h-3.5" />, onClick: () => navigate(`/tryon/${gen.id}`, { state: { fromVendorGallery: true } }) },
+                { key: 'share', label: copiedId === gen.id ? 'Link copied' : 'Copy link', icon: copiedId === gen.id ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />, onClick: () => copyLink(gen.id) },
               ]}
             />
           ))}

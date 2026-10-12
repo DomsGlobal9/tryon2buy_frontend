@@ -78,7 +78,7 @@ export default function App() {
           <Route path="/gallery" element={<VendorRoute><VendorGallery /></VendorRoute>} />
           <Route path="/vendor/catalog" element={<VendorRoute b2bOnly><VendorCatalog /></VendorRoute>} />
           <Route path="/vendor/upload" element={<VendorRoute b2bOnly><VendorUpload /></VendorRoute>} />
-          <Route path="/vendor/preview/:id" element={<VendorRoute><VendorTryon /></VendorRoute>} />
+          <Route path="/vendor/preview/:id" element={<VendorRoute b2bOnly><VendorTryon /></VendorRoute>} />
 
           {/* Customer Interface (Public) */}
           <Route path="/tryon/:id" element={<CustomerTryon />} />
