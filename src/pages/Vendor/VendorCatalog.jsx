@@ -7,6 +7,7 @@ import { API_URL } from '../../config';
 import VendorProfileModal from '../../components/VendorProfileModal';
 import { expireVendorSession, loginPath } from '../../utils/auth';
 import { categoryLabel } from '../../utils/categories';
+import GarmentCard from '../../components/GarmentCard';
 import { GridSkeleton } from '../../components/Skeleton';
 import { thumb } from '../../utils/thumb';
 
@@ -127,11 +128,11 @@ const VendorCatalog = () => {
             >
               <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" />
             </button>
-            <div className="bg-[#1A1410] text-[#faf7f2] p-2 md:p-2.5 rounded-xl shadow-md">
+            <div className="hidden sm:block bg-[#1A1410] text-[#faf7f2] p-2 md:p-2.5 rounded-xl shadow-md">
               <Package className="w-5 h-5 md:w-6 md:h-6" />
             </div>
             <div>
-              <h1 className="text-lg md:text-2xl font-bold text-[#1A1410] tracking-tight">Product Catalog</h1>
+              <h1 className="text-lg md:text-2xl font-bold text-[#1A1410] tracking-tight whitespace-nowrap">Product Catalog</h1>
               <p className="hidden md:block text-sm text-gray-500 font-medium mt-0.5">Manage and preview your digitized garments.</p>
             </div>
           </div>
@@ -176,7 +177,7 @@ const VendorCatalog = () => {
             </div>
             <input
               type="text"
-              placeholder="Search by Product Name or ID (e.g. PRD-A1B2)"
+              placeholder="Search by name or SKU"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="block w-full pl-11 pr-4 py-3 bg-white border border-[#e5e0d8] rounded-xl text-sm placeholder-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all shadow-sm"
@@ -300,75 +301,21 @@ const VendorCatalog = () => {
 
         {/* Product Grid */}
         {!loading && products.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
             {filteredProducts.map((product) => {
               const pId = getProductId(product);
               const imageUrl = product.primaryAsset?.imageUrl;
               
               return (
-                <div key={product.id} className="bg-white rounded-2xl border border-[#e5e0d8] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col">
-                  {/* Image Container */}
-                  <div className="aspect-[4/5] bg-[#faf7f2] relative overflow-hidden">
-                    {imageUrl ? (
-                      <img src={thumb(imageUrl, 480)} loading="lazy" alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-300">
-                        <ImageIcon className="w-12 h-12 opacity-50" />
-                      </div>
-                    )}
-                    
-                    {/* ID/SKU Badge */}
-                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md border border-white/20 shadow-sm text-[11px] font-bold uppercase tracking-wider text-[#1A1410]">
-                      {pId}
-                    </div>
-
-                    {/* Category Badge */}
-                    <div className="absolute top-3 right-3 bg-[#1A1410]/90 backdrop-blur-sm px-2.5 py-1 rounded-md border border-white/10 shadow-sm text-[11px] font-bold uppercase tracking-wider text-white">
-                      {categoryLabel(product.category)}
-                    </div>
-
-                    {/* Preview Button (Hover Reveal) */}
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setPreviewProduct(product);
-                      }}
-                      className="absolute bottom-3 right-12 bg-white/90 hover:bg-[#faf7f2] hover:text-accent text-gray-500 backdrop-blur-sm p-1.5 rounded-full shadow-sm transition-all md:opacity-0 md:group-hover:opacity-100 border border-white/20"
-                      title="Preview Product"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-
-                    {/* Delete Button (Hover Reveal) */}
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setProductToDelete(product);
-                      }}
-                      className="absolute bottom-3 right-3 bg-white/90 hover:bg-red-50 hover:text-red-600 text-gray-500 backdrop-blur-sm p-1.5 rounded-full shadow-sm transition-all md:opacity-0 md:group-hover:opacity-100 border border-white/20"
-                      title="Delete Product"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-3 md:p-4 flex-1 flex flex-col">
-                    <h3 className="text-sm md:text-base font-bold text-[#1A1410] mb-1 line-clamp-1" title={product.title}>{product.title}</h3>
-                    {product.description && (
-                      <p className="hidden md:block text-[11px] md:text-xs text-gray-500 line-clamp-2 leading-relaxed mb-3">{product.description}</p>
-                    )}
-                    
-                    <div className="mt-auto pt-3 flex gap-2">
-                      <button 
-                        onClick={() => handleTryOn(product)}
-                        className="flex-1 bg-[#1A1410] hover:bg-black text-white py-2 md:py-2.5 text-[11px] md:text-xs font-bold uppercase tracking-widest transition-colors"
-                      >
-                        Try It On
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <GarmentCard
+                  key={product.id}
+                  image={imageUrl ? thumb(imageUrl, 480) : undefined}
+                  title={product.title}
+                  subtitle={`${pId} · ${categoryLabel(product.category)}`}
+                  onOpen={() => setPreviewProduct(product)}
+                  openLabel={`View ${product.title} full size`}
+                  onTryOn={() => handleTryOn(product)}
+                />
               );
             })}
           </div>
@@ -464,7 +411,14 @@ const VendorCatalog = () => {
                 className="mt-4 text-center"
               >
                 <h3 className="text-white text-xl font-bold tracking-wide">{previewProduct.title}</h3>
-                <p className="text-white/70 text-sm mt-1 uppercase tracking-widest">{getProductId(previewProduct)} • {categoryLabel(previewProduct.category)}</p>
+                <p className="text-white/70 text-sm mt-1">{getProductId(previewProduct)} · {categoryLabel(previewProduct.category)}</p>
+                {/* The one place Delete lives: on every card it sat one tap from Try it on. */}
+                <button
+                  onClick={() => { const p = previewProduct; setPreviewProduct(null); setProductToDelete(p); }}
+                  className="mt-4 inline-flex items-center gap-2 px-4 py-2 border border-white/30 text-white/80 hover:text-white hover:border-red-400 hover:bg-red-600/80 text-[12px] font-semibold transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" /> Delete product
+                </button>
               </motion.div>
             </motion.div>
           </motion.div>

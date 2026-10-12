@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { API_URL } from '../../config';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Share2, Copy, Check, Trash2, ExternalLink, Eye, X } from 'lucide-react';
+import { ChevronLeft, Share2, Copy, Check, Trash2, ExternalLink, X } from 'lucide-react';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { getVendorToken, clearVendorSession } from '../../utils/auth';
 import { categoryLabel } from '../../utils/categories';
 import { GridSkeleton } from '../../components/Skeleton';
 import { thumb } from '../../utils/thumb';
+import GarmentCard from '../../components/GarmentCard';
 
 // Must match the hardcoded vendor ID in backend/index.js
 const DEFAULT_VENDOR_ID = 'feb21067-a3ee-4020-b388-16d3a37a29ce';
@@ -17,7 +18,7 @@ export default function VendorGallery() {
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState(null);
   const [galleryCopied, setGalleryCopied] = useState(false);
-  const [previewImage, setPreviewImage] = useState(null);
+  const [previewGen, setPreviewGen] = useState(null);
 
   /**
    * The same promise-shaped confirm the dock uses, for the same reason.
@@ -227,118 +228,53 @@ export default function VendorGallery() {
           <p className="text-[12px] uppercase tracking-widest text-muted">No draped garments yet.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full max-w-[1000px]">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6 w-full max-w-[1000px]">
           {generations.map((gen) => (
-            <div key={gen.id} className="bg-white border border-[rgba(26,20,16,0.1)] p-3 flex flex-col gap-3 group hover:border-accent transition-all hover:shadow-lg">
-              <div className="aspect-[3/4] bg-[#ede8df] overflow-hidden relative group/img">
-                <img 
-                  src={thumb(gen.resultImageUrl || gen.garmentImageUrl, 480)} loading="lazy" 
-                  alt="Draped Garment" 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                {/* Action Buttons Group */}
-                <div className="absolute top-2 right-2 md:opacity-0 md:group-hover/img:opacity-100 transition-opacity flex bg-white/95 rounded-md shadow-sm overflow-hidden border border-[rgba(26,20,16,0.1)]">
-                  <button 
-                    onClick={() => setPreviewImage(gen.resultImageUrl || gen.garmentImageUrl)}
-                    className={`hover:bg-gray-100 text-[#1a1410] p-2 transition-colors border-r border-[rgba(26,20,16,0.05)]`}
-                    title="Preview Full Image"
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                  </button>
-                  {/* Every vendor, not just the master account: the server deletes only the caller's own drapes. */}
-                  <button
-                    onClick={() => handleDelete(gen.id)}
-                    className="hover:bg-red-50 text-red-500 p-2 transition-colors"
-                    title="Delete from Gallery"
-                    aria-label="Delete from gallery"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-              <div className="flex flex-col gap-2">
-                <span className="text-[11px] font-bold uppercase tracking-widest text-[#1a1410] truncate">
-                  {categoryLabel(gen.category) || "Draped Garment"}
-                </span>
-
-                {/* Split Buttons: Share Link + Tryon */}
-                <div className="flex gap-1.5">
-                  {/* Share Link (left, wider) */}
-                  <button
-                    onClick={() => copyLink(gen.id)}
-                    title="Copy customer share link"
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-bold uppercase tracking-widest transition-colors ${
-                      copiedId === gen.id
-                        ? 'bg-[#1a1410] text-[#faf7f2]'
-                        : 'bg-[#faf7f2] border border-[#1a1410] text-[#1a1410] hover:bg-[#1a1410] hover:text-[#faf7f2]'
-                    }`}
-                  >
-                    {copiedId === gen.id ? (
-                      <><Check className="w-3 h-3" /><span>Copied</span></>
-                    ) : (
-                      <><Copy className="w-3 h-3" /><span>Share</span></>
-                    )}
-                  </button>
-
-                  {/*
-                    Two different things that used to be one button.
-
-                    Tryon opens the SHOP's try-on page. That is the one with the shared dock:
-                    the photograph and the outfits tried go to the account, so they are there
-                    on the tablet at the counter and on the phone in the stockroom. This is
-                    what "click tryon from the gallery" is meant to do.
-
-                    Preview opens the CUSTOMER page -- what someone who follows the share
-                    link sees. It keeps a browser-local dock on purpose: a shopper scanning a
-                    code has no account, and their photograph is not the shop's to collect.
-
-                    Both take the same id: each page fetches /api/tryon/generations/:id.
-                    Before this, Tryon went to the customer page, which is why a photo taken
-                    on one device never showed up on another -- it never left that browser.
-                  */}
-                  <button
-                    // fromVendorGallery lets the customer page send its logo back to the
-                    // workspace for the vendor who opened it -- and for nobody else.
-                    onClick={() => navigate(`/tryon/${gen.id}`, { state: { fromVendorGallery: true } })}
-                    title="Preview what a customer sees (stays on this device)"
-                    className="flex items-center justify-center px-2.5 py-2 text-[11px] font-bold uppercase tracking-widest bg-[#faf7f2] border border-[#1a1410] text-[#1a1410] hover:bg-[#1a1410] hover:text-[#faf7f2] transition-colors"
-                  >
-                    <Eye className="w-3 h-3" />
-                  </button>
-
-                  <button
-                    onClick={() => navigate(`/vendor/preview/${gen.id}`)}
-                    title="Try this on — your photos and outfits appear on every device you are signed in on"
-                    className="flex items-center justify-center gap-1.5 px-3 py-2 text-[11px] font-bold uppercase tracking-widest bg-accent text-[#faf7f2] hover:bg-[#1a1410] transition-colors"
-                  >
-                    <ExternalLink className="w-3 h-3" />
-                    <span>Try it on</span>
-                  </button>
-                </div>
-              </div>
-            </div>
+            <GarmentCard
+              key={gen.id}
+              image={thumb(gen.resultImageUrl || gen.garmentImageUrl, 480)}
+              title={categoryLabel(gen.category) || 'Draped garment'}
+              onOpen={() => setPreviewGen(gen)}
+              openLabel="View full size"
+              // The SHOP's try-on page, with the shared dock: photos and outfits follow the
+              // account across the counter tablet and the stockroom phone.
+              onTryOn={() => navigate(`/vendor/preview/${gen.id}`)}
+              actions={[
+                { key: 'share', label: copiedId === gen.id ? 'Copied' : 'Share', icon: copiedId === gen.id ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />, onClick: () => copyLink(gen.id) },
+                // What a shopper who follows the share link sees. fromVendorGallery lets that
+                // page send its logo back to the workspace for this vendor, and nobody else.
+                { key: 'preview', label: 'Preview', icon: <ExternalLink className="w-3.5 h-3.5" />, onClick: () => navigate(`/tryon/${gen.id}`, { state: { fromVendorGallery: true } }) },
+              ]}
+            />
           ))}
         </div>
       )}
 
-      {/* Full Screen Image Preview Modal */}
-      {previewImage && (
-        <div 
-          className="fixed inset-0 z-[200] bg-[#1a1410]/95 backdrop-blur-md flex items-center justify-center p-6 sm:p-12 cursor-zoom-out animate-in fade-in duration-300"
-          onClick={() => setPreviewImage(null)}
+      {/* Full-size view, and the one place Delete lives: on every card it sat one tap from Try it on. */}
+      {previewGen && (
+        <div
+          className="fixed inset-0 z-[200] bg-[#1a1410]/95 backdrop-blur-md flex flex-col items-center justify-center gap-4 p-6 sm:p-12 cursor-zoom-out animate-in fade-in duration-300"
+          onClick={() => setPreviewGen(null)}
         >
-          <button 
-            className="absolute top-6 right-6 sm:top-10 sm:right-10 text-white/50 hover:text-white transition-colors"
-            onClick={(e) => { e.stopPropagation(); setPreviewImage(null); }}
+          <button
+            aria-label="Close"
+            className="absolute top-6 right-6 sm:top-10 sm:right-10 text-white/60 hover:text-white transition-colors"
+            onClick={(e) => { e.stopPropagation(); setPreviewGen(null); }}
           >
             <X className="w-8 h-8" />
           </button>
-          <img 
-            src={previewImage} 
-            alt="Full Preview" 
-            className="max-w-full max-h-full object-contain cursor-default drop-shadow-2xl"
+          <img
+            src={previewGen.resultImageUrl || previewGen.garmentImageUrl}
+            alt="Full size"
+            className="max-w-full max-h-[80vh] object-contain cursor-default drop-shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           />
+          <button
+            onClick={(e) => { e.stopPropagation(); const id = previewGen.id; setPreviewGen(null); handleDelete(id); }}
+            className="flex items-center gap-2 px-4 py-2 border border-white/30 text-white/80 hover:text-white hover:border-red-400 hover:bg-red-600/80 text-[12px] font-semibold transition-colors"
+          >
+            <Trash2 className="w-4 h-4" /> Delete this drape
+          </button>
         </div>
       )}
 

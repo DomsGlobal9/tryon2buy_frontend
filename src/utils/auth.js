@@ -77,6 +77,16 @@ export function loginFailureMessage(status, body) {
   return status < 500 && typeof body?.error === 'string' ? body.error : LOGIN_UNAVAILABLE;
 }
 
+/** Home for whoever is signed in: a B2B client's catalogue, or a merchant's gallery. */
+export function homePath() {
+  return localStorage.getItem('portal_type') === 'b2b' ? '/vendor/catalog' : '/gallery';
+}
+
+/** Whether the signed-in account is a B2B client (the digitise/catalogue portal). */
+export function isB2B() {
+  return localStorage.getItem('portal_type') === 'b2b';
+}
+
 /** The login page for whoever was last signed in on this device. */
 export function loginPath() {
   return localStorage.getItem('portal_type') === 'b2b' ? '/client-login' : '/login';

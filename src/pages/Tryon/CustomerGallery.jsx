@@ -5,6 +5,7 @@ import { Sparkles, ShoppingBag, Copy, Check, ChevronLeft } from 'lucide-react';
 import ErrorScreen, { NETWORK_PROBLEM } from '../../components/ErrorScreen';
 import { GridSkeleton } from '../../components/Skeleton';
 import { thumb } from '../../utils/thumb';
+import GarmentCard from '../../components/GarmentCard';
 import { userFacingError } from '../../utils/generationRecovery';
 import { categoryLabel } from '../../utils/categories';
 
@@ -103,50 +104,23 @@ export default function CustomerGallery() {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6 w-full max-w-[1040px]">
             {/* Two per row on phones: one card per screen made browsing a collection a long scroll. */}
-            {generations.map((gen) => (
-              <div
-                key={gen.id}
-                className="bg-white border border-[rgba(26,20,16,0.1)] p-2 md:p-3 flex flex-col gap-2.5 group hover:border-accent transition-all hover:shadow-lg"
-              >
-                {/* Image */}
-                <div className="aspect-[3/4] bg-[#ede8df] overflow-hidden relative">
-                  <img
-                    src={thumb(gen.resultImageUrl || gen.garmentImageUrl, 480)}
-                    alt={gen.title || categoryLabel(gen.category) || 'Garment'}
-                    loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-
-                {/* Details */}
-                <div className="flex flex-col gap-2">
-                  <div className="min-w-0">
-                    {/* The product's own name when the shop gave it one; the category otherwise. */}
-                    <p className="text-[14px] font-semibold text-[#1a1410] leading-snug line-clamp-2">
-                      {gen.title || categoryLabel(gen.category) || 'Garment'}
-                    </p>
-                    {gen.title && gen.category && (
-                      <p className="text-[12px] text-muted">{categoryLabel(gen.category)}</p>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() => navigate(`/tryon/${gen.id}`, { state: { fromGallery: true } })}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#1a1410] text-[#faf7f2] text-[11px] font-bold uppercase tracking-widest hover:bg-accent transition-colors"
-                  >
-                    <Sparkles className="w-3 h-3" />
-                    <span>Try It On</span>
-                  </button>
-                  <button
-                    onClick={() => copyLink(gen.id)}
-                    className="flex items-center justify-center gap-1.5 py-1 text-[12px] font-medium text-[#1a1410] hover:text-accent transition-colors"
-                  >
-                    {copiedId === gen.id ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                    {copiedId === gen.id ? 'Link copied' : 'Copy link'}
-                  </button>
-                </div>
-              </div>
-            ))}
+            {generations.map((gen) => {
+              const tryOn = () => navigate(`/tryon/${gen.id}`, { state: { fromGallery: true } });
+              return (
+                <GarmentCard
+                  key={gen.id}
+                  image={thumb(gen.resultImageUrl || gen.garmentImageUrl, 480)}
+                  // The product's own name when the shop gave it one; the category otherwise.
+                  title={gen.title || categoryLabel(gen.category) || 'Garment'}
+                  subtitle={gen.title ? categoryLabel(gen.category) : null}
+                  // For a shopper the picture is the garment, so it opens the try-on.
+                  onOpen={tryOn}
+                  openLabel={`Try on ${gen.title || categoryLabel(gen.category) || 'this garment'}`}
+                  onTryOn={tryOn}
+                  actions={[{ key: 'copy', label: copiedId === gen.id ? 'Link copied' : 'Copy link', icon: copiedId === gen.id ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />, onClick: () => copyLink(gen.id) }]}
+                />
+              );
+            })}
           </div>
         )}
       </div>

@@ -2,7 +2,7 @@ import React, { lazy, Suspense } from 'react';
 // Every page except the home page loads on demand: the whole app used to be one 1.1 MB file,
 // downloaded in full before a phone could show anything.
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { getVendorToken, isGuestMode, loginPath } from './utils/auth';
+import { getVendorToken, isGuestMode, loginPath, isB2B } from './utils/auth';
 const TryonWorkspace = lazy(() => import('./pages/Tryon/TryonWorkspace'));
 const VendorGallery = lazy(() => import('./pages/Tryon/VendorGallery'));
 const CustomerTryon = lazy(() => import('./pages/Tryon/CustomerTryon'));
@@ -37,8 +37,10 @@ import ErrorScreen from './components/ErrorScreen';
 // or /vendor/preview/... opened a vendor screen whose every request the server then refused:
 // an empty catalogue, an upload form that could not save. Nothing leaked, but it was a dead
 // end. A guest is sent to log in instead, with guest mode left as it was.
-const VendorRoute = ({ children, allowGuest = false }) => {
+const VendorRoute = ({ children, allowGuest = false, b2bOnly = false }) => {
   const location = useLocation();
+  // The digitise/catalogue portal is for B2B logins; a merchant login belongs in the workspace.
+  if (b2bOnly && getVendorToken() && !isB2B()) return <Navigate to="/workspace" replace />;
   if (getVendorToken() || (allowGuest && isGuestMode())) return children;
   return <Navigate to={loginPath()} replace state={{ returnTo: location.pathname + location.search }} />;
 };
@@ -74,8 +76,8 @@ export default function App() {
           {/* Vendor Protected Interface */}
           <Route path="/workspace" element={<VendorRoute allowGuest><TryonWorkspace onExit={() => window.location.href = '/'} /></VendorRoute>} />
           <Route path="/gallery" element={<VendorRoute><VendorGallery /></VendorRoute>} />
-          <Route path="/vendor/catalog" element={<VendorRoute><VendorCatalog /></VendorRoute>} />
-          <Route path="/vendor/upload" element={<VendorRoute><VendorUpload /></VendorRoute>} />
+          <Route path="/vendor/catalog" element={<VendorRoute b2bOnly><VendorCatalog /></VendorRoute>} />
+          <Route path="/vendor/upload" element={<VendorRoute b2bOnly><VendorUpload /></VendorRoute>} />
           <Route path="/vendor/preview/:id" element={<VendorRoute><VendorTryon /></VendorRoute>} />
 
           {/* Customer Interface (Public) */}

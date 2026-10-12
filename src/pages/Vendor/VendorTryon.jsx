@@ -10,8 +10,9 @@ import FloatingImageAnimation from '../../components/FloatingImageAnimation';
 import { newClientRequestId, recoverGeneration, userFacingMessage } from '../../utils/generationRecovery';
 import { swipeable } from '../../utils/swipe';
 import { createPhotoDock, SHARED_RETENTION_MS, SHARED_GARMENT_LIMIT } from '../../utils/photoDock';
-import { getVendorToken, clearVendorSession, authProblem } from '../../utils/auth';
+import { getVendorToken, clearVendorSession, authProblem, homePath } from '../../utils/auth';
 import { PageSkeleton } from '../../components/Skeleton';
+import { categoryLabel } from '../../utils/categories';
 
 // How long to hold the synchronous request open before falling back to polling. Generous
 // enough for a normal generation to answer directly, short enough that we stop waiting on a
@@ -787,8 +788,11 @@ export default function VendorTryon() {
     }
   };
 
+  // Merchants and B2B clients both use this page; "back" and "home" used to mean the B2B
+  // catalogue for everyone, so a merchant from the workspace gallery landed on the B2B portal.
   const handleBack = () => {
-    navigate('/vendor/catalog');
+    if (window.history.state?.idx > 0) navigate(-1);
+    else navigate(homePath());
   };
 
   if (loading || loadedFor !== id) {
@@ -821,7 +825,7 @@ export default function VendorTryon() {
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
           <button
-            onClick={() => navigate('/vendor/catalog')}
+            onClick={() => navigate(homePath())}
             className="px-5 py-2.5 bg-[#1a202c] text-white font-sans text-[11px] uppercase tracking-widest hover:bg-[#2d3748] transition-colors"
           >
             Back to your outfits
@@ -909,7 +913,7 @@ export default function VendorTryon() {
         {/* Centered Branding */}
         <div className="flex justify-center items-center gap-2 md:gap-3">
           <div 
-            onClick={() => navigate('/vendor/catalog')}
+            onClick={() => navigate(homePath())}
             className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
           >
             <img src="/TRYON2BUY%20LOGO%20(black%20).png" alt="TryOn2Buy Logo" className="h-8 md:h-10 object-contain mr-2" />
@@ -945,37 +949,22 @@ export default function VendorTryon() {
           {tryonState !== 'generated' && (
             <div className="flex flex-col animate-fade-in w-full pt-4">
 
-              {/* Header */}
-              <div className="text-center mb-3">
-                <h2 className="text-[#1a202c] text-[18px] md:text-[20px] font-bold flex items-center justify-center gap-1.5 mb-1 font-sans">
-                  Upload Your Photo
-                </h2>
-                <p className="text-muted text-[11px] md:text-[11px] font-sans leading-tight">
-                  For the best try-on experience, please follow the guidelines below.
-                </p>
-              </div>
-
-              {/* Framing example */}
-              <div className="flex items-center justify-center mb-3">
-                <div className="h-[1px] w-8 bg-accent"></div>
-                <span className="px-2 text-[#1a202c] font-bold text-[11px] font-sans">Framing example</span>
-                <div className="h-[1px] w-8 bg-accent"></div>
-              </div>
-
-              <div className="flex justify-center mb-3">
-                <div className="w-[100px] h-[150px] bg-[#f8f9fa] rounded-lg shadow-[0_1px_6px_rgba(0,0,0,0.06)] border border-[#e2e8f0] overflow-hidden flex items-center justify-center">
-                  <img src="https://res.cloudinary.com/doiezptnn/image/upload/v1782733465/79061311-f8ef-4542-88ea-4783015af68d_z2bhdi.png" alt="Full image" className="w-full h-full object-cover object-top" />
+              {/* What they came for, first: a shopper arriving from a shop link used to see only
+                  "Upload Your Photo", with the garment itself below the fold. */}
+              <div className="flex items-center gap-4 mb-5 p-3 bg-white border border-[rgba(26,20,16,0.08)]">
+                <img src={drapedDressUrl} alt="" className="w-16 h-[88px] object-cover object-top shrink-0 bg-[#ede8df]" />
+                <div className="min-w-0">
+                  <p className="text-[12px] text-muted">You're trying on</p>
+                  <p className="font-serif text-[20px] leading-tight text-[#1a1410] line-clamp-2">{sourceGeneration.title || categoryLabel(sourceGeneration.category) || 'This look'}</p>
                 </div>
               </div>
 
-              {/* Tip Box -> Note Box */}
-              <div className="bg-[#fffaf0] rounded-lg p-3 flex items-center gap-3 mb-3 border border-[#fefcbf]">
-                <div className="bg-[#feebc8] rounded-full p-1.5 shrink-0">
-                  <Lightbulb className="w-4 h-4 text-accent" />
+              <div className="flex items-start gap-3 mb-4">
+                <img src="https://res.cloudinary.com/doiezptnn/image/upload/v1782733465/79061311-f8ef-4542-88ea-4783015af68d_z2bhdi.png" alt="Example: a full-length photo, standing straight" className="w-11 h-16 object-cover object-top shrink-0 border border-[rgba(26,20,16,0.08)]" />
+                <div>
+                  <h2 className="text-[17px] font-semibold text-[#1a1410] mb-0.5">Add your photo</h2>
+                  <p className="text-[13px] text-muted leading-snug">Full length, standing straight and facing the camera, like the example.</p>
                 </div>
-                <p className="text-[#4a5568] text-[11px] font-sans leading-relaxed">
-                  <span className="font-bold text-[#1a202c]">Note:</span> For the best fit visualization, please upload a clear, front-facing full-body photo. Ensure your posture and hand placement closely match the product model.
-                </p>
               </div>
 
               {/* Upload Area */}
@@ -984,7 +973,7 @@ export default function VendorTryon() {
                 onDragOver={handleDragOver}
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
-                className={`border-2 border-dashed rounded-xl p-3 flex flex-col items-center justify-center text-center bg-white transition-all relative group mb-3 min-h-[160px] ${isDragging ? 'border-accent bg-[#fffaf0] scale-[1.02] shadow-md' : 'border-[#f6ad55]'}`}
+                className={`border-2 border-dashed rounded-xl p-3 flex flex-col items-center justify-center text-center bg-white transition-all relative group mb-3 min-h-[160px] ${isDragging ? 'border-accent bg-[#fffaf0] scale-[1.02] shadow-md' : 'border-[#dcd6cc]'}`}
               >
 
                 {selectedImage ? (
@@ -1017,49 +1006,29 @@ export default function VendorTryon() {
                     </div>
                   </div>
                 ) : (
-                  <>
-                    <div className="bg-[#fffaf0] rounded-full p-2 mb-2 group-hover:scale-110 transition-transform">
-                      <CloudUpload className="w-6 h-6 text-accent" />
-                    </div>
-                    <h3 className="text-[#1a202c] text-[13px] font-bold mb-2 font-sans">Drag & drop your image here</h3>
-                    
-                    <div className="flex items-center justify-center w-full max-w-[160px] mb-2">
-                      <div className="flex-1 h-[1px] bg-[#e2e8f0]"></div>
-                      <span className="px-2 text-muted text-[11px] font-sans">or</span>
-                      <div className="flex-1 h-[1px] bg-[#e2e8f0]"></div>
-                    </div>
-
-                    <div className="flex items-center gap-2 mb-2 z-10">
-                      <button 
-                        onClick={triggerCamera} 
-                        className="lg:hidden border border-accent text-accent bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[11px] font-sans hover:bg-accent hover:text-white transition-colors"
-                      >
-                        <Camera className="w-3.5 h-3.5" /> Take Photo
-                      </button>
-                      <button 
-                        onClick={triggerFileBrowser} 
-                        className="border border-accent text-accent bg-white rounded-md px-3 py-1.5 flex items-center gap-1.5 font-bold text-[11px] font-sans hover:bg-accent hover:text-white transition-colors"
-                      >
-                        <FolderOpen className="w-3.5 h-3.5" /> Browse Files
-                      </button>
-                    </div>
-
-                    <p className="text-muted text-[11px] font-sans">PNG or JPG · Any size</p>
-                  </>
+                  <div className="w-full flex flex-col gap-2 z-10">
+                    {/* Most shoppers use the camera, so it is the big button on a phone; on a
+                        computer, choosing a file is. */}
+                    <button
+                      onClick={triggerCamera}
+                      className="lg:hidden w-full bg-accent hover:bg-accent-dark text-white py-3.5 flex items-center justify-center gap-2 font-bold text-[12px] uppercase tracking-widest transition-colors"
+                    >
+                      <Camera className="w-4 h-4" /> Take Photo
+                    </button>
+                    <button
+                      onClick={triggerFileBrowser}
+                      className="w-full border border-[#1a1410] text-[#1a1410] lg:bg-accent lg:border-accent lg:text-white py-3 flex items-center justify-center gap-2 font-bold text-[12px] uppercase tracking-widest hover:bg-[#1a1410] hover:text-white lg:hover:bg-accent-dark transition-colors"
+                    >
+                      <FolderOpen className="w-4 h-4" /> <span className="lg:hidden">Choose from gallery</span><span className="hidden lg:inline">Choose a photo</span>
+                    </button>
+                    <p className="text-muted text-[12px] mt-1"><span className="hidden lg:inline">or drag one here · </span>PNG or JPG, any size</p>
+                  </div>
                 )}
               </div>
 
-              {/* Note Box */}
-              <div className="bg-white rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.04)] border border-[#e2e8f0] p-3 mb-4">
-                <div className="flex items-start gap-2 mb-2">
-                  <Lock className="w-3 h-3 text-accent shrink-0 mt-0.5" />
-                  <span className="text-[#4a5568] text-[11px] font-medium font-sans leading-relaxed">Uploaded images will be used solely to generate virtual try-on previews.</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Heart className="w-3 h-3 text-accent shrink-0 mt-0.5" />
-                  <span className="text-[#4a5568] text-[11px] font-medium font-sans leading-relaxed">Your privacy is important to us. We do not share your images with anyone.</span>
-                </div>
-              </div>
+              <p className="flex items-center justify-center gap-1.5 text-[12px] text-muted mb-4">
+                <Lock className="w-3.5 h-3.5 shrink-0" /> Kept on your shop account for 20 minutes, so your other devices see it.
+              </p>
 
             </div>
           )}

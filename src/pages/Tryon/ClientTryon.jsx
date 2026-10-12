@@ -11,7 +11,6 @@ import VendorUpgradeModal from '../../components/VendorUpgradeModal';
 import { uploadSelfie } from '../../utils/imageUpload';
 import { userFacingMessage, userFacingError } from '../../utils/generationRecovery';
 import { NETWORK_PROBLEM } from '../../components/ErrorScreen';
-import { thumb } from '../../utils/thumb';
 import { categoryLabel } from '../../utils/categories';
 import { resolveBackTarget } from '../../utils/backTarget';
 
@@ -740,7 +739,7 @@ export default function ClientTryon() {
               {/* What they came for, first: a shopper arriving from a shop link used to see only
                   "Upload Your Photo", with the garment itself below the fold. */}
               <div className="flex items-center gap-4 mb-5 p-3 bg-white border border-[rgba(26,20,16,0.08)]">
-                <img src={thumb(drapedDressUrl, 320)} alt="" className="w-16 h-[88px] object-cover object-top shrink-0 bg-[#ede8df]" />
+                <img src={drapedDressUrl} alt="" className="w-16 h-[88px] object-cover object-top shrink-0 bg-[#ede8df]" />
                 <div className="min-w-0">
                   <p className="text-[12px] text-muted">You're trying on</p>
                   <p className="font-serif text-[20px] leading-tight text-[#1a1410] line-clamp-2">{sourceGeneration.dressName || categoryLabel(sourceGeneration.category) || 'This look'}</p>
