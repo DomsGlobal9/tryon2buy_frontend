@@ -7,7 +7,8 @@ const TryonWorkspace = lazy(() => import('./pages/Tryon/TryonWorkspace'));
 const VendorGallery = lazy(() => import('./pages/Tryon/VendorGallery'));
 const CustomerTryon = lazy(() => import('./pages/Tryon/CustomerTryon'));
 const CustomerGallery = lazy(() => import('./pages/Tryon/CustomerGallery'));
-const ClientTryon = lazy(() => import('./pages/Tryon/ClientTryon'));
+// A scanned tag opens the try-on LIST (28 Oct): scan more tags, one photo, try them all on.
+const TryOnList = lazy(() => import('./pages/Tryon/TryOnList'));
 
 const VendorAuth = lazy(() => import('./pages/Tryon/VendorAuth'));
 const ClientAuth = lazy(() => import('./pages/Vendor/ClientAuth'));
@@ -90,7 +91,8 @@ export default function App() {
               asks Inventory what was scanned. Without this route the catch-all below silently
               redirected every scan to the landing page, which is what "the QR is not working"
               was: a 200, then a redirect. */}
-          <Route path="/try/:clientId/:productCode" element={<ClientTryon />} />
+          {/* One route for a tag and for the list (/try/:clientId/list), so moving between them keeps the page. */}
+          <Route path="/try/:clientId/:productCode" element={<TryOnList />} />
 
           {/* Said, not silently redirected: a mistyped or dead link used to land on the home
               page as if it had worked. */}

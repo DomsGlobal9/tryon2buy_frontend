@@ -57,9 +57,9 @@ export default function ShopperNumberGate({ clientId, garmentTitle, garmentImage
     } catch (e) { setSaid(e.message); } finally { setBusy(false); }
   };
 
-  const field = 'w-full border border-[rgba(26,20,16,0.2)] bg-white px-4 py-3 text-[16px] outline-none focus:border-[#1a1410]';
-  const go = 'w-full py-3.5 bg-accent hover:bg-accent-dark disabled:opacity-50 text-white text-[11px] font-bold uppercase tracking-[2px] transition-colors';
-  const quiet = 'text-[12px] text-muted underline underline-offset-2 disabled:opacity-50';
+  const field = 'w-full h-14 rounded-2xl border border-[#d9cfc0] bg-white px-4 text-[17px] outline-none focus:border-[#1a1410] focus:ring-2 focus:ring-[#1a1410]/10';
+  const go = 'w-full h-14 rounded-full bg-accent hover:bg-accent-dark disabled:opacity-50 text-white text-[14px] font-semibold shadow-[0_8px_20px_-8px_rgba(194,65,12,0.6)] transition-colors';
+  const quiet = 'text-[13px] text-[#8a7f72] underline underline-offset-2 disabled:opacity-50';
 
   return (
     <div className="min-h-screen bg-[#faf7f2] flex flex-col items-center px-6 pt-10 pb-12 font-sans text-[#1a1410]">
@@ -67,12 +67,12 @@ export default function ShopperNumberGate({ clientId, garmentTitle, garmentImage
       <div className="w-full max-w-[360px] flex flex-col gap-5">
         {garmentImageUrl && (
           <div className="flex items-center gap-3">
-            <img src={garmentImageUrl} alt="" className="w-14 h-[72px] object-cover bg-white border border-[rgba(26,20,16,0.08)]" />
+            <img src={garmentImageUrl} alt="" className="w-16 aspect-[3/4] object-cover rounded-xl shadow-[0_6px_18px_-10px_rgba(26,20,16,0.4)]" />
             <span className="font-serif text-[18px] leading-snug">{garmentTitle}</span>
           </div>
         )}
         <div>
-          <h1 className="font-serif text-[26px] mb-2">See it on you</h1>
+          <h1 className="font-serif text-[32px] leading-tight mb-2">See it on you</h1>
           <p className="text-[13px] leading-relaxed text-muted">
             {sent ? 'Enter the 6-digit code we sent on WhatsApp.' : "Enter your WhatsApp number. We'll send a code to check it's yours."}
           </p>
