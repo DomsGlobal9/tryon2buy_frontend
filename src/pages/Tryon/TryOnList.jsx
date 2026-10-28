@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ScanLine, Camera, Images, X, Heart, ChevronLeft, ChevronRight, RefreshCw, Loader2, Check, Users, Sparkles, ArrowLeft } from 'lucide-react';
+import { ScanLine, Camera, Images, X, Heart, RefreshCw, Loader2, Check, Users, Sparkles, ArrowLeft } from 'lucide-react';
 import { API_URL, INVENTORY_API_URL } from '../../config';
 import { uploadSelfie } from '../../utils/imageUpload';
-import { swipeable } from '../../utils/swipe';
+import { saveToHistory, getActiveImage } from '../../utils/imageStore';
 import QrScanner from '../../components/QrScanner';
 import ShopperNumberGate, { heldShopProof, dropShopProof } from '../../components/ShopperNumberGate';
 
@@ -86,11 +86,25 @@ function TryOnList() {
   const [view, setView] = useState('list');            // list | results | staff
   const [at, setAt] = useState(0);
   const [comparing, setComparing] = useState(false);
+  // The swipe between try-ons: how far the top card is dragged, and which way it is leaving.
+  const [drag, setDrag] = useState({ x: 0, active: false });
+  const [leaving, setLeaving] = useState(null);       // 'next' | 'prev' | null
+  const dragFrom = useRef(null);
   const cameraRef = useRef(null);
   const galleryRef = useRef(null);
   const started = useRef(null);
 
   useEffect(() => { saveList(clientId, list); }, [clientId, list]);
+  /*
+   * The photo survives the page opening again -- which it does every time a tag is scanned with the
+   * phone's own camera -- for as long as TryOn2Buy keeps photos on the phone (20 minutes), so a
+   * shopper who took it once is not asked again for the next tag.
+   */
+  useEffect(() => {
+    let live = true;
+    getActiveImage().then(r => { if (live && r?.file && !photo) setPhoto({ file: r.file, preview: URL.createObjectURL(r.file) }); }).catch(() => undefined);
+    return () => { live = false; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   // A note is a passing word ("added", "already in your list"), not something to dismiss.
   useEffect(() => { if (!note) return undefined; const t = setTimeout(() => setNote(null), 4000); return () => clearTimeout(t); }, [note]);
   const patch = (key, change) => setList(l => ({ ...l, items: l.items.map(i => (i.key === key ? { ...i, ...change } : i)) }));
@@ -110,6 +124,9 @@ function TryOnList() {
       variantCode: garment.variantCode ?? null, colourName: garment.colourName ?? null,
       imageUrl: garment.imageUrl, colours, status: 'new', resultUrl: null, liked: false, message: null
     };
+    // The tag may have named a colour the shop does not know: it comes back as the garment without one,
+    // which can be in the list already. Checked against what came back, not what was scanned.
+    if (loadList(clientId).items.some(i => i.key === item.key)) { setNote('That piece is already in your list.'); return; }
     setList(l => {
       if (l.items.some(i => i.key === item.key)) return l;
       return { ...l, needsNumber: garment.needsNumber === true, items: [...l.items, item] };
@@ -144,6 +161,7 @@ function TryOnList() {
     if (photo?.preview) URL.revokeObjectURL(photo.preview);
     humanUrl.current = null;
     setPhoto({ file, preview: URL.createObjectURL(file) });
+    saveToHistory(file);
     // A new photo: every try-on is redone with it.
     setList(l => ({ ...l, items: l.items.map(i => ({ ...i, status: 'new', resultUrl: null, message: null })) }));
   };
@@ -205,15 +223,20 @@ function TryOnList() {
   const like = (item) => {
     const liked = !item.liked;
     patch(item.key, { liked });
-    if (proof) {
-      fetch(`${INVENTORY_API_URL}/api/v1/public/tryon/${encodeURIComponent(clientId)}/${encodeURIComponent(item.productCode)}/liked`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: proof, liked, ...(item.variantCode ? { variant: item.variantCode } : {}) })
-      }).catch(() => undefined);
-    }
+    if (!proof) return;
+    /*
+     * The shop keeps one heart per garment (the Customer card lists garments). Taking the heart off
+     * one colour must not take it off the garment while another colour of it is still hearted here:
+     * that colour is sent as the liked one instead.
+     */
+    const otherLiked = items.find(x => x.key !== item.key && x.productCode === item.productCode && x.liked);
+    const send = !liked && otherLiked ? { liked: true, variant: otherLiked.variantCode } : { liked, variant: item.variantCode };
+    fetch(`${INVENTORY_API_URL}/api/v1/public/tryon/${encodeURIComponent(clientId)}/${encodeURIComponent(item.productCode)}/liked`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: proof, liked: send.liked, ...(send.variant ? { variant: send.variant } : {}) })
+    }).catch(() => undefined);
   };
 
-  const swipe = useMemo(() => swipeable({ onNext: () => setAt(a => Math.min(a + 1, done.length - 1)), onPrev: () => setAt(a => Math.max(a - 1, 0)), enabled: done.length > 1 }), [done.length]);
 
   // ── The number, before anything else, when this shop asks for it ──
   if (list.needsNumber && !proof && items.length) {
@@ -234,8 +257,9 @@ function TryOnList() {
       </div>
     </header>
   );
-  const bottomBar = (children) => (
+  const bottomBar = (children, hint) => (
     <div className="fixed bottom-0 inset-x-0 z-30 bg-gradient-to-t from-[#faf7f2] via-[#faf7f2] to-[#faf7f2]/0 pt-6 px-4" style={{ paddingBottom: 'calc(14px + env(safe-area-inset-bottom))' }}>
+      {hint && <p className="max-w-[560px] mx-auto text-center text-[12px] text-[#8a5a2b] mb-2">{hint}</p>}
       <div className="max-w-[560px] mx-auto flex gap-2">{children}</div>
     </div>
   );
@@ -278,34 +302,100 @@ function TryOnList() {
     );
   }
 
-  // ── One try-on at a time, swipe for the next ──
+  // ── One try-on at a time: a stack of cards, swiped ──
   if (view === 'results' && done.length) {
     const n = Math.min(at, done.length - 1);
     const i = done[n];
-    const hold = { onPointerDown: () => setComparing(true), onPointerUp: () => setComparing(false), onPointerLeave: () => setComparing(false), onPointerCancel: () => setComparing(false) };
     const favourites = items.filter(x => x.liked).length;
+    const reduce = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    const canGo = (dir) => (dir === 'next' ? n < done.length - 1 : n > 0);
+    // Which card waits underneath: the next one, or the previous one while dragging back.
+    const underDir = leaving ?? (drag.x > 0 ? 'prev' : 'next');
+    const under = canGo(underDir) ? done[underDir === 'next' ? n + 1 : n - 1] : null;
+    const progress = leaving ? 1 : Math.min(Math.abs(drag.x) / 220, 1);
+    const go = (dir) => { if (!leaving && canGo(dir)) { setComparing(false); setLeaving(dir); } };
+    const landed = () => {
+      if (!leaving) return;
+      setAt(leaving === 'next' ? n + 1 : n - 1);
+      setLeaving(null);
+      setDrag({ x: 0, active: false });
+    };
+    const pointer = {
+      onPointerDown: (e) => { if (leaving) return; dragFrom.current = e.clientX; e.currentTarget.setPointerCapture?.(e.pointerId); setDrag({ x: 0, active: true }); },
+      onPointerMove: (e) => {
+        if (dragFrom.current === null) return;
+        const dx = e.clientX - dragFrom.current;
+        // Past the first or the last one, it only gives a little, then springs back.
+        const atEnd = (dx < 0 && !canGo('next')) || (dx > 0 && !canGo('prev'));
+        setDrag({ x: atEnd ? dx * 0.25 : dx, active: true });
+      },
+      onPointerUp: () => {
+        if (dragFrom.current === null) return;
+        dragFrom.current = null;
+        const dir = drag.x < -70 ? 'next' : drag.x > 70 ? 'prev' : null;
+        if (dir && canGo(dir)) { setDrag(d => ({ ...d, active: false })); setLeaving(dir); }
+        else setDrag({ x: 0, active: false });
+      },
+      onPointerCancel: () => { dragFrom.current = null; setDrag({ x: 0, active: false }); }
+    };
+    const topTransform = reduce
+      ? 'none'
+      : leaving === 'next' ? 'translateX(-118%) rotate(-7deg)'
+      : leaving === 'prev' ? 'translateX(118%) rotate(7deg)'
+      : `translateX(${drag.x}px) rotate(${drag.x / 28}deg)`;
+    const easing = 'cubic-bezier(0.2, 0.75, 0.25, 1)';
+    const hold = {
+      onPointerDown: (e) => { e.stopPropagation(); setComparing(true); },
+      onPointerUp: (e) => { e.stopPropagation(); setComparing(false); },
+      onPointerLeave: () => setComparing(false), onPointerCancel: () => setComparing(false)
+    };
     return (
-      <div className="min-h-screen bg-[#faf7f2] text-[#1a1410] font-sans pb-32">
+      <div className="min-h-screen bg-[#faf7f2] text-[#1a1410] font-sans pb-32 overflow-x-hidden">
         {header(() => setView('list'))}
         <main className="max-w-[560px] mx-auto px-4 pt-4">
-          {/* The swipe handlers carry a style of their own (touch-action); merged, so the 3:4 shape stays. */}
-          <div className="relative rounded-3xl overflow-hidden bg-[#ebe4d8] shadow-[0_18px_40px_-18px_rgba(26,20,16,0.45)]" {...swipe} style={{ ...(swipe.style ?? {}), aspectRatio: '3 / 4' }}>
-            <img src={i.resultUrl} alt={`${i.title}, on you`} className="absolute inset-0 w-full h-full object-cover" />
-            {photo?.preview && comparing && <img src={photo.preview} alt="" className="absolute inset-0 w-full h-full object-cover" />}
-            <span className="absolute top-3 left-3 bg-[#1a1410]/70 text-white text-[12px] font-semibold rounded-full px-3 py-1">{n + 1} of {done.length}{running ? ' · more coming' : ''}</span>
-            {done.length > 1 && <>
-              <button type="button" aria-label="Previous try-on" disabled={n === 0} onClick={() => setAt(Math.max(n - 1, 0))} className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/85 grid place-items-center disabled:opacity-0 transition-opacity"><ChevronLeft className="w-5 h-5" /></button>
-              <button type="button" aria-label="Next try-on" disabled={n >= done.length - 1} onClick={() => setAt(Math.min(n + 1, done.length - 1))} className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/85 grid place-items-center disabled:opacity-0 transition-opacity"><ChevronRight className="w-5 h-5" /></button>
-            </>}
-            {photo?.preview && (
-              <button type="button" {...hold} className="absolute bottom-3 left-3 bg-white/90 rounded-full px-4 h-11 text-[12px] font-semibold select-none">{comparing ? 'Your photo' : 'Hold to compare'}</button>
+          <div className="relative" style={{ aspectRatio: '3 / 4' }} tabIndex={0} aria-label={`Try-on ${n + 1} of ${done.length}. Swipe, or use the arrow keys.`}
+            onKeyDown={(e) => { if (e.key === 'ArrowRight') go('next'); if (e.key === 'ArrowLeft') go('prev'); }}>
+            {/* The card underneath: rises to the front as the top one is swiped away. */}
+            {under && (
+              <div aria-hidden="true" className="absolute inset-0 rounded-3xl overflow-hidden bg-[#ebe4d8]"
+                style={{
+                  transform: reduce ? 'none' : `translateY(${14 * (1 - progress)}px) scale(${0.93 + 0.07 * progress})`,
+                  opacity: reduce ? (leaving ? 1 : 0) : 0.55 + 0.45 * progress,
+                  transition: drag.active ? 'none' : `transform 320ms ${easing}, opacity 320ms ${easing}`
+                }}>
+                <img src={under.resultUrl} alt="" className="w-full h-full object-cover" />
+              </div>
             )}
-            <button type="button" onClick={() => like(i)} aria-pressed={i.liked} aria-label={i.liked ? 'Liked' : 'Like this one'} className="absolute bottom-3 right-3 w-12 h-12 rounded-full bg-white shadow-lg grid place-items-center active:scale-95 transition-transform">
-              <Heart className={`w-6 h-6 ${i.liked ? 'fill-[#d6334a] text-[#d6334a]' : 'text-[#1a1410]'}`} />
-            </button>
+            {/* The card on top: follows the finger, and leaves to the side. */}
+            <div key={i.key} className="absolute inset-0 rounded-3xl overflow-hidden bg-[#ebe4d8] shadow-[0_18px_40px_-18px_rgba(26,20,16,0.45)] cursor-grab active:cursor-grabbing select-none"
+              {...pointer}
+              onTransitionEnd={(e) => { if (e.target === e.currentTarget && e.propertyName === (reduce ? 'opacity' : 'transform')) landed(); }}
+              style={{
+                touchAction: 'pan-y',
+                transform: topTransform,
+                opacity: reduce && leaving ? 0 : 1,
+                transition: drag.active ? 'none' : `transform 320ms ${easing}, opacity 240ms ease-out`
+              }}>
+              <img src={i.resultUrl} alt={`${i.title}, on you`} draggable={false} className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
+              {photo?.preview && comparing && <img src={photo.preview} alt="" draggable={false} className="absolute inset-0 w-full h-full object-cover pointer-events-none" />}
+              <span className="absolute top-3 left-3 bg-[#1a1410]/70 text-white text-[12px] font-semibold rounded-full px-3 py-1">{n + 1} of {done.length}{running ? ' · more coming' : ''}</span>
+              {photo?.preview && (
+                <button type="button" {...hold} className="absolute bottom-3 left-3 bg-white/90 rounded-full px-4 h-11 text-[12px] font-semibold select-none">{comparing ? 'Your photo' : 'Hold to compare'}</button>
+              )}
+              <button type="button" onPointerDown={(e) => e.stopPropagation()} onClick={() => like(i)} aria-pressed={i.liked} aria-label={i.liked ? 'Liked' : 'Like this one'}
+                className="absolute bottom-3 right-3 w-12 h-12 rounded-full bg-white shadow-lg grid place-items-center active:scale-95 transition-transform">
+                <Heart className={`w-6 h-6 ${i.liked ? 'fill-[#d6334a] text-[#d6334a]' : 'text-[#1a1410]'}`} />
+              </button>
+            </div>
           </div>
 
-          <div className="mt-4">
+          {done.length > 1 && (
+            <div className="flex justify-center gap-1.5 mt-4" aria-hidden="true">
+              {done.map((x, k) => <span key={x.key} className={`h-1.5 rounded-full transition-all duration-300 ${k === n ? 'w-5 bg-[#1a1410]' : 'w-1.5 bg-[#d9cfc0]'}`} />)}
+            </div>
+          )}
+
+          <div className="mt-3">
             <h2 className="font-serif text-[24px] leading-tight">{i.title}</h2>
             {i.colourName && <div className={`text-[13px] ${muted} mt-0.5`}>{i.colourName}</div>}
           </div>
@@ -313,8 +403,8 @@ function TryOnList() {
           {done.length > 1 && (
             <div className="flex gap-2 mt-4 overflow-x-auto pb-1" aria-label="All your try-ons">
               {done.map((x, k) => (
-                <button key={x.key} type="button" onClick={() => setAt(k)} aria-label={`Show ${x.title}${x.colourName ? `, ${x.colourName}` : ''}`}
-                  className={`relative shrink-0 w-14 aspect-[3/4] rounded-xl overflow-hidden ${k === n ? 'ring-2 ring-accent ring-offset-2 ring-offset-[#faf7f2]' : 'opacity-80'}`}>
+                <button key={x.key} type="button" onClick={() => { setComparing(false); setAt(k); }} aria-label={`Show ${x.title}${x.colourName ? `, ${x.colourName}` : ''}`}
+                  className={`relative shrink-0 w-14 aspect-[3/4] rounded-xl overflow-hidden transition-opacity ${k === n ? 'ring-2 ring-accent ring-offset-2 ring-offset-[#faf7f2]' : 'opacity-70'}`}>
                   <img src={x.resultUrl} alt="" className="w-full h-full object-cover" />
                   {x.liked && <Heart className="absolute top-1 right-1 w-3.5 h-3.5 fill-[#d6334a] text-[#d6334a]" />}
                 </button>
@@ -437,7 +527,6 @@ function TryOnList() {
             </div>
           </section>
         )}
-        {items.some(i => !ready(i)) && <p className={`text-[12px] ${muted} mt-3`}>Choose the colour on each piece to try it on.</p>}
         {items.length === 0 && !adding && <p className={`text-[14px] ${muted} mt-6`}>Your fitting room is empty. Scan the QR on a garment's tag to start.</p>}
 
         <input ref={cameraRef} type="file" accept="image/jpeg,image/png,image/webp" capture onChange={choose} className="hidden" aria-label="Take a photo" />
@@ -463,7 +552,10 @@ function TryOnList() {
           ) : (
             <button type="button" className={primary} disabled>{items.some(i => i.status === 'unavailable') ? 'Not available just now. Ask the staff.' : 'Choose the colours above'}</button>
           )}
-        </>
+        </>,
+        !running && items.some(i => !ready(i))
+          ? `${items.filter(i => !ready(i)).length === 1 ? '1 piece needs' : `${items.filter(i => !ready(i)).length} pieces need`} a colour first. Tap it above.`
+          : null
       )}
       {scanning && <QrScanner onFound={onScanned} onClose={() => setScanning(false)} />}
     </div>
