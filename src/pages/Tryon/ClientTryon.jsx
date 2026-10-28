@@ -13,6 +13,7 @@ import { userFacingMessage, userFacingError } from '../../utils/generationRecove
 import { NETWORK_PROBLEM } from '../../components/ErrorScreen';
 import { categoryLabel } from '../../utils/categories';
 import { resolveBackTarget } from '../../utils/backTarget';
+import ShopperNumberGate, { heldShopProof, dropShopProof } from '../../components/ShopperNumberGate';
 
 
 // Display-only — no prompts or raw image logic here.
@@ -57,6 +58,10 @@ export default function ClientTryon() {
   const [colours, setColours] = useState([]);
   const [chosenVariant, setChosenVariant] = useState(null);
   const [garmentTitle, setGarmentTitle] = useState('');
+  // The shop asks for a proved WhatsApp number before a try-on (Inventory's needsNumber), and the
+  // pass this phone holds for that shop once proved. See ShopperNumberGate.
+  const [needsNumber, setNeedsNumber] = useState(false);
+  const [shopProof, setShopProof] = useState(() => heldShopProof(clientId));
 
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -180,6 +185,7 @@ export default function ClientTryon() {
         setColours(Array.isArray(garment.colours) ? garment.colours : []);
         setChosenVariant(garment.variantCode ?? null);
         setGarmentTitle(garment.title);
+        setNeedsNumber(garment.needsNumber === true);
         // Shaped into what the rest of this page already reads. It only ever asks for
         // garmentImageUrl, resultImageUrl and vendorId; vendorId stays absent on purpose,
         // because a scanned garment belongs to a shop in Inventory rather than to a vendor
@@ -310,6 +316,8 @@ export default function ClientTryon() {
 
   const startGeneration = async () => {
     if (!selectedImage || !sourceGeneration) return;
+    // Nothing is uploaded before the number is proved.
+    if (needsNumber && !shopProof) return;
 
     setTryonState('generating');
     setProgress(0);
@@ -376,12 +384,24 @@ export default function ClientTryon() {
            */
           body: JSON.stringify({
             humanImageUrl: human_image_url,
-            ...(chosenVariant ? { variant: chosenVariant } : {})
+            ...(chosenVariant ? { variant: chosenVariant } : {}),
+            // The pass from proving their number, so the shop knows who tried it on.
+            ...(shopProof ? { token: shopProof } : {})
           })
         }
       );
 
       const inventoryBody = await genRes.json().catch(() => ({}));
+      // The pass ran out, or the shop has just started asking: back to the number step. Their photo
+      // stays chosen, so after confirming they press the button once more.
+      if (genRes.status === 400 && inventoryBody?.needsNumber) {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        dropShopProof(clientId);
+        setShopProof(null);
+        setNeedsNumber(true);
+        setTryonState('initial');
+        return;
+      }
       // Mapped onto the shape the rest of this page already handles, so everything below --
       // the progress bar, the carousel, the saved history -- is untouched.
       const genData = {
@@ -498,6 +518,17 @@ export default function ClientTryon() {
           About TryOn2Buy
         </button>
       </div>
+    );
+  }
+
+  if (needsNumber && !shopProof) {
+    return (
+      <ShopperNumberGate
+        clientId={clientId}
+        garmentTitle={sourceGeneration.dressName || garmentTitle}
+        garmentImageUrl={sourceGeneration.garmentImageUrl}
+        onProved={(token) => setShopProof(token)}
+      />
     );
   }
 
